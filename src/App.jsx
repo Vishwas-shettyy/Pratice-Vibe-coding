@@ -97,9 +97,9 @@ function App() {
   }, []);
 
   // Update Relocation Status via API Call
-  const handleUpdateRelocationStatus = async (areaId, newStatus) => {
+  const handleUpdateRelocationStatus = async (areaId, newStatus, progress = null) => {
     try {
-      await api.updateRelocationStatus(areaId, newStatus);
+      await api.updateRelocationStatus(areaId, newStatus, progress);
       // Re-fetch updated data
       await loadBackendData();
     } catch (err) {
@@ -346,7 +346,7 @@ function App() {
       <NavbarSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        alertsCount={alerts.filter((a) => a.status === "ACTIVE").length}
+        alertCount={alerts.filter((a) => a.status === "ACTIVE").length}
       />
 
       {/* MAIN CONTENT CONTAINER */}
@@ -412,9 +412,6 @@ function App() {
             <RelocationPlannerView
               habitations={habitations}
               safeSites={safeSites}
-              onInspectHabitation={handleInspectHabitation}
-              onInspectShelter={handleInspectShelter}
-              onUpdateStatus={handleUpdateRelocationStatus}
             />
           )}
 

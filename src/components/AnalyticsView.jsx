@@ -68,10 +68,11 @@ function AnalyticsView({ habitations = [], shelters = [], stats = {}, theme = "d
   };
 
   // 2. Demographic Vulnerability Doughnut Chart Data
-  const totalElderly = habitations.reduce((sum, h) => sum + (h.elderly || 0), 0);
-  const totalChildren = habitations.reduce((sum, h) => sum + (h.children || 0), 0);
-  const totalMedical = habitations.reduce((sum, h) => sum + (h.medicalPriority || 0), 0);
-  const totalPop = stats.populationAtRisk || habitations.reduce((sum, h) => sum + (h.population || 0), 0);
+  const safeHabitations = habitations || [];
+  const totalElderly = safeHabitations.reduce((sum, h) => sum + (h.elderly || 0), 0);
+  const totalChildren = safeHabitations.reduce((sum, h) => sum + (h.children || 0), 0);
+  const totalMedical = safeHabitations.reduce((sum, h) => sum + (h.medicalPriority || 0), 0);
+  const totalPop = stats.populationAtRisk || safeHabitations.reduce((sum, h) => sum + (h.population || 0), 0);
   const totalGeneral = Math.max(0, totalPop - (totalElderly + totalChildren + totalMedical));
 
   const vulnerabilityData = {
