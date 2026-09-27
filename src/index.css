@@ -23,6 +23,10 @@
   --accent-warning: #F59E0B;       /* warning */
   --accent-safe: #10B981;          /* safe */
   --accent-active: #06B6D4;        /* active / AI */
+  --accent-red: #EF4444;
+  --accent-amber: #F59E0B;
+  --accent-emerald: #10B981;
+  --accent-red-glow: rgba(239, 68, 68, 0.25);
   --accent-blue: #2563eb;
   --accent-cyan: var(--accent-active);
 
@@ -65,6 +69,10 @@
   --accent-active: #06B6D4;
   --accent-blue: #2563eb;
   --accent-cyan: var(--accent-active);
+  --accent-red: #EF4444;
+  --accent-amber: #F59E0B;
+  --accent-emerald: #10B981;
+  --accent-red-glow: rgba(239, 68, 68, 0.18);
 
   --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: 'Outfit', sans-serif;
@@ -100,6 +108,29 @@ body,
   font-family: var(--font-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent-active);
+  outline-offset: 2px;
+}
+
+button:disabled,
+input:disabled,
+select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Custom Scrollbar */
