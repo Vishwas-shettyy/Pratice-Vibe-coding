@@ -22,6 +22,18 @@ import {
   EVACUATION_ROUTES
 } from "./data/disasterData";
 
+const normalizeDashboardStats = (rawStats = {}) => ({
+  populationAtRisk: Number(rawStats.populationAtRisk ?? rawStats.totalPopulationAtRisk ?? 0),
+  redZonesCount: Number(rawStats.redZonesCount ?? 0),
+  safeSitesCount: Number(rawStats.safeSitesCount ?? 0),
+  totalCapacity: Number(rawStats.totalCapacity ?? 0),
+  relocatedCount: Number(rawStats.relocatedCount ?? 0),
+  surplusCapacity: Number(rawStats.surplusCapacity ?? rawStats.availableCapacity ?? 0),
+  criticalAlerts: Number(rawStats.criticalAlerts ?? rawStats.criticalAlertsCount ?? 0),
+  systemStatus: rawStats.systemStatus ?? "OFFLINE",
+  hazardLevel: rawStats.hazardLevel ?? "UNKNOWN",
+});
+
 function App() {
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -61,16 +73,20 @@ function App() {
         api.getMapData(),
       ]);
 
-      setStats(backendStats);
-      setHabitations(backendAreas);
-      setSafeSites(backendShelters);
-      setAlerts(backendAlerts);
+      setStats(normalizeDashboardStats(backendStats));
+      setHabitations(Array.isArray(backendAreas) ? backendAreas : HABITATIONS_DATA);
+      setSafeSites(Array.isArray(backendShelters) ? backendShelters : SAFE_SITES_DATA);
+      setAlerts(Array.isArray(backendAlerts) ? backendAlerts : ALERTS_DATA);
       if (backendMap?.hazardZones) setHazardZones(backendMap.hazardZones);
 
       setBackendOnline(true);
     } catch (err) {
       console.warn("Using offline fallback data for frontend:", err.message);
       setBackendOnline(false);
+      setStats(INITIAL_STATS);
+      setHabitations(HABITATIONS_DATA);
+      setSafeSites(SAFE_SITES_DATA);
+      setAlerts(ALERTS_DATA);
     } finally {
       setLoading(false);
     }
@@ -325,7 +341,7 @@ function App() {
   const latestAlert = alerts.length > 0 ? alerts[0] : null;
 
   return (
-    <div className="app-layout">
+    <div className="app-container">
       {/* LEFT SIDEBAR NAVIGATION */}
       <NavbarSidebar
         activeTab={activeTab}
@@ -348,7 +364,14 @@ function App() {
 
         {/* DYNAMIC TAB VIEWS */}
         <div className="view-container">
-          {activeTab === "overview" && (
+          {loading && activeTab === "overview" ? (
+            <div className="glass-panel" style={{ padding: "32px", textAlign: "center" }}>
+              <div className="panel-title">Loading dashboard data…</div>
+              <div className="panel-sub">Fetching disaster intelligence feeds from the Flask backend.</div>
+            </div>
+          ) : null}
+
+          {activeTab === "overview" && !loading && (
             <OverviewView
               stats={stats}
               habitations={habitations}

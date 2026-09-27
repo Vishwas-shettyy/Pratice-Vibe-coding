@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 
-function RelocationPlannerView({ habitations, safeSites, routes }) {
+function RelocationPlannerView({ habitations = [], safeSites = [], routes = [] }) {
   const [selectedHabitationId, setSelectedHabitationId] = useState(habitations[0]?.id || "");
 
-  const currentHabitation = habitations.find((h) => h.id === selectedHabitationId) || habitations[0];
-  const assignedShelter = safeSites.find((s) => s.id === currentHabitation.assignedShelterId) || safeSites[0];
+  const currentHabitation = habitations.find((h) => h.id === selectedHabitationId) || habitations[0] || {};
+  const assignedShelter = safeSites.find((s) => s.id === currentHabitation.assignedShelterId) || safeSites[0] || {};
 
   // Bus calculation (50 people per bus)
-  const busesRequired = Math.ceil(currentHabitation.population / 50);
-  const ambulanceRequired = Math.ceil(currentHabitation.medicalPriority / 4);
+  const busesRequired = Math.ceil((currentHabitation.population || 0) / 50);
+  const ambulanceRequired = Math.ceil((currentHabitation.medicalPriority || 0) / 4);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -56,22 +56,22 @@ function RelocationPlannerView({ habitations, safeSites, routes }) {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
               <div style={{ flex: 1, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", padding: "14px", borderRadius: "10px" }}>
                 <span className="badge immediate">ORIGIN (RED ZONE)</span>
-                <h4 style={{ color: "#fff", fontSize: "16px", marginTop: "6px" }}>{currentHabitation.name}</h4>
+                <h4 style={{ color: "#fff", fontSize: "16px", marginTop: "6px" }}>{currentHabitation.name || "No habitation selected"}</h4>
                 <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px" }}>
-                  Pop: {currentHabitation.population} | Risk: {currentHabitation.riskScore}/100
+                  Pop: {currentHabitation.population || 0} | Risk: {currentHabitation.riskScore || 0}/100
                 </div>
               </div>
 
               <div style={{ color: "var(--accent-cyan)", fontSize: "20px", fontWeight: 700, textAlign: "center" }}>
                 &rarr;
-                <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{currentHabitation.distanceToShelterKm} km</div>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{currentHabitation.distanceToShelterKm || 0} km</div>
               </div>
 
               <div style={{ flex: 1, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", padding: "14px", borderRadius: "10px" }}>
                 <span className="badge safe">DESTINATION (SAFE SHELTER)</span>
-                <h4 style={{ color: "#fff", fontSize: "16px", marginTop: "6px" }}>{assignedShelter.name}</h4>
+                <h4 style={{ color: "#fff", fontSize: "16px", marginTop: "6px" }}>{assignedShelter.name || "No shelter assigned"}</h4>
                 <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px" }}>
-                  Beds Available: {assignedShelter.available} / {assignedShelter.capacity}
+                  Beds Available: {assignedShelter.available || 0} / {assignedShelter.capacity || 0}
                 </div>
               </div>
             </div>
@@ -88,13 +88,13 @@ function RelocationPlannerView({ habitations, safeSites, routes }) {
             <div style={{ background: "rgba(255,255,255,0.03)", padding: "14px", borderRadius: "10px", border: "1px solid var(--border-color)" }}>
               <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "block" }}>Ambulances</span>
               <strong style={{ fontSize: "22px", color: "var(--accent-red)" }}>{ambulanceRequired} Units</strong>
-              <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>For {currentHabitation.medicalPriority} patients</div>
+              <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>For {currentHabitation.medicalPriority || 0} patients</div>
             </div>
 
             <div style={{ background: "rgba(255,255,255,0.03)", padding: "14px", borderRadius: "10px", border: "1px solid var(--border-color)" }}>
               <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "block" }}>Transit Time</span>
-              <strong style={{ fontSize: "22px", color: "var(--accent-emerald)" }}>~{Math.round(currentHabitation.distanceToShelterKm * 4)} mins</strong>
-              <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>Road: {currentHabitation.roadCondition}</div>
+              <strong style={{ fontSize: "22px", color: "var(--accent-emerald)" }}>~{Math.round((currentHabitation.distanceToShelterKm || 0) * 4)} mins</strong>
+              <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>Road: {currentHabitation.roadCondition || "Awaiting assessment"}</div>
             </div>
           </div>
         </div>
@@ -109,7 +109,7 @@ function RelocationPlannerView({ habitations, safeSites, routes }) {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {routes.map((rt) => (
+            {(routes || []).map((rt) => (
               <div key={rt.id} style={{ background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "10px", borderLeft: `4px solid ${rt.color}` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <strong style={{ color: "#fff", fontSize: "13px" }}>{rt.fromName} &rarr; {rt.toName}</strong>
@@ -117,7 +117,7 @@ function RelocationPlannerView({ habitations, safeSites, routes }) {
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--text-secondary)", marginTop: "6px" }}>
                   <span>Vehicles: {rt.vehiclesAssigned} active</span>
-                  <span style={{ color: rt.status.includes("Active") ? "var(--accent-emerald)" : "var(--accent-amber)" }}>{rt.status}</span>
+                  <span style={{ color: String(rt.status || "").includes("Active") ? "var(--accent-emerald)" : "var(--accent-amber)" }}>{rt.status || "Unknown"}</span>
                 </div>
               </div>
             ))}

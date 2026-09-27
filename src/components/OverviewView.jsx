@@ -1,14 +1,24 @@
 import React from "react";
 
 function OverviewView({
-  stats,
-  habitations,
-  safeSites,
+  stats = {},
+  habitations = [],
+  safeSites = [],
   onSelectHabitation,
   onNavigateToMap,
   onNavigateToPlanner
 }) {
-  const sortedHabitations = [...habitations].sort((a, b) => b.riskScore - a.riskScore);
+  const safeStats = {
+    ...stats,
+    populationAtRisk: Number(stats.populationAtRisk ?? stats.totalPopulationAtRisk ?? 0),
+    redZonesCount: Number(stats.redZonesCount ?? 0),
+    safeSitesCount: Number(stats.safeSitesCount ?? safeSites.length ?? 0),
+    totalCapacity: Number(stats.totalCapacity ?? 0),
+    relocatedCount: Number(stats.relocatedCount ?? 0),
+    surplusCapacity: Number(stats.surplusCapacity ?? stats.availableCapacity ?? 0),
+  };
+
+  const sortedHabitations = [...habitations].sort((a, b) => (b.riskScore ?? 0) - (a.riskScore ?? 0));
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -21,7 +31,7 @@ function OverviewView({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 100 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
           </div>
-          <div className="stat-value">{stats.populationAtRisk.toLocaleString()}</div>
+          <div className="stat-value">{safeStats.populationAtRisk.toLocaleString()}</div>
           <div className="stat-subtext">Across {habitations.length} vulnerable habitations</div>
         </div>
 
@@ -32,7 +42,7 @@ function OverviewView({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <div className="stat-value">{stats.redZonesCount}</div>
+          <div className="stat-value">{safeStats.redZonesCount}</div>
           <div className="stat-subtext">Immediate action required</div>
         </div>
 
@@ -43,7 +53,7 @@ function OverviewView({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
           </div>
-          <div className="stat-value">{stats.safeSitesCount}</div>
+          <div className="stat-value">{safeStats.safeSitesCount}</div>
           <div className="stat-subtext">Verified high-ground shelters</div>
         </div>
 
@@ -54,8 +64,8 @@ function OverviewView({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <div className="stat-value">{stats.totalCapacity.toLocaleString()}</div>
-          <div className="stat-subtext">+{stats.surplusCapacity} capacity surplus</div>
+          <div className="stat-value">{safeStats.totalCapacity.toLocaleString()}</div>
+          <div className="stat-subtext">+{safeStats.surplusCapacity} capacity surplus</div>
         </div>
       </div>
 
@@ -163,18 +173,18 @@ function OverviewView({
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "var(--text-secondary)" }}>Relocation Target Achieved</span>
               <strong style={{ color: "var(--accent-cyan)" }}>
-                {stats.relocatedCount} / {stats.populationAtRisk} ({Math.round((stats.relocatedCount / stats.populationAtRisk) * 100)}%)
+                {safeStats.relocatedCount} / {safeStats.populationAtRisk} ({Math.round((safeStats.relocatedCount / (safeStats.populationAtRisk || 1)) * 100)}%)
               </strong>
             </div>
             <div className="progress-bar-container" style={{ height: "12px" }}>
-              <div className="progress-bar-fill" style={{ width: `${(stats.relocatedCount / stats.populationAtRisk) * 100}%` }}></div>
+              <div className="progress-bar-fill" style={{ width: `${(safeStats.relocatedCount / (safeStats.populationAtRisk || 1)) * 100}%` }}></div>
             </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginTop: "20px" }}>
             <div style={{ background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
               <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>EVACUATED</div>
-              <strong style={{ fontSize: "18px", color: "var(--accent-emerald)" }}>{stats.relocatedCount}</strong>
+              <strong style={{ fontSize: "18px", color: "var(--accent-emerald)" }}>{safeStats.relocatedCount}</strong>
             </div>
             <div style={{ background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
               <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>IN TRANSIT</div>
@@ -182,7 +192,7 @@ function OverviewView({
             </div>
             <div style={{ background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
               <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>PENDING</div>
-              <strong style={{ fontSize: "18px", color: "var(--accent-red)" }}>{stats.populationAtRisk - stats.relocatedCount}</strong>
+              <strong style={{ fontSize: "18px", color: "var(--accent-red)" }}>{Math.max(0, safeStats.populationAtRisk - safeStats.relocatedCount)}</strong>
             </div>
           </div>
         </div>

@@ -1,17 +1,22 @@
 import React, { useState } from "react";
 
-function RedZonesView({ habitations, onSelectHabitation, onUpdateStatus }) {
+function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLevel, setFilterLevel] = useState("ALL");
 
-  const filteredHabitations = habitations.filter((hab) => {
+  const filteredHabitations = (habitations || []).filter((hab) => {
+    const name = String(hab?.name || "");
+    const code = String(hab?.code || "");
+    const hazardType = String(hab?.hazardType || "");
+    const hazardLevel = String(hab?.hazardLevel || "");
+
     const matchesSearch =
-      hab.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      hab.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      hab.hazardType.toLowerCase().includes(searchTerm.toLowerCase());
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      hazardType.toLowerCase().includes(searchTerm.toLowerCase());
 
     if (filterLevel === "ALL") return matchesSearch;
-    return matchesSearch && hab.hazardLevel.toUpperCase() === filterLevel.toUpperCase();
+    return matchesSearch && hazardLevel.toUpperCase() === filterLevel.toUpperCase();
   });
 
   return (

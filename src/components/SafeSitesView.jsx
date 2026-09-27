@@ -1,6 +1,6 @@
 import React from "react";
 
-function SafeSitesView({ safeSites, onSelectShelter }) {
+function SafeSitesView({ safeSites = [], onSelectShelter }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       <div className="glass-panel" style={{ padding: "18px 22px" }}>
@@ -18,8 +18,8 @@ function SafeSitesView({ safeSites, onSelectShelter }) {
       </div>
 
       <div className="grid-1-1">
-        {safeSites.map((shelter) => {
-          const occupancyPct = Math.round((shelter.occupied / shelter.capacity) * 100);
+        {(safeSites || []).map((shelter) => {
+          const occupancyPct = Math.round(((shelter.occupied || 0) / Math.max((shelter.capacity || 0), 1)) * 100);
 
           return (
             <div key={shelter.id} className="shelter-card">
@@ -31,8 +31,8 @@ function SafeSitesView({ safeSites, onSelectShelter }) {
                   <h3 className="shelter-title">{shelter.name}</h3>
                   <div className="shelter-sub">{shelter.type} • Elevation: {shelter.elevation}</div>
                 </div>
-                <span className={`badge ${shelter.status.includes("Active") ? "safe" : "short"}`}>
-                  {shelter.status}
+                <span className={`badge ${String(shelter.status || "").includes("Active") ? "safe" : "short"}`}>
+                  {shelter.status || "Unknown"}
                 </span>
               </div>
 
@@ -69,8 +69,8 @@ function SafeSitesView({ safeSites, onSelectShelter }) {
 
               {/* INVENTORY TAGS */}
               <div className="resource-tags">
-                <span className="res-tag">💧 Water: {(shelter.waterStockLiters / 1000).toFixed(1)}k Liters</span>
-                <span className="res-tag">🍞 Food: {shelter.foodMealsStock.toLocaleString()} Meals</span>
+                <span className="res-tag">💧 Water: {((shelter.waterStockLiters || 0) / 1000).toFixed(1)}k Liters</span>
+                <span className="res-tag">🍞 Food: {Number(shelter.foodMealsStock || 0).toLocaleString()} Meals</span>
                 <span className="res-tag">🩺 Medical Teams: {shelter.medicalTeams} Units</span>
                 <span className="res-tag">⚡ Power: {shelter.powerGenerators} Gensets</span>
               </div>
