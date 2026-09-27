@@ -1,244 +1,426 @@
- import "./App.css";
-import RiskMap from "./RiskMap";
+import React, { useState, useEffect } from "react";
+import "./App.css";
+
+import NavbarSidebar from "./components/NavbarSidebar";
+import HeaderTopbar from "./components/HeaderTopbar";
+import OverviewView from "./components/OverviewView";
+import RiskMapExplorer from "./components/RiskMapExplorer";
+import RedZonesView from "./components/RedZonesView";
+import SafeSitesView from "./components/SafeSitesView";
+import RelocationPlannerView from "./components/RelocationPlannerView";
+import AnalyticsView from "./components/AnalyticsView";
+import SimulatorView from "./components/SimulatorView";
+import DetailModal from "./components/DetailModal";
+
+import { api } from "./services/api";
+import {
+  INITIAL_STATS,
+  ALERTS_DATA,
+  HABITATIONS_DATA,
+  SAFE_SITES_DATA,
+  HAZARD_ZONES,
+  EVACUATION_ROUTES
+} from "./data/disasterData";
 
 function App() {
-  return (
-    <div className="app">
+  const [activeTab, setActiveTab] = useState("overview");
 
-      {/* SIDEBAR */}
-      <aside className="sidebar">
+  // Theme State (Dark / Light) with Persistence
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("apex_theme") || "dark";
+  });
 
-        <div className="logo">
-          <div className="logo-box">A</div>
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("apex_theme", theme);
+  }, [theme]);
 
-          <div>
-            <h2>APEX</h2>
-            <p>Disaster Intelligence</p>
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
+  // Dynamic Data States (fetched from Flask REST API)
+  const [stats, setStats] = useState(INITIAL_STATS);
+  const [habitations, setHabitations] = useState(HABITATIONS_DATA);
+  const [safeSites, setSafeSites] = useState(SAFE_SITES_DATA);
+  const [hazardZones, setHazardZones] = useState(HAZARD_ZONES);
+  const [evacuationRoutes, setEvacuationRoutes] = useState(EVACUATION_ROUTES);
+  const [alerts, setAlerts] = useState(ALERTS_DATA);
+  const [loading, setLoading] = useState(true);
+  const [backendOnline, setBackendOnline] = useState(false);
+
+  // Load Data from Flask Backend API
+  const loadBackendData = async () => {
+    try {
+      setLoading(true);
+      const [backendStats, backendAreas, backendShelters, backendAlerts, backendMap] = await Promise.all([
+        api.getDashboardStats(),
+        api.getRiskAreas(),
+        api.getShelters(),
+        api.getAlerts(),
+        api.getMapData(),
+      ]);
+
+      setStats(backendStats);
+      setHabitations(backendAreas);
+      setSafeSites(backendShelters);
+      setAlerts(backendAlerts);
+      if (backendMap?.hazardZones) setHazardZones(backendMap.hazardZones);
+
+      setBackendOnline(true);
+    } catch (err) {
+      console.warn("Using offline fallback data for frontend:", err.message);
+      setBackendOnline(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadBackendData();
+  }, []);
+
+  // Update Relocation Status via API Call
+  const handleUpdateRelocationStatus = async (areaId, newStatus) => {
+    try {
+      await api.updateRelocationStatus(areaId, newStatus);
+      // Re-fetch updated data
+      await loadBackendData();
+    } catch (err) {
+      console.error("Failed to update status on backend, updating local state:", err);
+      setHabitations((prev) =>
+        prev.map((h) => (h.id === areaId ? { ...h, relocationStatus: newStatus } : h))
+      );
+    }
+  };
+
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    content: null
+  });
+
+  const closeModal = () => setModalConfig({ isOpen: false, title: "", content: null });
+
+  // Open Habitation Inspection Modal
+  const handleInspectHabitation = (hab) => {
+    setModalConfig({
+      isOpen: true,
+      title: `Habitation Audit: ${hab.name} (${hab.code})`,
+      content: (
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px", color: "var(--text-primary)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div style={{ background: "var(--bg-secondary)", padding: "12px", borderRadius: "8px" }}>
+              <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Hazard Rating</span>
+              <strong style={{ display: "block", fontSize: "20px", color: hab.riskScore > 80 ? "var(--accent-red)" : "var(--accent-amber)" }}>
+                {hab.riskScore} / 100
+              </strong>
+            </div>
+            <div style={{ background: "var(--bg-secondary)", padding: "12px", borderRadius: "8px" }}>
+              <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Total Population</span>
+              <strong style={{ display: "block", fontSize: "20px", color: "var(--text-primary)" }}>
+                {hab.population} residents
+              </strong>
+            </div>
+          </div>
+
+          <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "8px", fontSize: "13px" }}>
+            <div style={{ fontWeight: 700, marginBottom: "8px", color: "var(--accent-blue)" }}>Demographic Breakdown</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", textAlign: "center" }}>
+              <div>
+                <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>ELDERLY</span>
+                <strong style={{ display: "block", fontSize: "16px" }}>{hab.elderly}</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>CHILDREN</span>
+                <strong style={{ display: "block", fontSize: "16px" }}>{hab.children}</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>MEDICAL</span>
+                <strong style={{ display: "block", fontSize: "16px", color: "var(--accent-red)" }}>{hab.medicalPriority}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div><strong>Road Condition:</strong> {hab.roadCondition}</div>
+            <div><strong>Primary Threat:</strong> {hab.hazardType} ({hab.hazardLevel})</div>
+            <div><strong>Relocation Status:</strong> <span className="badge safe">{hab.relocationStatus}</span></div>
+          </div>
+
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+            <button
+              className="action-btn primary"
+              style={{ flex: 1, justifyContent: "center" }}
+              onClick={() => {
+                closeModal();
+                setActiveTab("relocation");
+              }}
+            >
+              Dispatch Evacuation Route
+            </button>
+            <button className="action-btn" style={{ justifyContent: "center" }} onClick={closeModal}>
+              Close Audit
+            </button>
           </div>
         </div>
+      )
+    });
+  };
 
-        <nav>
-          <button className="nav-item active">
-            Dashboard
-          </button>
-
-          <button className="nav-item">
-            Risk Map
-          </button>
-
-          <button className="nav-item">
-            Red Zones
-          </button>
-
-          <button className="nav-item">
-            Vulnerable Population
-          </button>
-
-          <button className="nav-item">
-            Safe Sites
-          </button>
-
-          <button className="nav-item">
-            Relocation Plan
-          </button>
-
-          <button className="nav-item">
-            Reports
-          </button>
-        </nav>
-
-      </aside>
-
-
-      {/* MAIN CONTENT */}
-      <main className="main">
-
-        {/* TOP BAR */}
-        <header className="topbar">
-
-          <div>
-            <h1>Disaster Management Dashboard</h1>
-
-            <p>
-              Hazard-based risk analysis and intelligent
-              relocation planning
-            </p>
-          </div>
-
-          <div className="status">
-            ● System Online
-          </div>
-
-        </header>
-
-
-        {/* STATISTICS */}
-        <section className="stats">
-
-          <div className="stat-card">
-            <span>Population at Risk</span>
-            <strong>2,480</strong>
-            <small>Across 12 habitations</small>
-          </div>
-
-          <div className="stat-card danger">
-            <span>Red Zones</span>
-            <strong>12</strong>
-            <small>Immediate attention required</small>
-          </div>
-
-          <div className="stat-card">
-            <span>Safe Sites</span>
-            <strong>7</strong>
-            <small>Safety verified</small>
-          </div>
-
-          <div className="stat-card success">
-            <span>Available Capacity</span>
-            <strong>3,250</strong>
-            <small>770 capacity surplus</small>
-          </div>
-
-        </section>
-
-
-        {/* MAP + PRIORITY */}
-        <section className="content-grid">
-
-          {/* REAL GIS MAP */}
-          <div className="panel map-panel">
-
-            <div className="panel-header">
-
-              <div>
-                <h2>Regional Risk Map</h2>
-                <p>Current hazard assessment</p>
-              </div>
-
-              <button className="view-button">
-                View Full Map
-              </button>
-
+  // Open Shelter Inspection Modal
+  const handleInspectShelter = (site) => {
+    const occPct = Math.round((site.occupied / site.capacity) * 100);
+    setModalConfig({
+      isOpen: true,
+      title: `Shelter Control Room: ${site.name}`,
+      content: (
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px", color: "var(--text-primary)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+            <div style={{ background: "var(--bg-secondary)", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
+              <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>CAPACITY</span>
+              <strong style={{ display: "block", fontSize: "18px" }}>{site.capacity}</strong>
             </div>
-
-            <div className="map-placeholder">
-              <RiskMap />
+            <div style={{ background: "var(--bg-secondary)", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
+              <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>OCCUPIED</span>
+              <strong style={{ display: "block", fontSize: "18px", color: "var(--accent-amber)" }}>{site.occupied} ({occPct}%)</strong>
             </div>
-
+            <div style={{ background: "var(--bg-secondary)", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
+              <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>AVAILABLE</span>
+              <strong style={{ display: "block", fontSize: "18px", color: "var(--accent-emerald)" }}>{site.available}</strong>
+            </div>
           </div>
 
-
-          {/* PRIORITY HABITATIONS */}
-          <div className="panel">
-
-            <div className="panel-header">
-
-              <div>
-                <h2>Priority Habitations</h2>
-                <p>Relocation priority</p>
-              </div>
-
+          <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "8px" }}>
+            <div style={{ fontWeight: 700, marginBottom: "10px", color: "var(--accent-cyan)", fontSize: "13px" }}>Relief Logistics Stock</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "12px" }}>
+              <div>💧 Water: <strong>{site.waterStockLiters?.toLocaleString()} L</strong></div>
+              <div>🍲 Food Rations: <strong>{site.foodMealsStock?.toLocaleString()} Meals</strong></div>
+              <div>🚑 Medical Teams: <strong>{site.medicalTeams} Units</strong></div>
+              <div>⚡ Gensets: <strong>{site.powerGenerators} Units</strong></div>
             </div>
-
-            <div className="priority-list">
-
-              <div className="priority-item">
-
-                <div>
-                  <strong>Village A</strong>
-                  <span>680 people</span>
-                </div>
-
-                <div className="priority immediate">
-                  Immediate
-                </div>
-
-              </div>
-
-
-              <div className="priority-item">
-
-                <div>
-                  <strong>Village B</strong>
-                  <span>450 people</span>
-                </div>
-
-                <div className="priority short">
-                  Short-term
-                </div>
-
-              </div>
-
-
-              <div className="priority-item">
-
-                <div>
-                  <strong>Village C</strong>
-                  <span>300 people</span>
-                </div>
-
-                <div className="priority medium">
-                  Medium-term
-                </div>
-
-              </div>
-
-            </div>
-
           </div>
 
-        </section>
+          <button className="action-btn primary" style={{ width: "100%", justifyContent: "center" }} onClick={closeModal}>
+            Acknowledge Control Room Status
+          </button>
+        </div>
+      )
+    });
+  };
 
-
-        {/* BOTTOM SECTION */}
-        <section className="bottom-grid">
-
-          {/* RELOCATION STATUS */}
-          <div className="panel">
-
-            <h2>Relocation Status</h2>
-
-            <div className="progress-row">
-
-              <div>
-                <span>People requiring relocation</span>
-                <strong>2,480</strong>
-              </div>
-
-              <div className="progress">
-                <div className="progress-fill"></div>
-              </div>
-
-            </div>
-
+  // Trigger Emergency Broadcast Action
+  const handleTriggerEmergency = () => {
+    setModalConfig({
+      isOpen: true,
+      title: "🚨 Emergency Broadcast Issued",
+      content: (
+        <div style={{ textAlign: "center", padding: "10px 0" }}>
+          <div className="pulse-red" style={{ display: "inline-block", padding: "16px", borderRadius: "50%", background: "rgba(239, 68, 68, 0.2)", marginBottom: "16px" }}>
+            <svg width="40" height="40" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
           </div>
+          <h3 style={{ color: "var(--text-primary)", fontSize: "18px", marginBottom: "8px" }}>Statewide Disaster Alert Broadcasted</h3>
+          <p style={{ color: "var(--text-secondary)", fontSize: "13px", marginBottom: "20px" }}>
+            Emergency push SMS, weather siren warnings, and regional transport dispatch orders have been dispatched to control centers.
+          </p>
+          <button className="action-btn primary" style={{ width: "100%", justifyContent: "center" }} onClick={closeModal}>
+            Acknowledge & Dismiss Alert
+          </button>
+        </div>
+      )
+    });
+  };
 
-
-          {/* SYSTEM WORKFLOW */}
-          <div className="panel">
-
-            <h2>System Workflow</h2>
-
-            <div className="workflow">
-
-              <span>Hazard</span>
-              →
-              <span>Red Zone</span>
-              →
-              <span>Priority</span>
-              →
-              <span>Safe Site</span>
-              →
-              <span>Relocation</span>
-
-            </div>
-
+  // Export GIS Report Action
+  const handleExportReport = () => {
+    setModalConfig({
+      isOpen: true,
+      title: "📄 Generating GIS Disaster Executive Report",
+      content: (
+        <div style={{ textAlign: "center", padding: "10px 0" }}>
+          <div style={{ display: "inline-block", padding: "16px", borderRadius: "50%", background: "rgba(59, 130, 246, 0.2)", marginBottom: "16px" }}>
+            <svg width="40" height="40" fill="none" stroke="#3b82f6" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
           </div>
+          <h3 style={{ color: "var(--text-primary)", fontSize: "18px", marginBottom: "8px" }}>PDF Intelligence Report Ready</h3>
+          <p style={{ color: "var(--text-secondary)", fontSize: "13px", marginBottom: "20px" }}>
+            Report includes Red Zone habitations analysis, shelter capacity reserves ({stats.totalCapacity} beds), and AI relocation transit routes.
+          </p>
+          <button className="action-btn primary" style={{ width: "100%", justifyContent: "center" }} onClick={closeModal}>
+            Download APEX_Disaster_Report.pdf
+          </button>
+        </div>
+      )
+    });
+  };
 
-        </section>
+  // Handle Scenario Simulator updates
+  const handleSimulateImpact = (simResult) => {
+    setStats((prev) => ({
+      ...prev,
+      hazardLevel: simResult.threatLabel,
+      redZonesCount: simResult.calculatedRiskIndex > 75 ? 12 : 8
+    }));
 
+    const newSimAlert = {
+      id: `ALT-SIM-${Date.now()}`,
+      type: "WARNING",
+      title: `Scenario Simulation: ${simResult.threatLabel}`,
+      time: "Just now",
+      message: `Simulated Rainfall: ${simResult.rainfall}mm/hr | Slope Instability: ${simResult.slopeInstability}%. Risk Index recalculated to ${simResult.calculatedRiskIndex}/100.`
+    };
+    setAlerts([newSimAlert, ...alerts]);
+
+    setActiveTab("overview");
+  };
+
+  // Header Titles Map
+  const getHeaderInfo = () => {
+    switch (activeTab) {
+      case "overview":
+        return {
+          title: "Disaster Intelligence Command Center",
+          subtitle: `Flask REST Backend ${backendOnline ? "CONNECTED (http://localhost:5005)" : "OFFLINE fallback"} • Interactive SIH Prototype`
+        };
+      case "map":
+        return {
+          title: "Interactive GIS Risk Map Explorer",
+          subtitle: "Live hazard buffer overlays, vulnerable habitations, and evacuation polylines"
+        };
+      case "redzones":
+        return {
+          title: "Red Zones & Vulnerable Habitations",
+          subtitle: "Detailed settlement risk audit, demographic vulnerabilities, and hazard scores"
+        };
+      case "safesites":
+        return {
+          title: "Safe Sites & Relief Shelters",
+          subtitle: "High-ground shelter capacities, medical teams, and emergency supply stocks"
+        };
+      case "relocation":
+        return {
+          title: "AI Relocation & Route Planner",
+          subtitle: "Algorithmic origin-to-destination pairing and transport logistics calculator"
+        };
+      case "analytics":
+        return {
+          title: "Multi-Hazard Analytics & Chart.js Reports",
+          subtitle: "Statistical vulnerability curves, risk score distributions, and export data"
+        };
+      case "simulator":
+        return {
+          title: "Hazard Impact Scenario Simulator",
+          subtitle: "'What-If' severe event simulation for emergency dispatch testing"
+        };
+      default:
+        return { title: "APEX Command Center", subtitle: "Emergency Response Platform" };
+    }
+  };
+
+  const headerInfo = getHeaderInfo();
+  const latestAlert = alerts.length > 0 ? alerts[0] : null;
+
+  return (
+    <div className="app-layout">
+      {/* LEFT SIDEBAR NAVIGATION */}
+      <NavbarSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        alertsCount={alerts.filter((a) => a.status === "ACTIVE").length}
+      />
+
+      {/* MAIN CONTENT CONTAINER */}
+      <main className="main-content">
+        {/* TOP HEADER */}
+        <HeaderTopbar
+          title={headerInfo.title}
+          subtitle={headerInfo.subtitle}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          onTriggerEmergency={handleTriggerEmergency}
+          onExportReport={handleExportReport}
+          latestAlert={latestAlert}
+        />
+
+        {/* DYNAMIC TAB VIEWS */}
+        <div className="view-container">
+          {activeTab === "overview" && (
+            <OverviewView
+              stats={stats}
+              habitations={habitations}
+              safeSites={safeSites}
+              onSelectHabitation={handleInspectHabitation}
+              onNavigateToMap={() => setActiveTab("map")}
+              onNavigateToPlanner={() => setActiveTab("relocation")}
+            />
+          )}
+
+          {activeTab === "map" && (
+            <RiskMapExplorer
+              habitations={habitations}
+              safeSites={safeSites}
+              hazardZones={hazardZones}
+              evacuationRoutes={evacuationRoutes}
+              onSelectHabitation={handleInspectHabitation}
+              onSelectShelter={handleInspectShelter}
+            />
+          )}
+
+          {activeTab === "redzones" && (
+            <RedZonesView
+              habitations={habitations}
+              onSelectHabitation={handleInspectHabitation}
+              onUpdateStatus={handleUpdateRelocationStatus}
+            />
+          )}
+
+          {activeTab === "safesites" && (
+            <SafeSitesView
+              safeSites={safeSites}
+              onSelectShelter={handleInspectShelter}
+            />
+          )}
+
+          {activeTab === "relocation" && (
+            <RelocationPlannerView
+              habitations={habitations}
+              safeSites={safeSites}
+              onInspectHabitation={handleInspectHabitation}
+              onInspectShelter={handleInspectShelter}
+              onUpdateStatus={handleUpdateRelocationStatus}
+            />
+          )}
+
+          {activeTab === "analytics" && (
+            <AnalyticsView
+              habitations={habitations}
+              shelters={safeSites}
+              stats={stats}
+              theme={theme}
+              onExportReport={handleExportReport}
+            />
+          )}
+
+          {activeTab === "simulator" && (
+            <SimulatorView
+              onSimulateImpact={handleSimulateImpact}
+            />
+          )}
+        </div>
       </main>
 
+      {/* INSPECTION / ALERT MODAL DIALOG */}
+      <DetailModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        onClose={closeModal}
+      >
+        {modalConfig.content}
+      </DetailModal>
     </div>
   );
 }
