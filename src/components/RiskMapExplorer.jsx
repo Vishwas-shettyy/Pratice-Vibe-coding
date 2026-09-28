@@ -80,6 +80,26 @@ function RiskMapExplorer({
 
   const getRiskScore = (hab) => Number(hab?.riskScore ?? hab?.risk_score ?? hab?.risk_assessment?.risk_score ?? 0);
   const getRiskLevel = (hab) => String(hab?.riskLevel ?? hab?.risk_level ?? hab?.risk_assessment?.risk_level ?? "LOW");
+  const getMainHazard = (hab) => String(hab?.hazardType ?? hab?.risk_assessment?.main_hazard ?? hab?.risk_assessment?.contributing_factors?.[0] ?? "Not specified");
+  const getAssessmentSummary = (hab) => {
+    const factors = Array.isArray(hab?.risk_assessment?.contributing_factors) ? hab.risk_assessment.contributing_factors : [];
+    const factorScores = hab?.risk_assessment?.factor_scores || {};
+    const scorePairs = Object.entries(factorScores).slice(0, 3);
+
+    if (factors.length || scorePairs.length) {
+      return [...scorePairs.map(([key, value]) => `${key.replace(/_/g, " ")}: ${Number(value).toFixed(1)}`), ...factors.slice(0, 2)].join(" • ");
+    }
+
+    return "Assessment available in the detail inspection modal.";
+  };
+
+  const getOccupancyText = (shelter) => {
+    const occupied = Number(shelter?.occupied ?? 0);
+    const capacity = Number(shelter?.capacity ?? 0);
+
+    if (!capacity) return "Capacity unavailable";
+    return `${occupied} / ${capacity} occupied (${Math.round((occupied / capacity) * 100)}%)`;
+  };
 
   if (!safeHabitations.length && !safeSafeSites.length && !safeHazardZones.length && !safeRoutes.length) {
     return (
@@ -147,6 +167,10 @@ function RiskMapExplorer({
                       <span>Coverage Buffer:</span>
                       <strong>{(zone.radius / 1000).toFixed(1)} km</strong>
                     </div>
+                    <div className="risk-popup-row">
+                      <span>Operational:</span>
+                      <strong>{zone.severity === "CRITICAL" ? "Immediate response" : "Monitoring"}</strong>
+                    </div>
                   </div>
                 </Popup>
               </Circle>
@@ -176,6 +200,10 @@ function RiskMapExplorer({
                       <span>Status:</span>
                       <strong>{route.status}</strong>
                     </div>
+                    <div className="risk-popup-row">
+                      <span>Role:</span>
+                      <strong>Safe-route dispatch</strong>
+                    </div>
                   </div>
                 </Popup>
               </Polyline>
@@ -187,6 +215,7 @@ function RiskMapExplorer({
               const riskScore = getRiskScore(hab);
               const riskLevel = getRiskLevel(hab);
               const riskStyle = getRiskStyle(riskLevel, riskScore);
+              const mainHazard = getMainHazard(hab);
 
               return (
                 <CircleMarker
@@ -213,15 +242,19 @@ function RiskMapExplorer({
                       </div>
                       <div className="risk-popup-row">
                         <span>Risk Level:</span>
-                        <strong style={{ color: riskStyle.fillColor }}>{riskStyle.label}</strong>
+                        <strong style={{ color: riskStyle.fillColor }}>{riskLevel}</strong>
                       </div>
                       <div className="risk-popup-row">
-                        <span>Population:</span>
-                        <strong>{hab.population}</strong>
+                        <span>Main Hazard:</span>
+                        <strong>{mainHazard}</strong>
                       </div>
                       <div className="risk-popup-row">
-                        <span>Elderly:</span>
-                        <strong>{hab.elderly}</strong>
+                        <span>Exposure:</span>
+                        <strong>{hab.population} residents</strong>
+                      </div>
+                      <div className="risk-popup-row">
+                        <span>Assessment:</span>
+                        <strong>{getAssessmentSummary(hab)}</strong>
                       </div>
                       <button
                         className="risk-popup-action"
@@ -243,12 +276,20 @@ function RiskMapExplorer({
                   <div className="risk-popup-card">
                     <strong className="risk-popup-title risk-popup-safe">{shelter.name}</strong>
                     <div className="risk-popup-row">
-                      <span>Available Beds:</span>
-                      <strong>{shelter.available} / {shelter.capacity}</strong>
+                      <span>Capacity:</span>
+                      <strong>{shelter.capacity}</strong>
                     </div>
                     <div className="risk-popup-row">
-                      <span>Status:</span>
-                      <strong>{shelter.status}</strong>
+                      <span>Occupancy:</span>
+                      <strong>{getOccupancyText(shelter)}</strong>
+                    </div>
+                    <div className="risk-popup-row">
+                      <span>Available:</span>
+                      <strong>{shelter.available} beds</strong>
+                    </div>
+                    <div className="risk-popup-row">
+                      <span>Resources:</span>
+                      <strong>{shelter.waterStockLiters?.toLocaleString() || 0}L / {shelter.foodMealsStock?.toLocaleString() || 0} meals</strong>
                     </div>
                     <button
                       className="risk-popup-action safe"
@@ -328,7 +369,7 @@ function RiskMapExplorer({
           </div>
           <div className="legend-item">
             <div className="legend-color" style={{ background: "#3b82f6" }}></div>
-            <span>Route</span>
+            <span>Evacuation Route</span>
           </div>
         </div>
       </div>
