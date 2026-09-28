@@ -96,19 +96,7 @@ function OverviewView({
           </div>
 
           <div
-            style={{
-              height: "360px",
-              background: "#0f172a",
-              borderRadius: "12px",
-              border: "1px solid var(--border-color)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              position: "relative",
-              overflow: "hidden",
-              cursor: "pointer"
-            }}
+            className="gis-preview-panel"
             onClick={onNavigateToMap}
           >
             <div
@@ -126,8 +114,8 @@ function OverviewView({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
               </div>
-              <h3 style={{ color: "#fff", fontSize: "18px", marginBottom: "6px" }}>GIS Map Radar Active</h3>
-              <p style={{ color: "var(--text-muted)", fontSize: "13px", maxWidth: "340px", margin: "0 auto 16px" }}>
+              <h3 className="gis-preview-title">GIS Map Radar Active</h3>
+              <p className="gis-preview-description">
                 Interactive map layers loaded: Flood buffer, Landslide hazard, Evacuation polylines, Safe sites.
               </p>
               <button className="action-btn primary" onClick={onNavigateToMap}>
