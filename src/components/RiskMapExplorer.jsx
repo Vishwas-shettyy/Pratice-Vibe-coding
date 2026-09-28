@@ -3,11 +3,54 @@ import {
   MapContainer,
   TileLayer,
   Circle,
+  CircleMarker,
   Marker,
   Popup,
   Polyline
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+
+const getRiskStyle = (riskLevel, riskScore = 0) => {
+  const normalizedLevel = String(riskLevel ?? "LOW").trim().toUpperCase();
+
+  if (normalizedLevel === "CRITICAL") {
+    return {
+      color: "#dc2626",
+      fillColor: "#ef4444",
+      label: "CRITICAL",
+      stroke: "#b91c1c",
+      radius: 12 + Math.min(riskScore / 10, 12),
+    };
+  }
+
+  if (normalizedLevel === "HIGH") {
+    return {
+      color: "#d97706",
+      fillColor: "#f97316",
+      label: "HIGH",
+      stroke: "#b45309",
+      radius: 10 + Math.min(riskScore / 12, 10),
+    };
+  }
+
+  if (normalizedLevel === "MODERATE") {
+    return {
+      color: "#b45309",
+      fillColor: "#f59e0b",
+      label: "MODERATE",
+      stroke: "#92400e",
+      radius: 8 + Math.min(riskScore / 14, 8),
+    };
+  }
+
+  return {
+    color: "#166534",
+    fillColor: "#22c55e",
+    label: "LOW",
+    stroke: "#15803d",
+    radius: 7 + Math.min(riskScore / 20, 6),
+  };
+};
 
 function RiskMapExplorer({
   habitations = [],
@@ -37,8 +80,6 @@ function RiskMapExplorer({
 
   const getRiskScore = (hab) => Number(hab?.riskScore ?? hab?.risk_score ?? hab?.risk_assessment?.risk_score ?? 0);
   const getRiskLevel = (hab) => String(hab?.riskLevel ?? hab?.risk_level ?? hab?.risk_assessment?.risk_level ?? "LOW");
-
-  const riskBadgeColor = (score) => (score > 80 ? "#ef4444" : score > 65 ? "#f59e0b" : "#3b82f6");
 
   if (!safeHabitations.length && !safeSafeSites.length && !safeHazardZones.length && !safeRoutes.length) {
     return (
@@ -93,16 +134,19 @@ function RiskMapExplorer({
                   dashArray: zone.severity === "CRITICAL" ? "5, 5" : null
                 }}
               >
-                <Popup>
-                  <div style={{ color: "#111" }}>
-                    <strong style={{ fontSize: "14px" }}>{zone.label}</strong>
-                    <br />
-                    <span>Severity: </span>
-                    <strong style={{ color: zone.severity === "CRITICAL" ? "#dc2626" : "#d97706" }}>
-                      {zone.severity}
-                    </strong>
-                    <br />
-                    <span>Coverage Buffer: {(zone.radius / 1000).toFixed(1)} km</span>
+                <Popup className="risk-map-popup">
+                  <div className="risk-popup-card">
+                    <strong className="risk-popup-title">{zone.label}</strong>
+                    <div className="risk-popup-row">
+                      <span>Severity:</span>
+                      <strong style={{ color: zone.severity === "CRITICAL" ? "#dc2626" : "#d97706" }}>
+                        {zone.severity}
+                      </strong>
+                    </div>
+                    <div className="risk-popup-row">
+                      <span>Coverage Buffer:</span>
+                      <strong>{(zone.radius / 1000).toFixed(1)} km</strong>
+                    </div>
                   </div>
                 </Popup>
               </Circle>
@@ -121,13 +165,17 @@ function RiskMapExplorer({
                   opacity: 0.9
                 }}
               >
-                <Popup>
-                  <div style={{ color: "#111" }}>
-                    <strong>Evacuation Path: {route.fromName} &rarr; {route.toName}</strong>
-                    <br />
-                    <span>Distance: {route.distance}</span>
-                    <br />
-                    <span>Status: {route.status}</span>
+                <Popup className="risk-map-popup">
+                  <div className="risk-popup-card">
+                    <strong className="risk-popup-title">Evacuation Path: {route.fromName} &rarr; {route.toName}</strong>
+                    <div className="risk-popup-row">
+                      <span>Distance:</span>
+                      <strong>{route.distance}</strong>
+                    </div>
+                    <div className="risk-popup-row">
+                      <span>Status:</span>
+                      <strong>{route.status}</strong>
+                    </div>
                   </div>
                 </Popup>
               </Polyline>
@@ -138,40 +186,52 @@ function RiskMapExplorer({
             safeHabitations.map((hab) => {
               const riskScore = getRiskScore(hab);
               const riskLevel = getRiskLevel(hab);
+              const riskStyle = getRiskStyle(riskLevel, riskScore);
 
               return (
-                <Marker key={hab.id} position={[hab.lat, hab.lng]}>
-                  <Popup>
-                    <div style={{ color: "#111", minWidth: "160px" }}>
-                      <strong style={{ fontSize: "14px" }}>{hab.name}</strong>
-                      <div style={{ margin: "4px 0", fontSize: "12px" }}>
-                        Risk Score: <strong style={{ color: riskBadgeColor(riskScore) }}>{riskScore}/100</strong>
+                <CircleMarker
+                  key={hab.id}
+                  center={[hab.lat, hab.lng]}
+                  radius={riskStyle.radius}
+                  pathOptions={{
+                    color: riskStyle.color,
+                    fillColor: riskStyle.fillColor,
+                    fillOpacity: 0.85,
+                    weight: 2,
+                    opacity: 1,
+                  }}
+                  eventHandlers={{
+                    click: () => onSelectHabitation?.(hab),
+                  }}
+                >
+                  <Popup className="risk-map-popup">
+                    <div className="risk-popup-card">
+                      <strong className="risk-popup-title">{hab.name}</strong>
+                      <div className="risk-popup-row">
+                        <span>Risk Score:</span>
+                        <strong style={{ color: riskStyle.fillColor }}>{riskScore}/100</strong>
                       </div>
-                      <div style={{ margin: "4px 0", fontSize: "12px" }}>
-                        Risk Level: <strong style={{ color: riskBadgeColor(riskScore) }}>{riskLevel}</strong>
+                      <div className="risk-popup-row">
+                        <span>Risk Level:</span>
+                        <strong style={{ color: riskStyle.fillColor }}>{riskStyle.label}</strong>
                       </div>
-                      <div style={{ fontSize: "12px", marginBottom: "8px" }}>
-                        Population: <strong>{hab.population}</strong> (Elderly: {hab.elderly})
+                      <div className="risk-popup-row">
+                        <span>Population:</span>
+                        <strong>{hab.population}</strong>
+                      </div>
+                      <div className="risk-popup-row">
+                        <span>Elderly:</span>
+                        <strong>{hab.elderly}</strong>
                       </div>
                       <button
-                        style={{
-                          background: "#3b82f6",
-                          color: "#fff",
-                          border: "none",
-                          padding: "4px 8px",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          width: "100%",
-                          fontSize: "11px",
-                          fontWeight: 600
-                        }}
-                        onClick={() => onSelectHabitation(hab)}
+                        className="risk-popup-action"
+                        onClick={() => onSelectHabitation?.(hab)}
                       >
                         Inspect Settlement
                       </button>
                     </div>
                   </Popup>
-                </Marker>
+                </CircleMarker>
               );
             })}
 
@@ -179,28 +239,20 @@ function RiskMapExplorer({
           {layers.safeSites &&
             safeSafeSites.map((shelter) => (
               <Marker key={shelter.id} position={[shelter.lat, shelter.lng]}>
-                <Popup>
-                  <div style={{ color: "#111", minWidth: "160px" }}>
-                    <strong style={{ fontSize: "14px", color: "#059669" }}>{shelter.name}</strong>
-                    <div style={{ margin: "4px 0", fontSize: "12px" }}>
-                      Available Beds: <strong>{shelter.available} / {shelter.capacity}</strong>
+                <Popup className="risk-map-popup">
+                  <div className="risk-popup-card">
+                    <strong className="risk-popup-title risk-popup-safe">{shelter.name}</strong>
+                    <div className="risk-popup-row">
+                      <span>Available Beds:</span>
+                      <strong>{shelter.available} / {shelter.capacity}</strong>
                     </div>
-                    <div style={{ fontSize: "12px", marginBottom: "8px" }}>
-                      Status: <strong>{shelter.status}</strong>
+                    <div className="risk-popup-row">
+                      <span>Status:</span>
+                      <strong>{shelter.status}</strong>
                     </div>
                     <button
-                      style={{
-                        background: "#10b981",
-                        color: "#fff",
-                        border: "none",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        width: "100%",
-                        fontSize: "11px",
-                        fontWeight: 600
-                      }}
-                      onClick={() => onSelectShelter(shelter)}
+                      className="risk-popup-action safe"
+                      onClick={() => onSelectShelter?.(shelter)}
                     >
                       Inspect Shelter Inventory
                     </button>
@@ -255,12 +307,20 @@ function RiskMapExplorer({
         {/* MAP LEGEND */}
         <div className="map-legend">
           <div className="legend-item">
-            <div className="legend-color" style={{ background: "#ef4444" }}></div>
-            <span>Red Zone (Critical)</span>
+            <div className="legend-color" style={{ background: "#22c55e" }}></div>
+            <span>Low Risk</span>
           </div>
           <div className="legend-item">
             <div className="legend-color" style={{ background: "#f59e0b" }}></div>
-            <span>High Risk Zone</span>
+            <span>Moderate Risk</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-color" style={{ background: "#f97316" }}></div>
+            <span>High Risk</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-color" style={{ background: "#ef4444" }}></div>
+            <span>Critical Risk</span>
           </div>
           <div className="legend-item">
             <div className="legend-color" style={{ background: "#10b981" }}></div>
@@ -268,7 +328,7 @@ function RiskMapExplorer({
           </div>
           <div className="legend-item">
             <div className="legend-color" style={{ background: "#3b82f6" }}></div>
-            <span>Evacuation Route</span>
+            <span>Route</span>
           </div>
         </div>
       </div>
