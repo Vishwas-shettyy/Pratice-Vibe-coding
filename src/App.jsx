@@ -60,11 +60,13 @@ function App() {
   const [alerts, setAlerts] = useState(ALERTS_DATA);
   const [loading, setLoading] = useState(true);
   const [backendOnline, setBackendOnline] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   // Load Data from Flask Backend API
   const loadBackendData = async () => {
     try {
       setLoading(true);
+      setApiError("");
       const [backendStats, backendAreas, backendShelters, backendAlerts, backendMap] = await Promise.all([
         api.getDashboardStats(),
         api.getRiskAreas(),
@@ -78,11 +80,13 @@ function App() {
       setSafeSites(Array.isArray(backendShelters) ? backendShelters : SAFE_SITES_DATA);
       setAlerts(Array.isArray(backendAlerts) ? backendAlerts : ALERTS_DATA);
       if (backendMap?.hazardZones) setHazardZones(backendMap.hazardZones);
+      if (backendMap?.evacuationRoutes) setEvacuationRoutes(backendMap.evacuationRoutes);
 
       setBackendOnline(true);
     } catch (err) {
       console.warn("Using offline fallback data for frontend:", err.message);
       setBackendOnline(false);
+      setApiError("Flask backend unavailable. Showing offline fallback data.");
       setStats(INITIAL_STATS);
       setHabitations(HABITATIONS_DATA);
       setSafeSites(SAFE_SITES_DATA);
@@ -364,6 +368,14 @@ function App() {
 
         {/* DYNAMIC TAB VIEWS */}
         <div className="view-container">
+          {apiError && (
+            <div className="glass-panel" style={{ padding: "12px 16px", marginBottom: "12px", borderColor: "rgba(239,68,68,0.45)" }}>
+              <div className="panel-sub" style={{ color: "var(--accent-red)", margin: 0 }}>
+                {apiError}
+              </div>
+            </div>
+          )}
+
           {loading && activeTab === "overview" ? (
             <div className="glass-panel" style={{ padding: "32px", textAlign: "center" }}>
               <div className="panel-title">Loading dashboard data…</div>

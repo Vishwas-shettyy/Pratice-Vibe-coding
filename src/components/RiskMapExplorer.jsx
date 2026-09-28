@@ -10,10 +10,10 @@ import {
 import "leaflet/dist/leaflet.css";
 
 function RiskMapExplorer({
-  habitations,
-  safeSites,
-  hazardZones,
-  evacuationRoutes,
+  habitations = [],
+  safeSites = [],
+  hazardZones = [],
+  evacuationRoutes = [],
   onSelectHabitation,
   onSelectShelter
 }) {
@@ -24,11 +24,24 @@ function RiskMapExplorer({
     routes: true,
   });
 
+  const safeHabitations = Array.isArray(habitations) ? habitations : [];
+  const safeSafeSites = Array.isArray(safeSites) ? safeSites : [];
+  const safeHazardZones = Array.isArray(hazardZones) ? hazardZones : [];
+  const safeRoutes = Array.isArray(evacuationRoutes) ? evacuationRoutes : [];
+
   const center = [12.2958, 76.6394];
 
   const toggleLayer = (layerKey) => {
     setLayers((prev) => ({ ...prev, [layerKey]: !prev[layerKey] }));
   };
+
+  if (!safeHabitations.length && !safeSafeSites.length && !safeHazardZones.length && !safeRoutes.length) {
+    return (
+      <div className="empty-state">
+        No GIS data available. The backend is either offline or has not returned any map layers.
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -62,7 +75,7 @@ function RiskMapExplorer({
 
           {/* HAZARD ZONES / CIRCLES */}
           {layers.redZones &&
-            hazardZones.map((zone) => (
+            safeHazardZones.map((zone) => (
               <Circle
                 key={zone.id}
                 center={zone.center}
@@ -92,7 +105,7 @@ function RiskMapExplorer({
 
           {/* EVACUATION ROUTE POLYLINES */}
           {layers.routes &&
-            evacuationRoutes.map((route) => (
+            safeRoutes.map((route) => (
               <Polyline
                 key={route.id}
                 positions={route.positions}
@@ -117,7 +130,7 @@ function RiskMapExplorer({
 
           {/* HABITATION MARKERS */}
           {layers.habitations &&
-            habitations.map((hab) => (
+            safeHabitations.map((hab) => (
               <Marker key={hab.id} position={[hab.lat, hab.lng]}>
                 <Popup>
                   <div style={{ color: "#111", minWidth: "160px" }}>
@@ -151,7 +164,7 @@ function RiskMapExplorer({
 
           {/* SAFE SITES MARKERS */}
           {layers.safeSites &&
-            safeSites.map((shelter) => (
+            safeSafeSites.map((shelter) => (
               <Marker key={shelter.id} position={[shelter.lat, shelter.lng]}>
                 <Popup>
                   <div style={{ color: "#111", minWidth: "160px" }}>

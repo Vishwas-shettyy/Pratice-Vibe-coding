@@ -8,6 +8,8 @@ function OverviewView({
   onNavigateToMap,
   onNavigateToPlanner
 }) {
+  const hasHabitations = Array.isArray(habitations) && habitations.length > 0;
+  const hasSafeSites = Array.isArray(safeSites) && safeSites.length > 0;
   const safeStats = {
     ...stats,
     populationAtRisk: Number(stats.populationAtRisk ?? stats.totalPopulationAtRisk ?? 0),
@@ -18,7 +20,15 @@ function OverviewView({
     surplusCapacity: Number(stats.surplusCapacity ?? stats.availableCapacity ?? 0),
   };
 
-  const sortedHabitations = [...habitations].sort((a, b) => (b.riskScore ?? 0) - (a.riskScore ?? 0));
+  const sortedHabitations = [...(Array.isArray(habitations) ? habitations : [])].sort((a, b) => (b.riskScore ?? 0) - (a.riskScore ?? 0));
+
+  if (!hasHabitations && !hasSafeSites) {
+    return (
+      <div className="empty-state">
+        No dashboard data is available right now. The backend may be offline or returning an empty response.
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>

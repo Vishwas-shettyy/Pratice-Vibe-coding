@@ -15,10 +15,21 @@ async function fetchAPI(endpoint, options = {}) {
       ...options,
     });
 
-    const result = await response.json();
-    if (!response.ok || !result.success) {
-      throw new Error(result?.error?.message || `HTTP ${response.status}: API request failed`);
+    const rawText = await response.text();
+    let result = {};
+
+    if (rawText) {
+      try {
+        result = JSON.parse(rawText);
+      } catch (parseError) {
+        throw new Error("Backend returned an invalid JSON response.");
+      }
     }
+
+    if (!response.ok || !result.success) {
+      throw new Error(result?.error?.message || result?.message || `HTTP ${response.status}: API request failed`);
+    }
+
     return result.data;
   } catch (error) {
     console.warn(`[API Client Warning] Failed to fetch ${endpoint}:`, error.message);

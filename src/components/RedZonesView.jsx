@@ -4,7 +4,9 @@ function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus }) 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLevel, setFilterLevel] = useState("ALL");
 
-  const filteredHabitations = (habitations || []).filter((hab) => {
+  const safeHabitations = Array.isArray(habitations) ? habitations : [];
+
+  const filteredHabitations = safeHabitations.filter((hab) => {
     const name = String(hab?.name || "");
     const code = String(hab?.code || "");
     const hazardType = String(hab?.hazardType || "");
@@ -18,6 +20,14 @@ function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus }) 
     if (filterLevel === "ALL") return matchesSearch;
     return matchesSearch && hazardLevel.toUpperCase() === filterLevel.toUpperCase();
   });
+
+  if (!filteredHabitations.length) {
+    return (
+      <div className="empty-state">
+        No red-zone habitations are available. The API either returned no data or the backend is offline.
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>

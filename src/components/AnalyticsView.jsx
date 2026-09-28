@@ -26,15 +26,25 @@ function AnalyticsView({ habitations = [], shelters = [], stats = {}, theme = "d
   const isDark = theme === "dark";
   const textColor = isDark ? "#9ca3af" : "#475569";
   const gridColor = isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)";
+  const safeHabitations = Array.isArray(habitations) ? habitations : [];
+  const safeShelters = Array.isArray(shelters) ? shelters : [];
+
+  if (!safeHabitations.length && !safeShelters.length) {
+    return (
+      <div className="empty-state">
+        No analytics data is currently available. The backend may be offline or returning an empty response.
+      </div>
+    );
+  }
 
   // 1. Habitation Risk Score Bar Chart Data
   const riskBarData = {
-    labels: habitations.map((h) => h.code || h.name),
+    labels: safeHabitations.map((h) => h.code || h.name),
     datasets: [
       {
         label: "Risk Score (0-100)",
-        data: habitations.map((h) => h.riskScore),
-        backgroundColor: habitations.map((h) =>
+        data: safeHabitations.map((h) => h.riskScore),
+        backgroundColor: safeHabitations.map((h) =>
           h.riskScore > 80 ? "#ef4444" : h.riskScore > 65 ? "#f59e0b" : "#3b82f6"
         ),
         borderRadius: 6,
@@ -68,7 +78,6 @@ function AnalyticsView({ habitations = [], shelters = [], stats = {}, theme = "d
   };
 
   // 2. Demographic Vulnerability Doughnut Chart Data
-  const safeHabitations = habitations || [];
   const totalElderly = safeHabitations.reduce((sum, h) => sum + (h.elderly || 0), 0);
   const totalChildren = safeHabitations.reduce((sum, h) => sum + (h.children || 0), 0);
   const totalMedical = safeHabitations.reduce((sum, h) => sum + (h.medicalPriority || 0), 0);
@@ -101,17 +110,17 @@ function AnalyticsView({ habitations = [], shelters = [], stats = {}, theme = "d
 
   // 3. Shelter Capacity Comparison Bar Chart
   const shelterBarData = {
-    labels: shelters.map((s) => s.code || s.name),
+    labels: safeShelters.map((s) => s.code || s.name),
     datasets: [
       {
         label: "Occupied Beds",
-        data: shelters.map((s) => s.occupied),
+        data: safeShelters.map((s) => s.occupied),
         backgroundColor: "#ef4444",
         borderRadius: 4,
       },
       {
         label: "Available Surplus Beds",
-        data: shelters.map((s) => s.available),
+        data: safeShelters.map((s) => s.available),
         backgroundColor: "#10b981",
         borderRadius: 4,
       },

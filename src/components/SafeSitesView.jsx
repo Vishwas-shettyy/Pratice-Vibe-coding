@@ -1,6 +1,16 @@
 import React from "react";
 
 function SafeSitesView({ safeSites = [], onSelectShelter }) {
+  const safeShelters = Array.isArray(safeSites) ? safeSites : [];
+
+  if (!safeShelters.length) {
+    return (
+      <div className="empty-state">
+        No safe-site data is available right now. Please retry once the backend is reachable.
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       <div className="glass-panel" style={{ padding: "18px 22px" }}>
@@ -18,7 +28,7 @@ function SafeSitesView({ safeSites = [], onSelectShelter }) {
       </div>
 
       <div className="grid-1-1">
-        {(safeSites || []).map((shelter) => {
+        {(safeShelters || []).map((shelter) => {
           const occupancyPct = Math.round(((shelter.occupied || 0) / Math.max((shelter.capacity || 0), 1)) * 100);
 
           return (

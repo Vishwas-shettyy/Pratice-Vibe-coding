@@ -1,14 +1,26 @@
 import React, { useState } from "react";
 
 function RelocationPlannerView({ habitations = [], safeSites = [], routes = [] }) {
-  const [selectedHabitationId, setSelectedHabitationId] = useState(habitations[0]?.id || "");
+  const [selectedHabitationId, setSelectedHabitationId] = useState((Array.isArray(habitations) ? habitations[0]?.id : "") || "");
 
-  const currentHabitation = habitations.find((h) => h.id === selectedHabitationId) || habitations[0] || {};
-  const assignedShelter = safeSites.find((s) => s.id === currentHabitation.assignedShelterId) || safeSites[0] || {};
+  const safeHabitations = Array.isArray(habitations) ? habitations : [];
+  const safeSafeSites = Array.isArray(safeSites) ? safeSites : [];
+  const safeRoutes = Array.isArray(routes) ? routes : [];
+
+  const currentHabitation = safeHabitations.find((h) => h.id === selectedHabitationId) || safeHabitations[0] || {};
+  const assignedShelter = safeSafeSites.find((s) => s.id === currentHabitation.assignedShelterId) || safeSafeSites[0] || {};
 
   // Bus calculation (50 people per bus)
   const busesRequired = Math.ceil((currentHabitation.population || 0) / 50);
   const ambulanceRequired = Math.ceil((currentHabitation.medicalPriority || 0) / 4);
+
+  if (!safeHabitations.length && !safeSafeSites.length && !safeRoutes.length) {
+    return (
+      <div className="empty-state">
+        Relocation planning data is currently unavailable. The backend data feed is missing or offline.
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -43,7 +55,7 @@ function RelocationPlannerView({ habitations = [], safeSites = [], routes = [] }
                 fontSize: "13px"
               }}
             >
-              {habitations.map((h) => (
+              {safeHabitations.map((h) => (
                 <option key={h.id} value={h.id}>
                   {h.name} ({h.population} people)
                 </option>
@@ -109,7 +121,7 @@ function RelocationPlannerView({ habitations = [], safeSites = [], routes = [] }
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {(routes || []).map((rt) => (
+            {safeRoutes.map((rt) => (
               <div key={rt.id} style={{ background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "10px", borderLeft: `4px solid ${rt.color}` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <strong style={{ color: "#fff", fontSize: "13px" }}>{rt.fromName} &rarr; {rt.toName}</strong>
