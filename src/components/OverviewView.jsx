@@ -20,7 +20,10 @@ function OverviewView({
     surplusCapacity: Number(stats.surplusCapacity ?? stats.availableCapacity ?? 0),
   };
 
-  const sortedHabitations = [...(Array.isArray(habitations) ? habitations : [])].sort((a, b) => (b.riskScore ?? 0) - (a.riskScore ?? 0));
+  const getHabitRiskScore = (hab) => Number(hab?.riskScore ?? hab?.risk_score ?? hab?.risk_assessment?.risk_score ?? 0);
+  const getHabitRiskLevel = (hab) => String(hab?.riskLevel ?? hab?.risk_level ?? hab?.risk_assessment?.risk_level ?? "LOW");
+
+  const sortedHabitations = [...(Array.isArray(habitations) ? habitations : [])].sort((a, b) => getHabitRiskScore(b) - getHabitRiskScore(a));
 
   if (!hasHabitations && !hasSafeSites) {
     return (

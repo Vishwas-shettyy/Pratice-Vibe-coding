@@ -35,6 +35,11 @@ function RiskMapExplorer({
     setLayers((prev) => ({ ...prev, [layerKey]: !prev[layerKey] }));
   };
 
+  const getRiskScore = (hab) => Number(hab?.riskScore ?? hab?.risk_score ?? hab?.risk_assessment?.risk_score ?? 0);
+  const getRiskLevel = (hab) => String(hab?.riskLevel ?? hab?.risk_level ?? hab?.risk_assessment?.risk_level ?? "LOW");
+
+  const riskBadgeColor = (score) => (score > 80 ? "#ef4444" : score > 65 ? "#f59e0b" : "#3b82f6");
+
   if (!safeHabitations.length && !safeSafeSites.length && !safeHazardZones.length && !safeRoutes.length) {
     return (
       <div className="empty-state">
@@ -130,37 +135,45 @@ function RiskMapExplorer({
 
           {/* HABITATION MARKERS */}
           {layers.habitations &&
-            safeHabitations.map((hab) => (
-              <Marker key={hab.id} position={[hab.lat, hab.lng]}>
-                <Popup>
-                  <div style={{ color: "#111", minWidth: "160px" }}>
-                    <strong style={{ fontSize: "14px" }}>{hab.name}</strong>
-                    <div style={{ margin: "4px 0", fontSize: "12px" }}>
-                      Risk Score: <strong style={{ color: "#ef4444" }}>{hab.riskScore}/100</strong>
+            safeHabitations.map((hab) => {
+              const riskScore = getRiskScore(hab);
+              const riskLevel = getRiskLevel(hab);
+
+              return (
+                <Marker key={hab.id} position={[hab.lat, hab.lng]}>
+                  <Popup>
+                    <div style={{ color: "#111", minWidth: "160px" }}>
+                      <strong style={{ fontSize: "14px" }}>{hab.name}</strong>
+                      <div style={{ margin: "4px 0", fontSize: "12px" }}>
+                        Risk Score: <strong style={{ color: riskBadgeColor(riskScore) }}>{riskScore}/100</strong>
+                      </div>
+                      <div style={{ margin: "4px 0", fontSize: "12px" }}>
+                        Risk Level: <strong style={{ color: riskBadgeColor(riskScore) }}>{riskLevel}</strong>
+                      </div>
+                      <div style={{ fontSize: "12px", marginBottom: "8px" }}>
+                        Population: <strong>{hab.population}</strong> (Elderly: {hab.elderly})
+                      </div>
+                      <button
+                        style={{
+                          background: "#3b82f6",
+                          color: "#fff",
+                          border: "none",
+                          padding: "4px 8px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          width: "100%",
+                          fontSize: "11px",
+                          fontWeight: 600
+                        }}
+                        onClick={() => onSelectHabitation(hab)}
+                      >
+                        Inspect Settlement
+                      </button>
                     </div>
-                    <div style={{ fontSize: "12px", marginBottom: "8px" }}>
-                      Population: <strong>{hab.population}</strong> (Elderly: {hab.elderly})
-                    </div>
-                    <button
-                      style={{
-                        background: "#3b82f6",
-                        color: "#fff",
-                        border: "none",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        width: "100%",
-                        fontSize: "11px",
-                        fontWeight: 600
-                      }}
-                      onClick={() => onSelectHabitation(hab)}
-                    >
-                      Inspect Settlement
-                    </button>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+                  </Popup>
+                </Marker>
+              );
+            })}
 
           {/* SAFE SITES MARKERS */}
           {layers.safeSites &&

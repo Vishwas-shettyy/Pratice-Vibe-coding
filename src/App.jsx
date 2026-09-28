@@ -125,6 +125,11 @@ function App() {
 
   // Open Habitation Inspection Modal
   const handleInspectHabitation = (hab) => {
+    const riskScore = Number(hab?.riskScore ?? hab?.risk_score ?? hab?.risk_assessment?.risk_score ?? 0);
+    const riskLevel = String(hab?.riskLevel ?? hab?.risk_level ?? hab?.risk_assessment?.risk_level ?? "LOW");
+    const factorScores = hab?.risk_assessment?.factor_scores || {};
+    const factors = hab?.risk_assessment?.contributing_factors || [];
+
     setModalConfig({
       isOpen: true,
       title: `Habitation Audit: ${hab.name} (${hab.code})`,
@@ -132,10 +137,15 @@ function App() {
         <div style={{ display: "flex", flexDirection: "column", gap: "16px", color: "var(--text-primary)" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             <div style={{ background: "var(--bg-secondary)", padding: "12px", borderRadius: "8px" }}>
-              <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Hazard Rating</span>
-              <strong style={{ display: "block", fontSize: "20px", color: hab.riskScore > 80 ? "var(--accent-red)" : "var(--accent-amber)" }}>
-                {hab.riskScore} / 100
-              </strong>
+              <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Risk Rating</span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginTop: "6px" }}>
+                <strong style={{ display: "block", fontSize: "20px", color: riskScore > 80 ? "var(--accent-red)" : "var(--accent-amber)" }}>
+                  {riskScore} / 100
+                </strong>
+                <span className={`badge ${riskLevel === "CRITICAL" ? "immediate" : riskLevel === "HIGH" ? "short" : "medium"}`}>
+                  {riskLevel}
+                </span>
+              </div>
             </div>
             <div style={{ background: "var(--bg-secondary)", padding: "12px", borderRadius: "8px" }}>
               <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Total Population</span>
@@ -146,21 +156,20 @@ function App() {
           </div>
 
           <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "8px", fontSize: "13px" }}>
-            <div style={{ fontWeight: 700, marginBottom: "8px", color: "var(--accent-blue)" }}>Demographic Breakdown</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", textAlign: "center" }}>
-              <div>
-                <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>ELDERLY</span>
-                <strong style={{ display: "block", fontSize: "16px" }}>{hab.elderly}</strong>
-              </div>
-              <div>
-                <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>CHILDREN</span>
-                <strong style={{ display: "block", fontSize: "16px" }}>{hab.children}</strong>
-              </div>
-              <div>
-                <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>MEDICAL</span>
-                <strong style={{ display: "block", fontSize: "16px", color: "var(--accent-red)" }}>{hab.medicalPriority}</strong>
-              </div>
+            <div style={{ fontWeight: 700, marginBottom: "8px", color: "var(--accent-blue)" }}>Risk Drivers</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              {Object.entries(factorScores).map(([key, value]) => (
+                <div key={key} style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
+                  <span style={{ textTransform: "capitalize", color: "var(--text-secondary)" }}>{key.replace(/_/g, " ")}</span>
+                  <strong>{Number(value).toFixed(1)}</strong>
+                </div>
+              ))}
             </div>
+            {factors.length > 0 && (
+              <div style={{ marginTop: "10px", color: "var(--text-secondary)" }}>
+                <strong style={{ color: "var(--accent-cyan)" }}>Contributing factors:</strong> {factors.join(", ")}
+              </div>
+            )}
           </div>
 
           <div style={{ fontSize: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>

@@ -3,6 +3,8 @@ Data Service Layer (Mock Data / In-Memory Store)
 Designed with modular data access functions to easily swap out for PostgreSQL/Supabase DB.
 """
 
+from app.services.risk_service import enrich_areas
+
 # Initial In-Memory State
 INITIAL_HABITATIONS = [
     {
@@ -18,8 +20,6 @@ INITIAL_HABITATIONS = [
         "elderly": 140,
         "children": 195,
         "medicalPriority": 42,
-        "riskScore": 88,
-        "riskLevel": "CRITICAL",
         "hazardType": "Flash Flood & Inundation",
         "hazardLevel": "Immediate",
         "assignedShelterId": "SAFE-01",
@@ -34,8 +34,8 @@ INITIAL_HABITATIONS = [
             "elevation": "720m",
             "riverProximity": "150m",
             "floodRisk": "CRITICAL",
-            "landslideRisk": "LOW"
-        }
+            "landslideRisk": "LOW",
+        },
     },
     {
         "id": "HAB-102",
@@ -50,8 +50,6 @@ INITIAL_HABITATIONS = [
         "elderly": 85,
         "children": 110,
         "medicalPriority": 18,
-        "riskScore": 76,
-        "riskLevel": "HIGH",
         "hazardType": "Slope Failure & Landslide",
         "hazardLevel": "Immediate",
         "assignedShelterId": "SAFE-02",
@@ -66,8 +64,8 @@ INITIAL_HABITATIONS = [
             "elevation": "950m",
             "riverProximity": "1.2km",
             "floodRisk": "MODERATE",
-            "landslideRisk": "CRITICAL"
-        }
+            "landslideRisk": "CRITICAL",
+        },
     },
     {
         "id": "HAB-103",
@@ -82,8 +80,6 @@ INITIAL_HABITATIONS = [
         "elderly": 50,
         "children": 78,
         "medicalPriority": 12,
-        "riskScore": 62,
-        "riskLevel": "MEDIUM",
         "hazardType": "Heavy Runoff",
         "hazardLevel": "Short-term",
         "assignedShelterId": "SAFE-01",
@@ -98,8 +94,8 @@ INITIAL_HABITATIONS = [
             "elevation": "810m",
             "riverProximity": "800m",
             "floodRisk": "HIGH",
-            "landslideRisk": "LOW"
-        }
+            "landslideRisk": "LOW",
+        },
     },
     {
         "id": "HAB-104",
@@ -114,8 +110,6 @@ INITIAL_HABITATIONS = [
         "elderly": 98,
         "children": 140,
         "medicalPriority": 29,
-        "riskScore": 82,
-        "riskLevel": "CRITICAL",
         "hazardType": "River Overflow",
         "hazardLevel": "Immediate",
         "assignedShelterId": "SAFE-03",
@@ -130,8 +124,8 @@ INITIAL_HABITATIONS = [
             "elevation": "690m",
             "riverProximity": "50m",
             "floodRisk": "CRITICAL",
-            "landslideRisk": "NEGLIGIBLE"
-        }
+            "landslideRisk": "NEGLIGIBLE",
+        },
     },
     {
         "id": "HAB-105",
@@ -146,8 +140,6 @@ INITIAL_HABITATIONS = [
         "elderly": 40,
         "children": 82,
         "medicalPriority": 9,
-        "riskScore": 48,
-        "riskLevel": "LOW",
         "hazardType": "Wind Gust & Runoff",
         "hazardLevel": "Medium-term",
         "assignedShelterId": "SAFE-04",
@@ -162,8 +154,8 @@ INITIAL_HABITATIONS = [
             "elevation": "880m",
             "riverProximity": "2.5km",
             "floodRisk": "LOW",
-            "landslideRisk": "LOW"
-        }
+            "landslideRisk": "LOW",
+        },
     },
     {
         "id": "HAB-106",
@@ -178,8 +170,6 @@ INITIAL_HABITATIONS = [
         "elderly": 32,
         "children": 54,
         "medicalPriority": 15,
-        "riskScore": 71,
-        "riskLevel": "HIGH",
         "hazardType": "Rockfall & Flash Surge",
         "hazardLevel": "Short-term",
         "assignedShelterId": "SAFE-02",
@@ -194,9 +184,9 @@ INITIAL_HABITATIONS = [
             "elevation": "760m",
             "riverProximity": "300m",
             "floodRisk": "HIGH",
-            "landslideRisk": "HIGH"
-        }
-    }
+            "landslideRisk": "HIGH",
+        },
+    },
 ]
 
 INITIAL_SHELTERS = [
@@ -216,7 +206,7 @@ INITIAL_SHELTERS = [
         "medicalTeams": 4,
         "powerGenerators": 3,
         "status": "Active & Ready",
-        "contact": "+91 98765-43210 (Control Room Alpha)"
+        "contact": "+91 98765-43210 (Control Room Alpha)",
     },
     {
         "id": "SAFE-02",
@@ -234,7 +224,7 @@ INITIAL_SHELTERS = [
         "medicalTeams": 3,
         "powerGenerators": 2,
         "status": "Active & Ready",
-        "contact": "+91 98765-43211 (Control Room Beta)"
+        "contact": "+91 98765-43211 (Control Room Beta)",
     },
     {
         "id": "SAFE-03",
@@ -252,7 +242,7 @@ INITIAL_SHELTERS = [
         "medicalTeams": 2,
         "powerGenerators": 2,
         "status": "Active & Ready",
-        "contact": "+91 98765-43212 (Control Room Gamma)"
+        "contact": "+91 98765-43212 (Control Room Gamma)",
     },
     {
         "id": "SAFE-04",
@@ -270,8 +260,8 @@ INITIAL_SHELTERS = [
         "medicalTeams": 2,
         "powerGenerators": 1,
         "status": "Standby Surplus",
-        "contact": "+91 98765-43213 (Control Room Delta)"
-    }
+        "contact": "+91 98765-43213 (Control Room Delta)",
+    },
 ]
 
 INITIAL_ALERTS = [
@@ -283,7 +273,7 @@ INITIAL_ALERTS = [
         "time": "10 mins ago",
         "area": "Kaveri Basin / Village A",
         "message": "Rainfall intensity reached 120mm/hr in North Hills. Immediate evacuation recommended for Village A & B.",
-        "status": "ACTIVE"
+        "status": "ACTIVE",
     },
     {
         "id": "ALT-02",
@@ -293,7 +283,7 @@ INITIAL_ALERTS = [
         "time": "35 mins ago",
         "area": "Mudhall Ridge / Village B",
         "message": "Slope movement detected near Mudhall Ridge (Sensor #S-104). Road access restricted.",
-        "status": "ACTIVE"
+        "status": "ACTIVE",
     },
     {
         "id": "ALT-03",
@@ -303,25 +293,26 @@ INITIAL_ALERTS = [
         "time": "1 hour ago",
         "area": "Safe Shelter Alpha",
         "message": "Safe Site Delta added 200 additional emergency beds and 500L clean water supply.",
-        "status": "RESOLVED"
-    }
+        "status": "RESOLVED",
+    },
 ]
 
 INITIAL_RESOURCES = {
-    "emergencyVehicles": { "buses": 34, "ambulances": 18, "rescueTrucks": 12 },
-    "medicalTeams": { "active": 11, "onCall": 6 },
-    "rescueTeams": { "ndrfUnits": 4, "fireServices": 8 },
+    "emergencyVehicles": {"buses": 34, "ambulances": 18, "rescueTrucks": 12},
+    "medicalTeams": {"active": 11, "onCall": 6},
+    "rescueTeams": {"ndrfUnits": 4, "fireServices": 8},
     "supplies": {
         "waterStockLiters": 44000,
         "foodRations": 12700,
         "blankets": 5200,
-        "generators": 8
-    }
+        "generators": 8,
+    },
 }
+
 
 class DataService:
     def __init__(self):
-        self.habitations = INITIAL_HABITATIONS
+        self.habitations = enrich_areas(INITIAL_HABITATIONS)
         self.shelters = INITIAL_SHELTERS
         self.alerts = INITIAL_ALERTS
         self.resources = INITIAL_RESOURCES
@@ -329,11 +320,16 @@ class DataService:
     def get_dashboard_stats(self):
         total_pop = sum(h["population"] for h in self.habitations)
         affected_pop = sum(h["affectedPopulation"] for h in self.habitations)
-        red_zones = sum(1 for h in self.habitations if h["riskLevel"] in ["CRITICAL", "HIGH"])
+        red_zones = sum(
+            1 for h in self.habitations if h["riskLevel"] in ["CRITICAL", "HIGH"]
+        )
         total_capacity = sum(s["capacity"] for s in self.shelters)
         total_occupied = sum(s["occupied"] for s in self.shelters)
         surplus_capacity = total_capacity - total_occupied
-        relocated_count = sum(int(h["population"] * (h["evacuationProgress"] / 100)) for h in self.habitations)
+        relocated_count = sum(
+            int(h["population"] * (h["evacuationProgress"] / 100))
+            for h in self.habitations
+        )
 
         return {
             "totalPopulationAtRisk": total_pop,
@@ -346,10 +342,14 @@ class DataService:
             "occupiedCapacity": total_occupied,
             "availableCapacity": total_capacity - total_occupied,
             "surplusCapacity": surplus_capacity,
-            "criticalAlertsCount": sum(1 for a in self.alerts if a["severity"] == "CRITICAL" and a["status"] == "ACTIVE"),
+            "criticalAlertsCount": sum(
+                1
+                for a in self.alerts
+                if a["severity"] == "CRITICAL" and a["status"] == "ACTIVE"
+            ),
             "activeResponseTeams": 15,
             "systemStatus": "ONLINE",
-            "hazardLevel": "HIGH (LEVEL 3)"
+            "hazardLevel": "HIGH (LEVEL 3)",
         }
 
     def get_risk_areas(self):
@@ -372,7 +372,7 @@ class DataService:
                     "radius": 2800,
                     "color": "#ef4444",
                     "label": "Red Zone Alpha - Kaveri Flash Flood Buffer",
-                    "severity": "CRITICAL"
+                    "severity": "CRITICAL",
                 },
                 {
                     "id": "ZONE-RED-2",
@@ -380,7 +380,7 @@ class DataService:
                     "radius": 2200,
                     "color": "#f59e0b",
                     "label": "Red Zone Beta - Mudhall Landslide Vulnerability",
-                    "severity": "HIGH"
+                    "severity": "HIGH",
                 },
                 {
                     "id": "ZONE-RED-3",
@@ -388,23 +388,25 @@ class DataService:
                     "radius": 1900,
                     "color": "#ef4444",
                     "label": "Red Zone Gamma - Lowland River Surge",
-                    "severity": "CRITICAL"
-                }
-            ]
+                    "severity": "CRITICAL",
+                },
+            ],
         }
 
     def get_relocation_priorities(self):
-        sorted_habs = sorted(self.habitations, key=lambda x: x["riskScore"], reverse=True)
+        sorted_habs = sorted(
+            self.habitations, key=lambda x: x["riskScore"], reverse=True
+        )
         return sorted_habs
 
     def get_relocation_workflow(self):
         return [
-            { "stage": "Risk Identified", "count": 6, "status": "Completed" },
-            { "stage": "Assessment", "count": 6, "status": "Completed" },
-            { "stage": "Relocation Planned", "count": 5, "status": "Completed" },
-            { "stage": "Transport Dispatch", "count": 4, "status": "In Progress" },
-            { "stage": "Shelter Allocation", "count": 3, "status": "In Progress" },
-            { "stage": "Relocation Completed", "count": 1, "status": "Active" }
+            {"stage": "Risk Identified", "count": 6, "status": "Completed"},
+            {"stage": "Assessment", "count": 6, "status": "Completed"},
+            {"stage": "Relocation Planned", "count": 5, "status": "Completed"},
+            {"stage": "Transport Dispatch", "count": 4, "status": "In Progress"},
+            {"stage": "Shelter Allocation", "count": 3, "status": "In Progress"},
+            {"stage": "Relocation Completed", "count": 1, "status": "Active"},
         ]
 
     def get_shelters(self):
@@ -424,7 +426,7 @@ class DataService:
                 "date": "2026-09-27",
                 "author": "SIH Emergency Control Operations",
                 "summary": "Full multi-hazard assessment covering Kaveri Basin & Mudhall Ridge Red Zones.",
-                "downloadUrl": "/reports/REP-2026-01.pdf"
+                "downloadUrl": "/reports/REP-2026-01.pdf",
             },
             {
                 "id": "REP-2026-02",
@@ -432,8 +434,8 @@ class DataService:
                 "date": "2026-09-26",
                 "author": "Relief Supply Logistics Team",
                 "summary": "Capacity surplus of 770 beds verified across 4 high-ground shelters.",
-                "downloadUrl": "/reports/REP-2026-02.pdf"
-            }
+                "downloadUrl": "/reports/REP-2026-02.pdf",
+            },
         ]
 
     def assign_shelter(self, area_id, shelter_id):
@@ -456,6 +458,7 @@ class DataService:
         elif status.lower() == "in progress":
             hab["evacuationProgress"] = max(hab["evacuationProgress"], 50)
         return hab
+
 
 # Global Singleton Instance
 data_service = DataService()
