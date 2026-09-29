@@ -55,6 +55,38 @@ def get_alerts():
     alerts = data_service.get_alerts()
     return success_response(alerts, message="Emergency alerts retrieved")
 
+@api_bp.route("/recommendations", methods=["GET"])
+def get_recommendations():
+    recs = data_service.get_recommendations()
+    return success_response(recs, message="Decision recommendations retrieved")
+
+@api_bp.route("/simulation/impact", methods=["POST"])
+def calculate_simulation_impact_api():
+    from flask import request
+    from app.services.simulation_engine import calculate_simulation_impact
+    data = request.json or {}
+
+    try:
+        rainfall = float(data.get("rainfall", 50))
+        slope_instability = float(data.get("slopeInstability", 30))
+        river_level = float(data.get("riverLevel", 2.0))
+
+        if rainfall < 0 or slope_instability < 0 or river_level < 0:
+            return error_response("Values cannot be negative", status_code=400)
+    except (ValueError, TypeError):
+        return error_response("Invalid input values. Must be numeric.", status_code=400)
+
+    impact = calculate_simulation_impact(
+        rainfall,
+        slope_instability,
+        river_level,
+        data_service.habitations,
+        data_service.shelters,
+        data_service.resources
+    )
+
+    return success_response(impact, message="Simulation impact calculated successfully")
+
 @api_bp.route("/reports", methods=["GET"])
 def get_reports():
     reports = data_service.get_reports()

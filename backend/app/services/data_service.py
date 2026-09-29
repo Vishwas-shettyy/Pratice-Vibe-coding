@@ -312,23 +312,41 @@ INITIAL_RESOURCES = {
 
 class DataService:
     def __init__(self):
-        self.habitations = enrich_areas(INITIAL_HABITATIONS)
-        self.shelters = INITIAL_SHELTERS
-        self.alerts = INITIAL_ALERTS
-        self.resources = INITIAL_RESOURCES
+        from app.services.repository import repo
+        self.repo = repo
+        # Seed the DB or populate in-memory
+        enriched = enrich_areas(INITIAL_HABITATIONS)
+        self.repo.seed_data(enriched, INITIAL_SHELTERS, INITIAL_RESOURCES)
+
+        # Load state dynamically
+        self.alerts = INITIAL_ALERTS  # Alerts can remain mostly dynamic based on current state
+
+    @property
+    def habitations(self):
+        return enrich_areas(self.repo.get_all_habitations())
+
+    @property
+    def shelters(self):
+        return self.repo.get_all_shelters()
+
+    @property
+    def resources(self):
+        return self.repo.get_resources()
 
     def get_dashboard_stats(self):
-        total_pop = sum(h["population"] for h in self.habitations)
-        affected_pop = sum(h["affectedPopulation"] for h in self.habitations)
+        habs = self.habitations
+        shelts = self.shelters
+        total_pop = sum(h["population"] for h in habs)
+        affected_pop = sum(h["affectedPopulation"] for h in habs)
         red_zones = sum(
-            1 for h in self.habitations if h["riskLevel"] in ["CRITICAL", "HIGH"]
+            1 for h in habs if h.get("riskLevel") in ["CRITICAL", "HIGH"]
         )
-        total_capacity = sum(s["capacity"] for s in self.shelters)
-        total_occupied = sum(s["occupied"] for s in self.shelters)
+        total_capacity = sum(s["capacity"] for s in shelts)
+        total_occupied = sum(s["occupied"] for s in shelts)
         surplus_capacity = total_capacity - total_occupied
         relocated_count = sum(
-            int(h["population"] * (h["evacuationProgress"] / 100))
-            for h in self.habitations
+            int(h["population"] * (h.get("evacuationProgress", 0) / 100))
+            for h in habs
         )
 
         return {
@@ -337,14 +355,14 @@ class DataService:
             "peopleRequiringRelocation": total_pop - relocated_count,
             "relocatedCount": relocated_count,
             "redZonesCount": red_zones,
-            "safeSitesCount": len(self.shelters),
+            "safeSitesCount": len(shelts),
             "totalCapacity": total_capacity,
             "occupiedCapacity": total_occupied,
             "availableCapacity": total_capacity - total_occupied,
             "surplusCapacity": surplus_capacity,
             "criticalAlertsCount": sum(
                 1
-                for a in self.alerts
+                for a in self.get_alerts()
                 if a["severity"] == "CRITICAL" and a["status"] == "ACTIVE"
             ),
             "activeResponseTeams": 15,
@@ -395,7 +413,7 @@ class DataService:
 
     def get_relocation_priorities(self):
         sorted_habs = sorted(
-            self.habitations, key=lambda x: x["riskScore"], reverse=True
+            self.habitations, key=lambda x: x.get("riskScore", 0), reverse=True
         )
         return sorted_habs
 
@@ -416,7 +434,16 @@ class DataService:
         return self.resources
 
     def get_alerts(self):
-        return self.alerts
+        # Generate new alerts dynamically based on the current habitations state
+        from app.services.alert_engine import generate_alerts
+        dynamic_alerts = generate_alerts(self.habitations)
+
+        history = [a for a in self.alerts if a.get("status") == "RESOLVED"]
+        return dynamic_alerts + history
+
+    def get_recommendations(self):
+        from app.services.recommendation_engine import generate_recommendations
+        return generate_recommendations(self.habitations, self.shelters, self.resources)
 
     def get_reports(self):
         return [
@@ -439,26 +466,16 @@ class DataService:
         ]
 
     def assign_shelter(self, area_id, shelter_id):
-        hab = self.get_risk_area_by_id(area_id)
+        hab = self.repo.update_habitation_relocation(area_id, status="Assigned", assigned_shelter_id=shelter_id)
         if not hab:
             return None
-        hab["assignedShelterId"] = shelter_id
-        hab["relocationStatus"] = "Assigned"
-        return hab
+        return enrich_areas([hab])[0]
 
     def update_relocation_status(self, area_id, status, progress=None):
-        hab = self.get_risk_area_by_id(area_id)
+        hab = self.repo.update_habitation_relocation(area_id, status, progress)
         if not hab:
             return None
-        hab["relocationStatus"] = status
-        if progress is not None:
-            hab["evacuationProgress"] = min(100, max(0, int(progress)))
-        elif status.lower() == "completed":
-            hab["evacuationProgress"] = 100
-        elif status.lower() == "in progress":
-            hab["evacuationProgress"] = max(hab["evacuationProgress"], 50)
-        return hab
-
+        return enrich_areas([hab])[0]
 
 # Global Singleton Instance
 data_service = DataService()

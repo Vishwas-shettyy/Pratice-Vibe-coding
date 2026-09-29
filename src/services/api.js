@@ -74,6 +74,16 @@ export const api = {
   // Alerts
   getAlerts: () => fetchAPI("/alerts"),
 
+  // Recommendations
+  getRecommendations: () => fetchAPI("/recommendations"),
+
+  // Simulation
+  runSimulationImpact: (payload) =>
+    fetchAPI(`/simulation/impact`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
   // Reports
   getReports: () => fetchAPI("/reports"),
 };

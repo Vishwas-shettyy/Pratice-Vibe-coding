@@ -54,18 +54,19 @@ function HeaderTopbar({ title, subtitle, theme, onToggleTheme, onTriggerEmergenc
       {latestAlert && (
         <div style={{ background: "rgba(239, 68, 68, 0.1)", borderBottom: "1px solid rgba(239, 68, 68, 0.2)", padding: "12px 28px", display: "flex", alignItems: "flex-start", gap: "16px" }}>
           <div style={{ background: "var(--accent-red)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "4px 8px", borderRadius: "4px", letterSpacing: "1px", flexShrink: 0, marginTop: "2px" }}>
-            LIVE ALERT
+            {latestAlert.severity?.toUpperCase() || "LIVE ALERT"}
           </div>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
             <div style={{ color: "var(--accent-red)", fontSize: "14px", fontWeight: 700 }}>
               {latestAlert.title}
+              {latestAlert.area && <span style={{ color: "var(--text-secondary)", fontWeight: 600, marginLeft: "8px" }}>— {latestAlert.area}</span>}
             </div>
             <div style={{ color: "var(--text-primary)", fontSize: "13px", fontWeight: 500 }}>
               {latestAlert.message}
             </div>
           </div>
           <div style={{ color: "var(--text-muted)", fontSize: "12px", fontWeight: 600, flexShrink: 0 }}>
-            {latestAlert.time}
+            {latestAlert.time || "Just now"}
           </div>
         </div>
       )}

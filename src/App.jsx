@@ -59,7 +59,9 @@ function App() {
   const [hazardZones, setHazardZones] = useState(HAZARD_ZONES);
   const [evacuationRoutes, setEvacuationRoutes] = useState(EVACUATION_ROUTES);
   const [alerts, setAlerts] = useState(ALERTS_DATA);
+  const [recommendations, setRecommendations] = useState([]);
   const [resources, setResources] = useState({});
+  const [latestSimulationResult, setLatestSimulationResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [backendOnline, setBackendOnline] = useState(false);
   const [apiError, setApiError] = useState("");
@@ -69,19 +71,21 @@ function App() {
     try {
       setLoading(true);
       setApiError("");
-      const [backendStats, backendAreas, backendShelters, backendAlerts, backendMap, backendResources] = await Promise.all([
+      const [backendStats, backendAreas, backendShelters, backendAlerts, backendMap, backendResources, backendRecommendations] = await Promise.all([
         api.getDashboardStats(),
         api.getRiskAreas(),
         api.getShelters(),
         api.getAlerts(),
         api.getMapData(),
         api.getResources(),
+        api.getRecommendations().catch(e => { console.warn("Failed to fetch recommendations", e); return []; }),
       ]);
 
       setStats(normalizeDashboardStats(backendStats));
       setHabitations(Array.isArray(backendAreas) ? backendAreas : HABITATIONS_DATA);
       setSafeSites(Array.isArray(backendShelters) ? backendShelters : SAFE_SITES_DATA);
       setAlerts(Array.isArray(backendAlerts) ? backendAlerts : ALERTS_DATA);
+      setRecommendations(Array.isArray(backendRecommendations) ? backendRecommendations : []);
       if (backendMap?.hazardZones) setHazardZones(backendMap.hazardZones);
       if (backendMap?.evacuationRoutes) setEvacuationRoutes(backendMap.evacuationRoutes);
       setResources(backendResources || {});
@@ -95,6 +99,7 @@ function App() {
       setHabitations(HABITATIONS_DATA);
       setSafeSites(SAFE_SITES_DATA);
       setAlerts(ALERTS_DATA);
+      setRecommendations([]);
     } finally {
       setLoading(false);
     }
@@ -293,6 +298,7 @@ function App() {
 
   // Handle Scenario Simulator updates
   const handleSimulateImpact = (simResult) => {
+    setLatestSimulationResult(simResult.fullResult);
     setStats((prev) => ({
       ...prev,
       hazardLevel: simResult.threatLabel,
@@ -341,8 +347,8 @@ function App() {
         };
       case "analytics":
         return {
-          title: "Multi-Hazard Analytics & Chart.js Reports",
-          subtitle: "Statistical vulnerability curves, risk score distributions, and export data"
+          title: "Operational Decision Analysis",
+          subtitle: "Multi-hazard reports, resource readiness, and simulation insights"
         };
       case "resources":
         return {
@@ -360,7 +366,21 @@ function App() {
   };
 
   const headerInfo = getHeaderInfo();
-  const latestAlert = alerts.length > 0 ? alerts[0] : null;
+
+  const getHighestPriorityAlert = () => {
+    const activeAlerts = alerts.filter(a => a.status === "ACTIVE");
+    if (!activeAlerts.length) return null;
+
+    const severityOrder = { "CRITICAL": 4, "HIGH": 3, "WARNING": 2, "INFO": 1 };
+
+    return activeAlerts.sort((a, b) => {
+      const rankA = severityOrder[a.severity?.toUpperCase()] || 0;
+      const rankB = severityOrder[b.severity?.toUpperCase()] || 0;
+      return rankB - rankA;
+    })[0];
+  };
+
+  const latestAlert = getHighestPriorityAlert();
 
   return (
     <div className="app-container">
@@ -411,9 +431,13 @@ function App() {
               stats={stats}
               habitations={habitations}
               safeSites={safeSites}
+              recommendations={recommendations}
               onSelectHabitation={handleInspectHabitation}
               onNavigateToMap={() => setActiveTab("map")}
               onNavigateToPlanner={() => setActiveTab("relocation")}
+              onNavigateToShelters={() => setActiveTab("safesites")}
+              onNavigateToResources={() => setActiveTab("resources")}
+              onNavigateToRedZones={() => setActiveTab("redzones")}
             />
           )}
 
@@ -457,6 +481,8 @@ function App() {
               habitations={habitations}
               shelters={safeSites}
               stats={stats}
+              resources={resources}
+              simulationResult={latestSimulationResult}
               theme={theme}
               onExportReport={handleExportReport}
             />
