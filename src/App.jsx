@@ -317,7 +317,7 @@ function App() {
       case "overview":
         return {
           title: "Disaster Intelligence Command Center",
-          subtitle: `Flask REST Backend ${backendOnline ? "CONNECTED (http://localhost:5005)" : "OFFLINE fallback"} • Interactive SIH Prototype`
+          subtitle: ""
         };
       case "map":
         return {
@@ -383,6 +383,7 @@ function App() {
             onTriggerEmergency={handleTriggerEmergency}
             onExportReport={handleExportReport}
             latestAlert={latestAlert}
+            backendOnline={backendOnline}
           />
         </div>
 

@@ -21,7 +21,7 @@ function OverviewView({
   };
 
   const getHabitRiskScore = (hab) => Number(hab?.riskScore ?? hab?.risk_score ?? hab?.risk_assessment?.risk_score ?? 0);
-  const getHabitRiskLevel = (hab) => String(hab?.riskLevel ?? hab?.risk_level ?? hab?.risk_assessment?.risk_level ?? "LOW");
+  const getHabitRiskLevel = (hab) => String(hab?.riskLevel ?? hab?.risk_level ?? hab?.risk_assessment?.risk_level ?? "LOW").toUpperCase();
 
   const sortedHabitations = [...(Array.isArray(habitations) ? habitations : [])].sort((a, b) => getHabitRiskScore(b) - getHabitRiskScore(a));
 
@@ -34,126 +34,137 @@ function OverviewView({
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-      {/* STATS METRICS GRID */}
+    <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+      {/* KPI COMMAND STRIP */}
       <div className="stats-grid">
-        <div className="stat-card danger">
-          <div className="stat-label">
-            <span>Population at Risk</span>
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 100 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
+        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-critical)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Population at Risk</span>
+            <span style={{ fontSize: "14px", color: "var(--text-muted)" }}>👥</span>
           </div>
-          <div className="stat-value">{safeStats.populationAtRisk.toLocaleString()}</div>
-          <div className="stat-subtext">Across {habitations.length} vulnerable habitations</div>
+          <div style={{ fontSize: "32px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.2 }}>
+            {safeStats.populationAtRisk.toLocaleString()}
+          </div>
+          <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+            Across {habitations.length} vulnerable habitations
+          </div>
         </div>
 
-        <div className="stat-card danger">
-          <div className="stat-label">
-            <span>Red Zones</span>
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-critical)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Red Zones</span>
+            <span style={{ fontSize: "14px", color: "var(--text-muted)" }}>📍</span>
           </div>
-          <div className="stat-value">{safeStats.redZonesCount}</div>
-          <div className="stat-subtext">Immediate action required</div>
+          <div style={{ fontSize: "32px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.2 }}>
+            {safeStats.redZonesCount}
+          </div>
+          <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+            Immediate action required
+          </div>
         </div>
 
-        <div className="stat-card warning">
-          <div className="stat-label">
-            <span>Safe Shelters</span>
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
+        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-warning)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Safe Shelters</span>
+            <span style={{ fontSize: "14px", color: "var(--text-muted)" }}>🛡️</span>
           </div>
-          <div className="stat-value">{safeStats.safeSitesCount}</div>
-          <div className="stat-subtext">Verified high-ground shelters</div>
+          <div style={{ fontSize: "32px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.2 }}>
+            {safeStats.safeSitesCount}
+          </div>
+          <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+            Verified high-ground shelters
+          </div>
         </div>
 
-        <div className="stat-card success">
-          <div className="stat-label">
-            <span>Available Capacity</span>
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-safe)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Available Capacity</span>
+            <span style={{ fontSize: "14px", color: "var(--text-muted)" }}>🛏️</span>
           </div>
-          <div className="stat-value">{safeStats.totalCapacity.toLocaleString()}</div>
-          <div className="stat-subtext">+{safeStats.surplusCapacity} capacity surplus</div>
+          <div style={{ fontSize: "32px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.2 }}>
+            {safeStats.totalCapacity.toLocaleString()}
+          </div>
+          <div style={{ fontSize: "12px", color: "var(--accent-safe)", fontWeight: 600 }}>
+            +{safeStats.surplusCapacity} capacity surplus
+          </div>
         </div>
       </div>
 
-      {/* MAP PREVIEW & PRIORITY HABITATIONS */}
+      {/* REGIONAL RISK & PRIORITY HABITATIONS */}
       <div className="grid-2-1">
-        <div className="glass-panel">
-          <div className="panel-header">
-            <div>
-              <div className="panel-title">Regional Risk & Hazard Assessment</div>
-              <div className="panel-sub">Real-time GIS hazard layers & vulnerable habitations</div>
-            </div>
-            <button className="action-btn" onClick={onNavigateToMap}>
-              Expand Full Map
-            </button>
+        {/* GIS LAUNCH PANEL */}
+        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", padding: "0", overflow: "hidden" }}>
+          <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-color)" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>Regional Risk & Hazard Assessment</h3>
+            <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>Real-time GIS hazard layers & vulnerable habitations</p>
           </div>
 
-          <div
-            className="gis-preview-panel"
-            onClick={onNavigateToMap}
-          >
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                backgroundImage: "radial-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px)",
-                backgroundSize: "24px 24px"
-              }}
-            />
+          <div style={{ padding: "24px", flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-secondary)", position: "relative" }}>
+            {/* Grid background effect */}
+            <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(var(--border-color) 1px, transparent 1px)", backgroundSize: "24px 24px", opacity: 0.5 }} />
 
-            <div style={{ zIndex: 2, textAlign: "center", padding: "20px" }}>
-              <div className="pulse-red" style={{ display: "inline-block", padding: "12px", borderRadius: "50%", background: "rgba(239, 68, 68, 0.2)", marginBottom: "12px" }}>
-                <svg width="32" height="32" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
+            <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", height: "100%", justifyContent: "center", gap: "24px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span className="pulse-red" style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent-red)", display: "inline-block" }}></span>
+                <span style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px", color: "var(--accent-red)" }}>GIS STATUS: LIVE</span>
               </div>
-              <h3 className="gis-preview-title">GIS Map Radar Active</h3>
-              <p className="gis-preview-description">
-                Interactive map layers loaded: Flood buffer, Landslide hazard, Evacuation polylines, Safe sites.
-              </p>
-              <button className="action-btn primary" onClick={onNavigateToMap}>
-                Open Interactive GIS Map
-              </button>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                <div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px" }}>Hazard Layers</div>
+                  <div style={{ fontSize: "13px", color: "var(--text-primary)", fontWeight: 500 }}>Flood • Landslide • Evacuation • Safe Sites</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px" }}>Habitations Monitored</div>
+                  <div style={{ fontSize: "13px", color: "var(--text-primary)", fontWeight: 500 }}>{habitations.length} High-Risk Zones</div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: "auto", paddingTop: "12px" }}>
+                <button className="action-btn primary" style={{ padding: "10px 20px" }} onClick={onNavigateToMap}>
+                  Open Interactive GIS Map
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* PRIORITY HABITATIONS LEADERBOARD */}
-        <div className="glass-panel">
-          <div className="panel-header">
-            <div>
-              <div className="panel-title">Priority Habitations</div>
-              <div className="panel-sub">Relocation queue by hazard rating</div>
-            </div>
+        {/* PRIORITY QUEUE */}
+        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", padding: "0", overflow: "hidden" }}>
+          <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-color)" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>Priority Habitations</h3>
+            <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>Relocation queue by hazard rating</p>
           </div>
 
-          <div className="priority-list">
-            {sortedHabitations.slice(0, 4).map((hab) => (
-              <div
-                key={hab.id}
-                className="habitation-card-item"
-                onClick={() => onSelectHabitation(hab)}
-              >
-                <div className="hab-info">
-                  <h4>{hab.name}</h4>
-                  <p>{hab.population} people • Risk Score: {hab.riskScore}/100</p>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {sortedHabitations.slice(0, 4).map((hab, index) => {
+              const riskLevel = getHabitRiskLevel(hab);
+              const isCritical = riskLevel === "CRITICAL" || riskLevel === "IMMEDIATE";
+              const isHigh = riskLevel === "HIGH" || riskLevel === "SHORT-TERM";
+              const statusColor = isCritical ? "var(--accent-critical)" : isHigh ? "var(--accent-warning)" : "var(--accent-blue)";
+
+              return (
+                <div key={hab.id} onClick={() => onSelectHabitation(hab)} style={{ display: "flex", alignItems: "center", padding: "16px 24px", borderBottom: "1px solid var(--border-color)", cursor: "pointer", transition: "background 0.2s ease" }} onMouseOver={(e) => e.currentTarget.style.background = "var(--bg-secondary)"} onMouseOut={(e) => e.currentTarget.style.background = "transparent"}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-muted)", width: "24px", marginRight: "12px" }}>
+                    {String(index + 1).padStart(2, "0")}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "4px" }}>{hab.name}</div>
+                    <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{hab.population} people</div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>{getHabitRiskScore(hab)} <span style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 500 }}>/ 100</span></div>
+                    <div style={{ fontSize: "10px", fontWeight: 700, color: statusColor, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      {riskLevel}
+                    </div>
+                  </div>
                 </div>
-                <span className={`badge ${hab.hazardLevel === "Immediate" ? "immediate" : hab.hazardLevel === "Short-term" ? "short" : "medium"}`}>
-                  {hab.hazardLevel}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
-          <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--border-color)", textAlign: "center" }}>
-            <button className="action-btn" style={{ width: "100%", justifyContent: "center" }} onClick={onNavigateToPlanner}>
+          <div style={{ padding: "16px 24px", background: "rgba(0,0,0,0.02)", textAlign: "center", marginTop: "auto" }}>
+            <button className="action-btn" style={{ width: "100%", justifyContent: "center", fontSize: "13px" }} onClick={onNavigateToPlanner}>
               Launch Relocation Planner
             </button>
           </div>
@@ -162,68 +173,73 @@ function OverviewView({
 
       {/* LOWER SECTION: RELOCATION PROGRESS & WORKFLOW */}
       <div className="grid-1-1">
-        <div className="glass-panel">
-          <div className="panel-header">
-            <div>
-              <div className="panel-title">Evacuation & Relocation Progress</div>
-              <div className="panel-sub">Live tracking of population transferred to safe havens</div>
+
+        {/* RELOCATION PROGRESS */}
+        <div className="glass-panel" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div>
+            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>Evacuation & Relocation Progress</h3>
+            <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>Live tracking of population transferred to safe havens</p>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", background: "var(--bg-secondary)", padding: "20px", border: "1px solid var(--border-color)", borderRadius: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+              <div>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "8px" }}>Relocation Target</div>
+                <div style={{ fontSize: "24px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
+                  {safeStats.relocatedCount.toLocaleString()} <span style={{ fontSize: "14px", color: "var(--text-muted)", fontWeight: 500 }}>/ {safeStats.populationAtRisk.toLocaleString()}</span>
+                </div>
+              </div>
+              <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--accent-blue)" }}>
+                {Math.round((safeStats.relocatedCount / (safeStats.populationAtRisk || 1)) * 100)}%
+              </div>
+            </div>
+
+            <div style={{ width: "100%", height: "8px", background: "rgba(0,0,0,0.06)", borderRadius: "4px", overflow: "hidden" }}>
+              <div style={{ width: `${(safeStats.relocatedCount / (safeStats.populationAtRisk || 1)) * 100}%`, height: "100%", background: "var(--accent-blue)" }}></div>
             </div>
           </div>
 
-          <div style={{ margin: "16px 0" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "var(--text-secondary)" }}>Relocation Target Achieved</span>
-              <strong style={{ color: "var(--accent-cyan)" }}>
-                {safeStats.relocatedCount} / {safeStats.populationAtRisk} ({Math.round((safeStats.relocatedCount / (safeStats.populationAtRisk || 1)) * 100)}%)
-              </strong>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
+            <div style={{ border: "1px solid var(--border-color)", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "6px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Evacuated</div>
+              <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--accent-safe)" }}>{safeStats.relocatedCount.toLocaleString()}</div>
             </div>
-            <div className="progress-bar-container" style={{ height: "12px" }}>
-              <div className="progress-bar-fill" style={{ width: `${(safeStats.relocatedCount / (safeStats.populationAtRisk || 1)) * 100}%` }}></div>
+            <div style={{ border: "1px solid var(--border-color)", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "6px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>In Transit</div>
+              <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--accent-warning)" }}>420</div>
             </div>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginTop: "20px" }}>
-            <div style={{ background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
-              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>EVACUATED</div>
-              <strong style={{ fontSize: "18px", color: "var(--accent-emerald)" }}>{safeStats.relocatedCount}</strong>
-            </div>
-            <div style={{ background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
-              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>IN TRANSIT</div>
-              <strong style={{ fontSize: "18px", color: "var(--accent-amber)" }}>420</strong>
-            </div>
-            <div style={{ background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "8px", textAlign: "center" }}>
-              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>PENDING</div>
-              <strong style={{ fontSize: "18px", color: "var(--accent-red)" }}>{Math.max(0, safeStats.populationAtRisk - safeStats.relocatedCount)}</strong>
+            <div style={{ border: "1px solid var(--border-color)", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "6px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Pending</div>
+              <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)" }}>{Math.max(0, safeStats.populationAtRisk - safeStats.relocatedCount).toLocaleString()}</div>
             </div>
           </div>
         </div>
 
-        <div className="glass-panel">
-          <div className="panel-header">
-            <div>
-              <div className="panel-title">System Execution Pipeline</div>
-              <div className="panel-sub">Automated decision workflow</div>
-            </div>
+        {/* SYSTEM EXECUTION PIPELINE */}
+        <div className="glass-panel" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div>
+            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>System Execution Pipeline</h3>
+            <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>Automated decision workflow</p>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "10px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {[
               { step: "01", title: "Hazard Detection", desc: "Flood & slope sensor metrics calculated", done: true },
               { step: "02", title: "Red Zone Demarcation", desc: "Buffer zones & high-risk habitations isolated", done: true },
               { step: "03", title: "Capacity Matching", desc: "Pair habitations to nearest available safe shelters", done: true },
               { step: "04", title: "Evacuation Dispatch", desc: "Live vehicle dispatch & route visualizer", done: false }
             ].map((st) => (
-              <div key={st.step} style={{ display: "flex", alignItems: "center", gap: "14px", background: "rgba(255,255,255,0.02)", padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-                <div style={{ background: st.done ? "var(--accent-blue)" : "rgba(255,255,255,0.1)", color: "#fff", width: "28px", height: "28px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700 }}>
+              <div key={st.step} style={{ display: "flex", alignItems: "center", gap: "16px", padding: "14px", border: "1px solid var(--border-color)", borderRadius: "8px", background: "var(--bg-secondary)" }}>
+                <div style={{ fontSize: "12px", fontWeight: 700, color: st.done ? "var(--text-secondary)" : "var(--text-muted)", width: "16px" }}>
                   {st.step}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ color: "#fff", fontWeight: 600, fontSize: "13px" }}>{st.title}</div>
-                  <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>{st.desc}</div>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" }}>{st.title}</div>
+                  <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{st.desc}</div>
                 </div>
-                <span className={`badge ${st.done ? "safe" : "medium"}`}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: st.done ? "var(--accent-safe)" : "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", background: st.done ? "rgba(16, 185, 129, 0.1)" : "rgba(0,0,0,0.05)", padding: "4px 8px", borderRadius: "4px" }}>
                   {st.done ? "COMPLETED" : "IN PROGRESS"}
-                </span>
+                </div>
               </div>
             ))}
           </div>
