@@ -39,7 +39,7 @@ function App() {
 
   // Theme State (Dark / Light) with Persistence
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("apex_theme") || "dark";
+    return localStorage.getItem("apex_theme") || "light";
   });
 
   useEffect(() => {
@@ -433,6 +433,8 @@ function App() {
             <RelocationPlannerView
               habitations={habitations}
               safeSites={safeSites}
+              routes={evacuationRoutes}
+              onRefreshData={loadBackendData}
             />
           )}
 
