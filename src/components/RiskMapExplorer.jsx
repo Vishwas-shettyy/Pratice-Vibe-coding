@@ -13,41 +13,41 @@ import "leaflet/dist/leaflet.css";
 const getRiskStyle = (riskLevel, riskScore = 0) => {
   const normalizedLevel = String(riskLevel ?? "LOW").trim().toUpperCase();
 
-  if (normalizedLevel === "CRITICAL") {
+  if (normalizedLevel === "CRITICAL" || normalizedLevel === "IMMEDIATE") {
     return {
-      color: "#dc2626",
-      fillColor: "#ef4444",
+      color: "#ef4444",
+      fillColor: "#dc2626",
       label: "CRITICAL",
-      stroke: "#b91c1c",
+      stroke: "#991b1b",
       radius: 12 + Math.min(riskScore / 10, 12),
     };
   }
 
-  if (normalizedLevel === "HIGH") {
+  if (normalizedLevel === "HIGH" || normalizedLevel === "SHORT-TERM") {
     return {
-      color: "#d97706",
-      fillColor: "#f97316",
+      color: "#f59e0b",
+      fillColor: "#d97706",
       label: "HIGH",
-      stroke: "#b45309",
+      stroke: "#92400e",
       radius: 10 + Math.min(riskScore / 12, 10),
     };
   }
 
   if (normalizedLevel === "MODERATE") {
     return {
-      color: "#b45309",
-      fillColor: "#f59e0b",
+      color: "#eab308",
+      fillColor: "#ca8a04",
       label: "MODERATE",
-      stroke: "#92400e",
+      stroke: "#854d0e",
       radius: 8 + Math.min(riskScore / 14, 8),
     };
   }
 
   return {
-    color: "#166534",
-    fillColor: "#22c55e",
+    color: "#10b981",
+    fillColor: "#059669",
     label: "LOW",
-    stroke: "#15803d",
+    stroke: "#065f46",
     radius: 7 + Math.min(riskScore / 20, 6),
   };
 };
@@ -110,28 +110,36 @@ function RiskMapExplorer({
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <div className="glass-panel" style={{ padding: "16px 22px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h2 className="panel-title">Interactive GIS Risk Map & Layer Explorer</h2>
-            <p className="panel-sub">
-              Live multi-hazard monitoring, vulnerable settlement buffers, safe site perimeters & evacuation routes
-            </p>
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px", height: "calc(100vh - 160px)" }}>
+      {/* OPERATIONAL STATUS STRIP */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-card)", padding: "12px 20px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+        <div style={{ display: "flex", gap: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span className="pulse-red" style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent-safe)", display: "inline-block" }}></span>
+            <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.5px", color: "var(--text-primary)" }}>MAP ENGINE ACTIVE</span>
           </div>
-          <div style={{ display: "flex", gap: "10px" }}>
-            <span className="badge safe">MAP ENGINE ACTIVE</span>
-            <span className="badge immediate">3 RED ZONES LOADED</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.5px", color: "var(--text-muted)" }}>SYNC:</span>
+            <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>LIVE GIS FEED</span>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "12px" }}>
+          <div style={{ background: "rgba(220, 38, 38, 0.1)", color: "var(--accent-critical)", padding: "4px 10px", borderRadius: "4px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.5px" }}>
+            {safeHazardZones.length} RED ZONES LOADED
+          </div>
+          <div style={{ background: "rgba(59, 130, 246, 0.1)", color: "var(--accent-blue)", padding: "4px 10px", borderRadius: "4px", fontSize: "11px", fontWeight: 700, letterSpacing: "0.5px" }}>
+            {safeHabitations.length} HABITATIONS MONITORED
           </div>
         </div>
       </div>
 
-      <div className="map-wrapper">
+      <div style={{ flex: 1, minHeight: 0, position: "relative", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border-color)", background: "var(--bg-card)" }}>
         <MapContainer
           center={center}
           zoom={11}
           scrollWheelZoom={true}
-          style={{ height: "100%", width: "100%" }}
+          style={{ height: "100%", width: "100%", zIndex: 0 }}
         >
           {/* OPENSTREETMAP BASE LAYER */}
           <TileLayer
@@ -147,21 +155,19 @@ function RiskMapExplorer({
                 center={zone.center}
                 radius={zone.radius}
                 pathOptions={{
-                  color: zone.color,
-                  fillColor: zone.fillColor,
-                  fillOpacity: zone.fillOpacity,
+                  color: zone.severity === "CRITICAL" ? "#dc2626" : "#f59e0b",
+                  fillColor: zone.severity === "CRITICAL" ? "#ef4444" : "#fcd34d",
+                  fillOpacity: 0.15,
                   weight: 2,
-                  dashArray: zone.severity === "CRITICAL" ? "5, 5" : null
+                  dashArray: zone.severity === "CRITICAL" ? "4, 6" : "2, 8"
                 }}
               >
                 <Popup className="risk-map-popup">
                   <div className="risk-popup-card">
-                    <strong className="risk-popup-title">{zone.label}</strong>
+                    <strong className="risk-popup-title" style={{ color: zone.severity === "CRITICAL" ? "#dc2626" : "#d97706" }}>{zone.label}</strong>
                     <div className="risk-popup-row">
                       <span>Severity:</span>
-                      <strong style={{ color: zone.severity === "CRITICAL" ? "#dc2626" : "#d97706" }}>
-                        {zone.severity}
-                      </strong>
+                      <strong>{zone.severity}</strong>
                     </div>
                     <div className="risk-popup-row">
                       <span>Coverage Buffer:</span>
@@ -183,15 +189,15 @@ function RiskMapExplorer({
                 key={route.id}
                 positions={route.positions}
                 pathOptions={{
-                  color: route.color,
+                  color: route.color || "#3b82f6",
                   weight: 4,
-                  dashArray: "8, 8",
-                  opacity: 0.9
+                  dashArray: "6, 6",
+                  opacity: 0.8
                 }}
               >
                 <Popup className="risk-map-popup">
                   <div className="risk-popup-card">
-                    <strong className="risk-popup-title">Evacuation Path: {route.fromName} &rarr; {route.toName}</strong>
+                    <strong className="risk-popup-title" style={{ color: "#3b82f6" }}>Evacuation Path: {route.fromName} &rarr; {route.toName}</strong>
                     <div className="risk-popup-row">
                       <span>Distance:</span>
                       <strong>{route.distance}</strong>
@@ -223,9 +229,9 @@ function RiskMapExplorer({
                   center={[hab.lat, hab.lng]}
                   radius={riskStyle.radius}
                   pathOptions={{
-                    color: riskStyle.color,
+                    color: riskStyle.stroke,
                     fillColor: riskStyle.fillColor,
-                    fillOpacity: 0.85,
+                    fillOpacity: 0.9,
                     weight: 2,
                     opacity: 1,
                   }}
@@ -235,14 +241,14 @@ function RiskMapExplorer({
                 >
                   <Popup className="risk-map-popup">
                     <div className="risk-popup-card">
-                      <strong className="risk-popup-title">{hab.name}</strong>
+                      <strong className="risk-popup-title" style={{ color: riskStyle.color }}>{hab.name}</strong>
                       <div className="risk-popup-row">
                         <span>Risk Score:</span>
-                        <strong style={{ color: riskStyle.fillColor }}>{riskScore}/100</strong>
+                        <strong style={{ color: riskStyle.color }}>{riskScore}/100</strong>
                       </div>
                       <div className="risk-popup-row">
                         <span>Risk Level:</span>
-                        <strong style={{ color: riskStyle.fillColor }}>{riskLevel}</strong>
+                        <strong style={{ color: riskStyle.color }}>{riskLevel}</strong>
                       </div>
                       <div className="risk-popup-row">
                         <span>Main Hazard:</span>
@@ -257,7 +263,8 @@ function RiskMapExplorer({
                         <strong>{getAssessmentSummary(hab)}</strong>
                       </div>
                       <button
-                        className="risk-popup-action"
+                        className="action-btn"
+                        style={{ marginTop: "12px", width: "100%", justifyContent: "center" }}
                         onClick={() => onSelectHabitation?.(hab)}
                       >
                         Inspect Settlement
@@ -274,7 +281,7 @@ function RiskMapExplorer({
               <Marker key={shelter.id} position={[shelter.lat, shelter.lng]}>
                 <Popup className="risk-map-popup">
                   <div className="risk-popup-card">
-                    <strong className="risk-popup-title risk-popup-safe">{shelter.name}</strong>
+                    <strong className="risk-popup-title" style={{ color: "#10b981" }}>{shelter.name}</strong>
                     <div className="risk-popup-row">
                       <span>Capacity:</span>
                       <strong>{shelter.capacity}</strong>
@@ -292,7 +299,8 @@ function RiskMapExplorer({
                       <strong>{shelter.waterStockLiters?.toLocaleString() || 0}L / {shelter.foodMealsStock?.toLocaleString() || 0} meals</strong>
                     </div>
                     <button
-                      className="risk-popup-action safe"
+                      className="action-btn primary"
+                      style={{ marginTop: "12px", width: "100%", justifyContent: "center" }}
                       onClick={() => onSelectShelter?.(shelter)}
                     >
                       Inspect Shelter Inventory
@@ -304,72 +312,50 @@ function RiskMapExplorer({
         </MapContainer>
 
         {/* MAP LAYER CONTROLS */}
-        <div className="map-controls-bar">
-          <div className="map-control-title">GIS Layers</div>
-          <div className="map-toggle-group">
-            <label className="map-toggle-item">
-              <input
-                type="checkbox"
-                checked={layers.redZones}
-                onChange={() => toggleLayer("redZones")}
-              />
-              <span>Red Hazard Zones</span>
+        <div style={{ position: "absolute", top: "16px", right: "16px", zIndex: 400, background: "var(--bg-card)", border: "1px solid var(--border-color)", padding: "14px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "10px", minWidth: "220px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+          <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", paddingBottom: "6px", borderBottom: "1px solid var(--border-color)" }}>GIS Layers</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px", color: "var(--text-primary)", fontWeight: 500 }}>
+              <input type="checkbox" checked={layers.redZones} onChange={() => toggleLayer("redZones")} style={{ accentColor: "var(--accent-red)" }} />
+              Red Hazard Zones
             </label>
-
-            <label className="map-toggle-item">
-              <input
-                type="checkbox"
-                checked={layers.habitations}
-                onChange={() => toggleLayer("habitations")}
-              />
-              <span>Vulnerable Habitations</span>
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px", color: "var(--text-primary)", fontWeight: 500 }}>
+              <input type="checkbox" checked={layers.habitations} onChange={() => toggleLayer("habitations")} style={{ accentColor: "var(--accent-warning)" }} />
+              Vulnerable Habitations
             </label>
-
-            <label className="map-toggle-item">
-              <input
-                type="checkbox"
-                checked={layers.safeSites}
-                onChange={() => toggleLayer("safeSites")}
-              />
-              <span>Safe Shelters</span>
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px", color: "var(--text-primary)", fontWeight: 500 }}>
+              <input type="checkbox" checked={layers.safeSites} onChange={() => toggleLayer("safeSites")} style={{ accentColor: "var(--accent-safe)" }} />
+              Safe Shelters
             </label>
-
-            <label className="map-toggle-item">
-              <input
-                type="checkbox"
-                checked={layers.routes}
-                onChange={() => toggleLayer("routes")}
-              />
-              <span>Evacuation Routes</span>
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px", color: "var(--text-primary)", fontWeight: 500 }}>
+              <input type="checkbox" checked={layers.routes} onChange={() => toggleLayer("routes")} style={{ accentColor: "var(--accent-blue)" }} />
+              Evacuation Routes
             </label>
           </div>
         </div>
 
         {/* MAP LEGEND */}
-        <div className="map-legend">
-          <div className="legend-item">
-            <div className="legend-color" style={{ background: "#22c55e" }}></div>
-            <span>Low Risk</span>
+        <div style={{ position: "absolute", bottom: "16px", left: "16px", zIndex: 400, background: "var(--bg-card)", border: "1px solid var(--border-color)", padding: "10px 14px", borderRadius: "8px", display: "flex", gap: "16px", flexWrap: "wrap", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>
+            <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#ef4444", border: "1px solid #991b1b" }}></div>
+            Critical Risk
           </div>
-          <div className="legend-item">
-            <div className="legend-color" style={{ background: "#f59e0b" }}></div>
-            <span>Moderate Risk</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>
+            <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#f59e0b", border: "1px solid #92400e" }}></div>
+            High Risk
           </div>
-          <div className="legend-item">
-            <div className="legend-color" style={{ background: "#f97316" }}></div>
-            <span>High Risk</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>
+            <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#eab308", border: "1px solid #854d0e" }}></div>
+            Moderate
           </div>
-          <div className="legend-item">
-            <div className="legend-color" style={{ background: "#ef4444" }}></div>
-            <span>Critical Risk</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>
+            <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#10b981", border: "1px solid #065f46" }}></div>
+            Low Risk / Safe
           </div>
-          <div className="legend-item">
-            <div className="legend-color" style={{ background: "#10b981" }}></div>
-            <span>Safe Haven</span>
-          </div>
-          <div className="legend-item">
-            <div className="legend-color" style={{ background: "#3b82f6" }}></div>
-            <span>Evacuation Route</span>
+          <div style={{ width: "1px", height: "14px", background: "var(--border-color)" }}></div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>
+            <div style={{ width: "16px", height: "3px", background: "#3b82f6" }}></div>
+            Evacuation Route
           </div>
         </div>
       </div>
