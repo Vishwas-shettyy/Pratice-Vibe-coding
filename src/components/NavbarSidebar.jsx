@@ -58,6 +58,15 @@ function NavbarSidebar({ activeTab, setActiveTab, alertCount }) {
       )
     },
     {
+      id: "resources",
+      label: "Resource Management",
+      icon: (
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      )
+    },
+    {
       id: "simulator",
       label: "Hazard Simulator",
       icon: (
@@ -71,10 +80,14 @@ function NavbarSidebar({ activeTab, setActiveTab, alertCount }) {
   return (
     <aside className="sidebar">
       <div className="brand-container">
-        <div className="brand-logo">A</div>
-        <div>
-          <div className="brand-title">APEX</div>
-          <div className="brand-subtitle">Disaster Intelligence</div>
+        <div className="brand-logo">
+          <svg width="42" height="42" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="10" fill="#0F172A"/>
+            <path d="M26 12L12 28H24L20 38L36 22H24L26 12Z" fill="white"/>
+          </svg>
+        </div>
+        <div className="brand-title">
+          RES<span style={{ fontSize: "1.15em", fontWeight: 800 }}>Q</span>
         </div>
       </div>
 

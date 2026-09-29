@@ -2,21 +2,21 @@
 
 :root,
 [data-theme="light"] {
-  /* Palette - Light (Official Government Default) */
-  --bg-primary: #F5F7FA;
+  /* Palette - Light (RESQ Primary) */
+  --bg-primary: #F4F6F8;
   --bg-secondary: #FFFFFF;
   --bg-card: #FFFFFF;
-  --bg-card-hover: #F8FAFC;
+  --bg-card-hover: #F9FAFB;
   --bg-sidebar: #FFFFFF;
 
   --border-color: #E2E8F0;
   --border-color-glow: transparent;
 
-  --text-primary: #1A1A1A;
+  --text-primary: #1A1D21;
   --text-secondary: #4A5568;
   --text-muted: #718096;
 
-  /* Government Navy Primary */
+  /* RESQ Brand Blue Accent */
   --accent-active: #0B3C6F;
   --accent-blue: #0B3C6F;
   --accent-cyan: #1F3A93;
@@ -48,30 +48,31 @@
 }
 
 [data-theme="dark"] {
-  /* Palette - Dark (Operational fallback) */
-  --bg-primary: #1A202C;
-  --bg-secondary: #2D3748;
-  --bg-card: #2D3748;
-  --bg-card-hover: #4A5568;
-  --bg-sidebar: #2D3748;
+  /* Palette - Dark (RESQ Neutral Secondary) */
+  --bg-primary: #181818;
+  --bg-secondary: #222222;
+  --bg-card: #222222;
+  --bg-card-hover: #2A2A2A;
+  --bg-sidebar: #222222;
 
-  --border-color: #4A5568;
+  --border-color: #383838;
   --border-color-glow: transparent;
 
-  --text-primary: #F7FAFC;
-  --text-secondary: #E2E8F0;
-  --text-muted: #A0AEC0;
+  --text-primary: #E8E8E8;
+  --text-secondary: #A3A3A3;
+  --text-muted: #737373;
 
-  --accent-active: #63B3ED;
-  --accent-blue: #63B3ED;
-  --accent-cyan: #90CDF4;
+  /* RESQ Brand Blue Accent (same hue as light, but accessible if needed) */
+  --accent-active: #3B82F6;
+  --accent-blue: #3B82F6;
+  --accent-cyan: #60A5FA;
 
-  --accent-critical: #FC8181;
-  --accent-warning: #F6AD55;
-  --accent-safe: #68D391;
-  --accent-red: #FC8181;
-  --accent-amber: #F6AD55;
-  --accent-emerald: #68D391;
+  --accent-critical: #EF4444;
+  --accent-warning: #F59E0B;
+  --accent-safe: #10B981;
+  --accent-red: #EF4444;
+  --accent-amber: #F59E0B;
+  --accent-emerald: #10B981;
   --accent-red-glow: transparent;
 
   --font-main: "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif;
@@ -101,8 +102,9 @@ body,
 #root {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  height: 100%;
   width: 100%;
+  overflow: hidden;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-main);
@@ -135,12 +137,12 @@ select:disabled {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {

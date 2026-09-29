@@ -1,19 +1,30 @@
 /* MAIN LAYOUT CONTAINER */
 .app-container {
   display: flex;
-  min-height: 100vh;
+  height: 100dvh;
   width: 100%;
   background: var(--bg-primary);
   color: var(--text-primary);
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
-.main-content {
+.app-main {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.app-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
 
 .view-container {
@@ -32,6 +43,7 @@
 /* SIDEBAR */
 .sidebar {
   width: 240px;
+  height: 100dvh;
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -39,6 +51,8 @@
   padding: var(--space-md) 16px;
   flex-shrink: 0;
   z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .brand-container {
@@ -50,26 +64,19 @@
 }
 
 .brand-logo {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-cyan) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 22px;
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.12);
+  flex-shrink: 0;
 }
 
 .brand-title {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.5px;
   color: var(--text-primary);
+  margin-left: 4px;
 }
 
 .brand-subtitle {

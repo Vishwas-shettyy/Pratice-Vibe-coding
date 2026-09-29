@@ -11,6 +11,7 @@ import RelocationPlannerView from "./components/RelocationPlannerView";
 import AnalyticsView from "./components/AnalyticsView";
 import SimulatorView from "./components/SimulatorView";
 import DetailModal from "./components/DetailModal";
+import ResourceManagementView from "./components/ResourceManagementView";
 
 import { api } from "./services/api";
 import {
@@ -58,6 +59,7 @@ function App() {
   const [hazardZones, setHazardZones] = useState(HAZARD_ZONES);
   const [evacuationRoutes, setEvacuationRoutes] = useState(EVACUATION_ROUTES);
   const [alerts, setAlerts] = useState(ALERTS_DATA);
+  const [resources, setResources] = useState({});
   const [loading, setLoading] = useState(true);
   const [backendOnline, setBackendOnline] = useState(false);
   const [apiError, setApiError] = useState("");
@@ -67,12 +69,13 @@ function App() {
     try {
       setLoading(true);
       setApiError("");
-      const [backendStats, backendAreas, backendShelters, backendAlerts, backendMap] = await Promise.all([
+      const [backendStats, backendAreas, backendShelters, backendAlerts, backendMap, backendResources] = await Promise.all([
         api.getDashboardStats(),
         api.getRiskAreas(),
         api.getShelters(),
         api.getAlerts(),
         api.getMapData(),
+        api.getResources(),
       ]);
 
       setStats(normalizeDashboardStats(backendStats));
@@ -81,6 +84,7 @@ function App() {
       setAlerts(Array.isArray(backendAlerts) ? backendAlerts : ALERTS_DATA);
       if (backendMap?.hazardZones) setHazardZones(backendMap.hazardZones);
       if (backendMap?.evacuationRoutes) setEvacuationRoutes(backendMap.evacuationRoutes);
+      setResources(backendResources || {});
 
       setBackendOnline(true);
     } catch (err) {
@@ -280,7 +284,7 @@ function App() {
             Report includes Red Zone habitations analysis, shelter capacity reserves ({stats.totalCapacity} beds), and AI relocation transit routes.
           </p>
           <button className="action-btn primary" style={{ width: "100%", justifyContent: "center" }} onClick={closeModal}>
-            Download APEX_Disaster_Report.pdf
+            Download RESQ_Disaster_Report.pdf
           </button>
         </div>
       )
@@ -340,13 +344,18 @@ function App() {
           title: "Multi-Hazard Analytics & Chart.js Reports",
           subtitle: "Statistical vulnerability curves, risk score distributions, and export data"
         };
+      case "resources":
+        return {
+          title: "Resource Management & Logistics",
+          subtitle: "Real-time visibility into emergency vehicles, personnel, and relief supplies"
+        };
       case "simulator":
         return {
           title: "Hazard Impact Scenario Simulator",
           subtitle: "'What-If' severe event simulation for emergency dispatch testing"
         };
       default:
-        return { title: "APEX Command Center", subtitle: "Emergency Response Platform" };
+        return { title: "RESQ Command Center", subtitle: "Emergency Response Platform" };
     }
   };
 
@@ -363,20 +372,24 @@ function App() {
       />
 
       {/* MAIN CONTENT CONTAINER */}
-      <main className="main-content">
-        {/* TOP HEADER */}
-        <HeaderTopbar
-          title={headerInfo.title}
-          subtitle={headerInfo.subtitle}
-          theme={theme}
-          onToggleTheme={toggleTheme}
-          onTriggerEmergency={handleTriggerEmergency}
-          onExportReport={handleExportReport}
-          latestAlert={latestAlert}
-        />
+      <main className="app-main">
+        {/* TOP HEADER (Fixed) */}
+        <div style={{ flex: "none", zIndex: 90 }}>
+          <HeaderTopbar
+            title={headerInfo.title}
+            subtitle={headerInfo.subtitle}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            onTriggerEmergency={handleTriggerEmergency}
+            onExportReport={handleExportReport}
+            latestAlert={latestAlert}
+          />
+        </div>
 
-        {/* DYNAMIC TAB VIEWS */}
-        <div className="view-container">
+        {/* SCROLLING CONTENT */}
+        <div className="app-content">
+          {/* DYNAMIC TAB VIEWS */}
+          <div className="view-container">
           {apiError && (
             <div className="glass-panel" style={{ padding: "12px 16px", marginBottom: "12px", borderColor: "rgba(239,68,68,0.45)" }}>
               <div className="panel-sub" style={{ color: "var(--accent-red)", margin: 0 }}>
@@ -448,11 +461,20 @@ function App() {
             />
           )}
 
+          {activeTab === "resources" && (
+            <ResourceManagementView
+              resources={resources}
+              habitations={habitations}
+              safeSites={safeSites}
+            />
+          )}
+
           {activeTab === "simulator" && (
             <SimulatorView
               onSimulateImpact={handleSimulateImpact}
             />
           )}
+        </div>
         </div>
       </main>
 
