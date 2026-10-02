@@ -119,3 +119,11 @@ def update_relocation_status(area_id):
         return error_response(code="NOT_FOUND", message=f"Area '{area_id}' not found", status_code=404)
 
     return success_response(updated_hab, message=f"Relocation status for '{area_id}' updated to '{status}'")
+
+@api_bp.route("/environmental-observations", methods=["GET"])
+def get_environmental_observations():
+    district = request.args.get("district")
+    parameter = request.args.get("parameter")
+
+    observations = data_service.get_environmental_observations(district=district, parameter=parameter)
+    return success_response(observations, message="Environmental observations retrieved")

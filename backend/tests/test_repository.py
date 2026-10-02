@@ -76,5 +76,207 @@ class TestRepository(unittest.TestCase):
         self.assertFalse(repo.in_memory)
         mock_psycopg2.connect.assert_called_once()
 
+    def test_observation_insert_and_retrieve(self):
+        sample_obs = {
+            "id": "OBS-MYS-01",
+            "station_name": "Mysuru Hydro Station",
+            "district": "Mysuru",
+            "river_basin": "Kaveri Basin",
+            "lat": 12.31,
+            "lng": 76.65,
+            "elevation_m": 770.0,
+            "parameter_name": "RAINFALL_24H_MM",
+            "parameter_value": 115.5,
+            "parameter_unit": "mm",
+            "observation_time": "2026-10-02T08:00:00Z",
+            "source_name": "IMD Hydromet Division",
+            "source_url": "https://hydro.imd.gov.in",
+            "source_dataset": "Daily Station Rainfall",
+            "source_type": "GOVERNMENT",
+            "data_status": "REAL"
+        }
+        inserted = self.repo.upsert_observation(sample_obs)
+        self.assertIsNotNone(inserted)
+        self.assertEqual(inserted["id"], "OBS-MYS-01")
+
+        all_obs = self.repo.get_observations()
+        self.assertEqual(len(all_obs), 1)
+        self.assertEqual(all_obs[0]["station_name"], "Mysuru Hydro Station")
+        self.assertEqual(all_obs[0]["parameter_value"], 115.5)
+
+    def test_observation_duplicate_upsert_behavior(self):
+        obs1 = {
+            "id": "OBS-MYS-01",
+            "station_name": "Mysuru Hydro Station",
+            "district": "Mysuru",
+            "parameter_name": "RAINFALL_24H_MM",
+            "parameter_value": 100.0,
+            "source_name": "IMD",
+            "source_type": "GOVERNMENT",
+            "data_status": "REAL"
+        }
+        self.repo.upsert_observation(obs1)
+
+        # Upsert with same ID but updated rainfall value
+        obs2 = {
+            "id": "OBS-MYS-01",
+            "station_name": "Mysuru Hydro Station",
+            "district": "Mysuru",
+            "parameter_name": "RAINFALL_24H_MM",
+            "parameter_value": 140.0,
+            "source_name": "IMD",
+            "source_type": "GOVERNMENT",
+            "data_status": "REAL"
+        }
+        self.repo.upsert_observation(obs2)
+
+        all_obs = self.repo.get_observations()
+        self.assertEqual(len(all_obs), 1, "Duplicate ID must update existing record rather than creating a second record")
+        self.assertEqual(all_obs[0]["parameter_value"], 140.0)
+
+    def test_observation_district_filtering(self):
+        obs_mys = {
+            "id": "OBS-MYS-01",
+            "station_name": "Mysuru Station",
+            "district": "Mysuru",
+            "parameter_name": "RAINFALL_24H_MM",
+            "parameter_value": 85.0
+        }
+        obs_man = {
+            "id": "OBS-MAN-01",
+            "station_name": "Mandya Station",
+            "district": "Mandya",
+            "parameter_name": "RAINFALL_24H_MM",
+            "parameter_value": 95.0
+        }
+        self.repo.upsert_observation(obs_mys)
+        self.repo.upsert_observation(obs_man)
+
+        mys_obs = self.repo.get_observations_by_district("Mysuru")
+        self.assertEqual(len(mys_obs), 1)
+        self.assertEqual(mys_obs[0]["id"], "OBS-MYS-01")
+
+        man_obs = self.repo.get_observations_by_district("MANDYA")
+        self.assertEqual(len(man_obs), 1)
+        self.assertEqual(man_obs[0]["id"], "OBS-MAN-01")
+
+    def test_observation_parameter_filtering(self):
+        obs_rain = {
+            "id": "OBS-MYS-01",
+            "station_name": "Mysuru Station",
+            "district": "Mysuru",
+            "parameter_name": "RAINFALL_24H_MM",
+            "parameter_value": 85.0
+        }
+        obs_stage = {
+            "id": "OBS-MYS-02",
+            "station_name": "KRS Reservoir Gauge",
+            "district": "Mandya",
+            "parameter_name": "RIVER_STAGE_M",
+            "parameter_value": 4.25
+        }
+        self.repo.upsert_observation(obs_rain)
+        self.repo.upsert_observation(obs_stage)
+
+        rain_results = self.repo.get_observations_by_parameter("RAINFALL_24H_MM")
+        self.assertEqual(len(rain_results), 1)
+        self.assertEqual(rain_results[0]["id"], "OBS-MYS-01")
+
+        stage_results = self.repo.get_observations_by_parameter("RIVER_STAGE_M")
+        self.assertEqual(len(stage_results), 1)
+        self.assertEqual(stage_results[0]["id"], "OBS-MYS-02")
+
+    def test_observation_in_memory_fallback(self):
+        self.assertTrue(self.repo.in_memory)
+        self.assertIn("observations", self.repo.memory_store)
+        self.assertEqual(len(self.repo.memory_store["observations"]), 0)
+
+    def test_observation_provenance_fields(self):
+        obs = {
+            "id": "OBS-PROV-01",
+            "station_name": "Chamundi Observatory",
+            "district": "Mysuru",
+            "source_name": "Central Water Commission",
+            "source_url": "https://indiawris.gov.in",
+            "source_dataset": "India-WRIS River Stage",
+            "source_type": "GOVERNMENT",
+            "data_status": "REAL"
+        }
+        self.repo.upsert_observation(obs)
+        retrieved = self.repo.get_observations()[0]
+
+        self.assertEqual(retrieved["source_name"], "Central Water Commission")
+        self.assertEqual(retrieved["source_url"], "https://indiawris.gov.in")
+        self.assertEqual(retrieved["source_dataset"], "India-WRIS River Stage")
+        self.assertEqual(retrieved["source_type"], "GOVERNMENT")
+        self.assertEqual(retrieved["data_status"], "REAL")
+
+    @patch('app.services.repository.psycopg2')
+    def test_postgres_observation_sql_execution(self, mock_psycopg2):
+        mock_conn = mock_psycopg2.connect.return_value
+        mock_cur = mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value
+
+        repo = Repository(db_url="postgres://user:pass@localhost:5432/db")
+        obs = {
+            "id": "OBS-PG-01",
+            "station_name": "PG Test Station",
+            "district": "Mysuru",
+            "parameter_name": "RAINFALL_24H_MM",
+            "parameter_value": 75.0,
+            "source_name": "IMD",
+            "source_type": "GOVERNMENT",
+            "data_status": "REAL"
+        }
+        repo.upsert_observation(obs)
+
+        self.assertTrue(mock_cur.execute.called)
+        executed_sql = mock_cur.execute.call_args[0][0]
+        self.assertIn("INSERT INTO environmental_observations", executed_sql)
+        self.assertIn("ON CONFLICT (id) DO UPDATE", executed_sql)
+
+    def test_real_dataset_ingestion_and_validation(self):
+        from scripts.ingest_real_data import validate_observation, ingest_dataset
+
+        # Test invalid negative rainfall
+        bad_obs = {
+            "id": "INVALID-01",
+            "station_name": "Test Station",
+            "district": "Mysuru",
+            "lat": 12.3,
+            "lng": 76.6,
+            "parameter_name": "RAINFALL_24H_MM",
+            "parameter_value": -50.0,
+            "source_name": "IMD",
+            "source_url": "https://hydro.imd.gov.in",
+            "source_dataset": "Test",
+            "source_type": "GOVERNMENT",
+            "data_status": "REAL"
+        }
+        is_valid, reason = validate_observation(bad_obs)
+        self.assertFalse(is_valid)
+        self.assertIn("Negative rainfall", reason)
+
+        # Test invalid latitude outside Karnataka
+        bad_lat_obs = dict(bad_obs, parameter_value=50.0, lat=45.0)
+        is_valid, reason = validate_observation(bad_lat_obs)
+        self.assertFalse(is_valid)
+        self.assertIn("Latitude", reason)
+
+        # Test full ingestion of real_observations_karnataka.json dataset
+        json_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "real_observations_karnataka.json"))
+        summary = ingest_dataset(json_path=json_path, repository=self.repo)
+
+        self.assertEqual(summary["total_records"], 22)
+        self.assertEqual(summary["successful_ingested"], 22)
+        self.assertEqual(summary["failed_records"], 0)
+
+        # Verify all ingested observations have data_status REAL and authentic source metadata
+        observations = self.repo.get_observations()
+        self.assertEqual(len(observations), 22)
+        for obs in observations:
+            self.assertEqual(obs["data_status"], "REAL")
+            self.assertIn(obs["source_type"], ["GOVERNMENT", "OPEN_DATA", "OSM"])
+            self.assertTrue(obs["source_url"].startswith("http"))
+
 if __name__ == '__main__':
     unittest.main()

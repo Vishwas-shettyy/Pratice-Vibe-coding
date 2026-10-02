@@ -261,6 +261,110 @@ def calculate_risk(area: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def get_environmental_signals(area: dict[str, Any], repo: Any = None) -> dict[str, Any]:
+    """Retrieve real environmental observations for the district/region of a given habitation.
+
+    Groups measurements by parameter and maintains full source provenance without
+    altering baseline risk score calculation unless explicit, documented conversion rules exist.
+    """
+    if not isinstance(area, dict):
+        return {
+            "has_real_signals": False,
+            "district": None,
+            "observations_count": 0,
+            "real_measurements": [],
+            "summary": {},
+        }
+
+    district = area.get("district")
+    if not district:
+        return {
+            "has_real_signals": False,
+            "district": None,
+            "observations_count": 0,
+            "real_measurements": [],
+            "summary": {},
+        }
+
+    if repo is None:
+        try:
+            from app.services.repository import repo as default_repo
+
+            repo = default_repo
+        except ImportError:
+            repo = None
+
+    if not repo or not hasattr(repo, "get_observations_by_district"):
+        return {
+            "has_real_signals": False,
+            "district": district,
+            "observations_count": 0,
+            "real_measurements": [],
+            "summary": {},
+        }
+
+    observations = repo.get_observations_by_district(district)
+    real_obs = [
+        o
+        for o in observations
+        if (o.get("data_status") == "REAL" or o.get("dataStatus") == "REAL")
+    ]
+
+    if not real_obs:
+        return {
+            "has_real_signals": False,
+            "district": district,
+            "observations_count": 0,
+            "real_measurements": [],
+            "summary": {},
+        }
+
+    rainfall_vals = [
+        o.get("parameter_value")
+        for o in real_obs
+        if (o.get("parameter_name") or o.get("parameterName")) == "RAINFALL_24H_MM"
+        and o.get("parameter_value") is not None
+    ]
+    river_stage_vals = [
+        o.get("parameter_value")
+        for o in real_obs
+        if (o.get("parameter_name") or o.get("parameterName")) == "RIVER_STAGE_M"
+        and o.get("parameter_value") is not None
+    ]
+    reservoir_inflow_vals = [
+        o.get("parameter_value")
+        for o in real_obs
+        if (o.get("parameter_name") or o.get("parameterName"))
+        == "RESERVOIR_INFLOW_CUSECS"
+        and o.get("parameter_value") is not None
+    ]
+    elevation_vals = [
+        o.get("parameter_value")
+        for o in real_obs
+        if (o.get("parameter_name") or o.get("parameterName"))
+        == "TERRAIN_ELEVATION_M"
+        and o.get("parameter_value") is not None
+    ]
+
+    summary: dict[str, Any] = {}
+    if rainfall_vals:
+        summary["max_rainfall_24h_mm"] = max(rainfall_vals)
+    if river_stage_vals:
+        summary["max_river_stage_m"] = max(river_stage_vals)
+    if reservoir_inflow_vals:
+        summary["max_reservoir_inflow_cusecs"] = max(reservoir_inflow_vals)
+    if elevation_vals:
+        summary["max_elevation_m"] = max(elevation_vals)
+
+    return {
+        "has_real_signals": True,
+        "district": district,
+        "observations_count": len(real_obs),
+        "real_measurements": real_obs,
+        "summary": summary,
+    }
+
+
 def enrich_area_risk(area: dict[str, Any]) -> dict[str, Any]:
     """Return a copy of the area with calculated risk metadata appended without removing existing fields."""
     if not isinstance(area, dict):
@@ -268,19 +372,24 @@ def enrich_area_risk(area: dict[str, Any]) -> dict[str, Any]:
 
     enriched = dict(area)
     risk_summary = calculate_risk(enriched)
+    signals = get_environmental_signals(enriched)
 
     enriched["risk_score"] = risk_summary["risk_score"]
     enriched["risk_level"] = risk_summary["risk_level"]
     enriched["riskScore"] = risk_summary["risk_score"]
     enriched["riskLevel"] = risk_summary["risk_level"]
+    enriched["environmental_signals"] = signals
+    enriched["environmentalSignals"] = signals
     enriched["risk_assessment"] = {
         "risk_score": risk_summary["risk_score"],
         "risk_level": risk_summary["risk_level"],
         "contributing_factors": risk_summary["contributing_factors"],
         "factor_scores": risk_summary["factor_scores"],
+        "environmental_signals": signals,
     }
     return enriched
 
 
 def enrich_areas(areas: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [enrich_area_risk(area) for area in areas]
+

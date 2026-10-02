@@ -3,6 +3,9 @@ Data Service Layer (Mock Data / In-Memory Store)
 Designed with modular data access functions to easily swap out for PostgreSQL/Supabase DB.
 """
 
+import json
+import os
+
 from app.services.risk_service import enrich_areas
 
 # Initial In-Memory State
@@ -318,6 +321,26 @@ class DataService:
         enriched = enrich_areas(INITIAL_HABITATIONS)
         self.repo.seed_data(enriched, INITIAL_SHELTERS, INITIAL_RESOURCES)
 
+        # Auto-seed real environmental observations if repository is currently empty
+        if not self.repo.get_observations():
+            try:
+                json_path = os.path.abspath(
+                    os.path.join(
+                        os.path.dirname(__file__),
+                        "..",
+                        "..",
+                        "data",
+                        "real_observations_karnataka.json",
+                    )
+                )
+                if os.path.exists(json_path):
+                    with open(json_path, "r", encoding="utf-8") as f:
+                        records = json.load(f)
+                        for r in records:
+                            self.repo.upsert_observation(r)
+            except Exception as e:
+                print(f"⚠️ Failed to auto-seed real observations: {e}")
+
         # Load state dynamically
         self.alerts = INITIAL_ALERTS  # Alerts can remain mostly dynamic based on current state
 
@@ -476,6 +499,9 @@ class DataService:
         if not hab:
             return None
         return enrich_areas([hab])[0]
+
+    def get_environmental_observations(self, district=None, parameter=None):
+        return self.repo.get_observations(district=district, parameter_name=parameter)
 
 # Global Singleton Instance
 data_service = DataService()
