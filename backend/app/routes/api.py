@@ -210,7 +210,7 @@ def get_scenarios():
 
 @api_bp.route("/scenarios/<scenario_id>", methods=["GET"])
 def get_scenario_detail(scenario_id):
-    scenario = scenario_service.repo.get_scenario(scenario_id)
+    scenario = scenario_service.get_scenario(scenario_id)
     if not scenario:
         return error_response(code="NOT_FOUND", message=f"Scenario '{scenario_id}' not found", status_code=404)
     return success_response(scenario, message="Scenario details retrieved")

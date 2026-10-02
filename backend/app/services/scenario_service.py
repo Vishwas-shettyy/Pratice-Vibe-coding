@@ -26,6 +26,7 @@ class ScenarioService:
 
     def __init__(self, repository=None):
         self.repo = repository or repo
+        self.get_or_create_default_scenario()
         
     def get_or_create_default_scenario(self):
         scenario_id = self.BASELINE_SCENARIO_ID
@@ -47,7 +48,8 @@ class ScenarioService:
                 "data_status": "SCENARIO",
                 "created_at": datetime.now(timezone.utc).isoformat()
             }
-            existing = self.repo.upsert_scenario(scenario)
+            res = self.repo.upsert_scenario(scenario)
+            existing = res or scenario
         self.get_or_create_harsh_scenario()
         return existing
 
@@ -73,17 +75,22 @@ class ScenarioService:
             "data_status": "SCENARIO",
             "created_at": datetime.now(timezone.utc).isoformat()
         }
-        return self.repo.upsert_scenario(scenario)
-        
-    def run_scenario(self, scenario_id):
+        res = self.repo.upsert_scenario(scenario)
+        return res or scenario
+
+    def get_scenario(self, scenario_id):
         scenario = self.repo.get_scenario(scenario_id)
         if not scenario:
             if scenario_id == self.HARSH_SCENARIO_ID:
                 scenario = self.get_or_create_harsh_scenario()
             elif scenario_id == self.BASELINE_SCENARIO_ID:
                 scenario = self.get_or_create_default_scenario()
-            else:
-                raise ValueError("Scenario not found")
+        return scenario
+        
+    def run_scenario(self, scenario_id):
+        scenario = self.get_scenario(scenario_id)
+        if not scenario:
+            raise ValueError(f"Scenario '{scenario_id}' not found")
             
         try:
             with open("backend/data/real_observations_karnataka.json", "r") as f:

@@ -140,5 +140,35 @@ class TestHarshCaseScenario(unittest.TestCase):
             self.assertIn(h["id"], [f"SET-KOD-{tal}-{idx:02d}" for tal in ["MAD", "SOM", "VIR"] for idx in range(1, 10)])
 
 
+    def test_09_cold_lookup_and_run_harsh_scenario(self):
+        """Prove cold get/run of KODAGU_EXTREME_MONSOON_HARSH_CASE resolves a non-null scenario definition and successfully reaches execution."""
+        # Clear scenarios store to simulate cold start without prior /api/scenarios call
+        repo.memory_store["scenarios"] = {}
+
+        # 1. Direct service lookup resolves non-null definition
+        definition = scenario_service.get_scenario("KODAGU_EXTREME_MONSOON_HARSH_CASE")
+        self.assertIsNotNone(definition)
+        self.assertIsInstance(definition, dict)
+        self.assertEqual(definition["id"], "KODAGU_EXTREME_MONSOON_HARSH_CASE")
+        self.assertIn("flood_influence_radius_km", definition)
+        self.assertEqual(definition["flood_influence_radius_km"], 10.0)
+
+        # Clear store again to test cold HTTP endpoint lookup
+        repo.memory_store["scenarios"] = {}
+        resp_get = self.app.get("/api/scenarios/KODAGU_EXTREME_MONSOON_HARSH_CASE")
+        self.assertEqual(resp_get.status_code, 200)
+        data = resp_get.get_json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["data"]["id"], "KODAGU_EXTREME_MONSOON_HARSH_CASE")
+        self.assertEqual(data["data"]["flood_influence_radius_km"], 10.0)
+
+        # 2. Cold POST run successfully executes without NoneType subscript errors
+        resp_run = self.app.post("/api/scenarios/KODAGU_EXTREME_MONSOON_HARSH_CASE/run")
+        self.assertEqual(resp_run.status_code, 200)
+        run_data = resp_run.get_json()
+        self.assertTrue(run_data["success"])
+        self.assertGreater(run_data["data"]["roads_evaluated"], 0)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1257,21 +1257,14 @@ class Repository:
             "data_status": scenario.get("data_status", "SCENARIO"),
             "created_at": scenario.get("created_at")
         }
-        if self.in_memory:
-            self.memory_store["scenarios"][s_id] = formatted
-            return formatted
-        # PG implementation omitted for brevity in demo, fallback to memory if error or implement simple replace
-        pass # In a real implementation we would write the INSERT ... ON CONFLICT
+        self.memory_store["scenarios"][s_id] = formatted
+        return formatted
 
     def get_all_scenarios(self):
-        if self.in_memory:
-            return list(self.memory_store["scenarios"].values())
-        return []
+        return list(self.memory_store["scenarios"].values())
 
     def get_scenario(self, scenario_id):
-        if self.in_memory:
-            return self.memory_store["scenarios"].get(scenario_id)
-        return None
+        return self.memory_store["scenarios"].get(scenario_id)
 
     def upsert_scenario_exposure(self, exp):
         e_id = exp["id"]
