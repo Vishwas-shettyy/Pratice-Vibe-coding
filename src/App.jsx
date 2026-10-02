@@ -252,19 +252,21 @@ function App() {
   const handleTriggerEmergency = () => {
     setModalConfig({
       isOpen: true,
-      title: "🚨 Emergency Broadcast Issued",
+      title: "Emergency Broadcast Issued",
       content: (
         <div style={{ textAlign: "center", padding: "10px 0" }}>
           <div className="pulse-red" style={{ display: "inline-block", padding: "16px", borderRadius: "50%", background: "rgba(239, 68, 68, 0.2)", marginBottom: "16px" }}>
-            <svg width="40" height="40" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
+            <svg width="44" height="44" fill="none" stroke="var(--accent-red)" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
           </div>
-          <h3 style={{ color: "var(--text-primary)", fontSize: "18px", marginBottom: "8px" }}>Statewide Disaster Alert Broadcasted</h3>
-          <p style={{ color: "var(--text-secondary)", fontSize: "13px", marginBottom: "20px" }}>
+          <h3 style={{ color: "var(--text-primary)", fontSize: "18px", marginBottom: "8px", fontWeight: 700 }}>
+            Statewide Disaster Alert Broadcasted
+          </h3>
+          <p style={{ color: "var(--text-secondary)", fontSize: "13px", marginBottom: "20px", lineHeight: 1.5 }}>
             Emergency push SMS, weather siren warnings, and regional transport dispatch orders have been dispatched to control centers.
           </p>
-          <button className="action-btn primary" style={{ width: "100%", justifyContent: "center" }} onClick={closeModal}>
+          <button className="action-btn primary" style={{ width: "100%", justifyContent: "center", padding: "12px", fontSize: "14px" }} onClick={closeModal}>
             Acknowledge & Dismiss Alert
           </button>
         </div>
@@ -272,28 +274,73 @@ function App() {
     });
   };
 
-  // Export GIS Report Action
+  // Export GIS Report Action (with Generating -> Ready state transition)
   const handleExportReport = () => {
+    // 1. Show Generating State
     setModalConfig({
       isOpen: true,
-      title: "📄 Generating GIS Disaster Executive Report",
+      title: "Generating GIS Disaster Executive Report",
       content: (
-        <div style={{ textAlign: "center", padding: "10px 0" }}>
-          <div style={{ display: "inline-block", padding: "16px", borderRadius: "50%", background: "rgba(59, 130, 246, 0.2)", marginBottom: "16px" }}>
-            <svg width="40" height="40" fill="none" stroke="#3b82f6" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        <div style={{ textAlign: "center", padding: "16px 0" }}>
+          <div style={{ display: "inline-block", padding: "16px", borderRadius: "50%", background: "rgba(59, 130, 246, 0.15)", marginBottom: "16px" }}>
+            <svg width="44" height="44" fill="none" stroke="var(--accent-blue)" viewBox="0 0 24 24" className="spin-slow">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </div>
-          <h3 style={{ color: "var(--text-primary)", fontSize: "18px", marginBottom: "8px" }}>PDF Intelligence Report Ready</h3>
-          <p style={{ color: "var(--text-secondary)", fontSize: "13px", marginBottom: "20px" }}>
-            Report includes Red Zone habitations analysis, shelter capacity reserves ({stats.totalCapacity} beds), and AI relocation transit routes.
+          <h3 style={{ color: "var(--text-primary)", fontSize: "18px", marginBottom: "8px", fontWeight: 700 }}>
+            Analyzing GIS Layers & Compiling Report...
+          </h3>
+          <p style={{ color: "var(--text-secondary)", fontSize: "13px", marginBottom: "20px", lineHeight: 1.5 }}>
+            Processing Kaveri Basin flood zones, shelter capacity reserves ({stats.totalCapacity} beds), and AI relocation polylines.
           </p>
-          <button className="action-btn primary" style={{ width: "100%", justifyContent: "center" }} onClick={closeModal}>
-            Download RESQ_Disaster_Report.pdf
-          </button>
+          <div style={{ width: "100%", height: "6px", background: "var(--bg-secondary)", borderRadius: "3px", overflow: "hidden" }}>
+            <div className="loading-progress-bar" />
+          </div>
         </div>
       )
     });
+
+    // 2. Transition inside the SAME centered modal to Ready State after 1 second
+    setTimeout(() => {
+      setModalConfig({
+        isOpen: true,
+        title: "PDF Intelligence Report Ready",
+        content: (
+          <div style={{ textAlign: "center", padding: "10px 0" }}>
+            <div style={{ display: "inline-block", padding: "16px", borderRadius: "50%", background: "rgba(16, 185, 129, 0.15)", marginBottom: "16px" }}>
+              <svg width="44" height="44" fill="none" stroke="var(--accent-safe)" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 style={{ color: "var(--text-primary)", fontSize: "18px", marginBottom: "8px", fontWeight: 700 }}>
+              PDF Intelligence Report Ready
+            </h3>
+            <p style={{ color: "var(--text-secondary)", fontSize: "13px", marginBottom: "20px", lineHeight: 1.5 }}>
+              Report includes Red Zone habitations analysis, shelter capacity reserves ({stats.totalCapacity} beds), and AI relocation transit routes.
+            </p>
+            <div style={{ display: "flex", gap: "10px", flexDirection: "column" }}>
+              <button
+                className="action-btn primary"
+                style={{ width: "100%", justifyContent: "center", padding: "12px", fontSize: "14px" }}
+                onClick={() => {
+                  const blob = new Blob(["RESQ GIS Disaster Executive Report\nGenerated: " + new Date().toISOString() + "\nStatus: Kaveri Basin High-Risk Monitored"], { type: "text/plain" });
+                  const link = document.createElement("a");
+                  link.href = URL.createObjectURL(blob);
+                  link.download = "RESQ_Disaster_Report.pdf";
+                  link.click();
+                  closeModal();
+                }}
+              >
+                Download RESQ_Disaster_Report.pdf
+              </button>
+              <button className="action-btn" style={{ width: "100%", justifyContent: "center", padding: "10px" }} onClick={closeModal}>
+                Close
+              </button>
+            </div>
+          </div>
+        )
+      });
+    }, 1000);
   };
 
   // Handle Scenario Simulator updates
