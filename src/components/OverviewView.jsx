@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { MapContainer, TileLayer, CircleMarker } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 function OverviewView({
   stats = {},
@@ -6,6 +8,9 @@ function OverviewView({
   safeSites = [],
   recommendations = [],
   environmentalObservations = [],
+  simulationResult,
+  onClearScenario,
+  backendOnline = true,
   onSelectHabitation,
   onNavigateToMap,
   onNavigateToPlanner,
@@ -76,9 +81,89 @@ function OverviewView({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+      {simulationResult && (() => {
+        const isHarsh = simulationResult.isHarshCase || simulationResult.scenarioId === "KODAGU_EXTREME_MONSOON_HARSH_CASE";
+        const bannerColor = isHarsh ? "var(--accent-red)" : "#a855f7";
+        const bannerBg = isHarsh ? "rgba(239, 68, 68, 0.04)" : "var(--bg-card)";
+        const affectedCount = simulationResult.relocations?.length || 0;
+        const criticalCount = simulationResult.relocations?.filter(r => r.priority === 'CRITICAL').length || 0;
+        const blockedCount = simulationResult.roadImpacts?.filter(i => i.impact_status === 'BLOCKED').length || 0;
+        const restrictedCount = simulationResult.roadImpacts?.filter(i => i.impact_status === 'RESTRICTED').length || 0;
+        const successCount = simulationResult.relocations?.filter(r => r.route_status === 'SUCCESS').length || 0;
+        const noRouteCount = simulationResult.relocations?.filter(r => r.route_status === 'NO_ROUTE').length || 0;
+        const capInsuffCount = simulationResult.relocations?.filter(r => r.capacity_status === 'CAPACITY_INSUFFICIENT').length || 0;
+
+        return (
+          <div className="glass-panel" style={{ background: bannerBg, border: `1px solid ${bannerColor}`, borderTop: `3px solid ${bannerColor}`, borderRadius: "8px", padding: "24px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                  <span style={{ fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: "4px", background: bannerColor, color: "#fff", letterSpacing: "1px" }}>
+                    {isHarsh ? "HARSH CASE" : "SCENARIO SIMULATION"}
+                  </span>
+                  <h3 style={{ fontSize: "18px", fontWeight: 700, color: bannerColor, margin: 0 }}>
+                    {isHarsh ? "HARSH CASE ACTIVE — Extreme Flood + Landslide Simulation" : `SCENARIO RESULT: ${simulationResult.scenario?.scenario_name || "Simulation"}`}
+                  </h3>
+                </div>
+                <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>
+                  Date: {simulationResult.date} {simulationResult.timestamp} | Data Status: SCENARIO | Scenario ID: {isHarsh ? "KODAGU_EXTREME_MONSOON_HARSH_CASE" : (simulationResult.scenario?.id || "KODAGU_MONSOON_FLOOD_LANDSLIDE_SCENARIO")}
+                </p>
+              </div>
+              <button className="action-btn" onClick={onClearScenario} style={{ border: `1px solid ${bannerColor}`, color: bannerColor, background: isHarsh ? "rgba(239, 68, 68, 0.1)" : "rgba(168, 85, 247, 0.1)" }}>
+                Exit Scenario
+              </button>
+            </div>
+
+            {/* REQUIRED HARSH CASE DISCLAIMER */}
+            <div style={{ background: isHarsh ? "rgba(239, 68, 68, 0.08)" : "rgba(168, 85, 247, 0.08)", border: `1px solid ${isHarsh ? "rgba(239, 68, 68, 0.25)" : "rgba(168, 85, 247, 0.25)"}`, borderRadius: "6px", padding: "10px 14px", marginBottom: "16px", fontSize: "12px", color: "var(--text-secondary)", lineHeight: "1.4" }}>
+              <strong style={{ color: bannerColor, marginRight: "6px" }}>SIMULATION ONLY:</strong>
+              HARSH CASE is a deterministic simulation used to demonstrate ResQ response under extreme disaster conditions. Results are simulated and do not represent a live hazard forecast.
+            </div>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px" }}>
+              <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "6px" }}>Affected Settlements</div>
+                <div style={{ fontSize: "22px", fontWeight: 700, color: "var(--text-primary)" }}>{affectedCount}</div>
+              </div>
+              
+              <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "6px" }}>Critical Priorities</div>
+                <div style={{ fontSize: "22px", fontWeight: 700, color: "var(--accent-critical)" }}>{criticalCount}</div>
+              </div>
+
+              <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "6px" }}>Blocked Roads</div>
+                <div style={{ fontSize: "22px", fontWeight: 700, color: "var(--accent-red)" }}>{blockedCount}</div>
+              </div>
+
+              <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "6px" }}>Restricted Roads</div>
+                <div style={{ fontSize: "22px", fontWeight: 700, color: "var(--accent-warning)" }}>{restrictedCount}</div>
+              </div>
+              
+              <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "6px" }}>Successful Relocations</div>
+                <div style={{ fontSize: "22px", fontWeight: 700, color: "var(--accent-safe)" }}>{successCount}</div>
+              </div>
+              
+              <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "6px" }}>NO_ROUTE Cases</div>
+                <div style={{ fontSize: "22px", fontWeight: 700, color: noRouteCount > 0 ? "var(--accent-critical)" : "var(--text-primary)" }}>{noRouteCount}</div>
+              </div>
+
+              <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "6px" }}>Capacity Insufficient</div>
+                <div style={{ fontSize: "22px", fontWeight: 700, color: capInsuffCount > 0 ? "var(--accent-warning)" : "var(--text-primary)" }}>{capInsuffCount}</div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* KPI COMMAND STRIP */}
       <div className="stats-grid">
-        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-critical)" }}>
+        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-critical)", position: "relative" }}>
+          {!backendOnline && <div style={{ position: "absolute", top: "12px", right: "12px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO / FALLBACK DATA</div>}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Population at Risk</span>
             <svg width="16" height="16" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
@@ -91,7 +176,8 @@ function OverviewView({
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-critical)" }}>
+        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-critical)", position: "relative" }}>
+          {!backendOnline && <div style={{ position: "absolute", top: "12px", right: "12px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO / FALLBACK DATA</div>}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Red Zones</span>
             <svg width="16" height="16" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -104,7 +190,8 @@ function OverviewView({
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-warning)" }}>
+        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-warning)", position: "relative" }}>
+          {!backendOnline && <div style={{ position: "absolute", top: "12px", right: "12px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO / FALLBACK DATA</div>}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Safe Shelters</span>
             <svg width="16" height="16" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
@@ -117,7 +204,8 @@ function OverviewView({
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-safe)" }}>
+        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-safe)", position: "relative" }}>
+          {!backendOnline && <div style={{ position: "absolute", top: "12px", right: "12px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO / FALLBACK DATA</div>}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Available Capacity</span>
             <svg width="16" height="16" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
@@ -161,7 +249,47 @@ function OverviewView({
                 </div>
               </div>
 
-              <div style={{ marginTop: "auto", paddingTop: "12px" }}>
+              {/* COMPACT MAP PREVIEW */}
+              <div style={{ 
+                height: "140px", 
+                width: "100%", 
+                borderRadius: "6px", 
+                overflow: "hidden", 
+                border: "1px solid rgba(255,255,255,0.1)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                opacity: 0.9,
+                pointerEvents: "none" // PREVIEW ONLY
+              }}>
+                <MapContainer
+                  center={[12.2958, 76.6394]}
+                  zoom={10}
+                  scrollWheelZoom={false}
+                  zoomControl={false}
+                  attributionControl={false}
+                  style={{ height: "100%", width: "100%", background: "#0f172a" }}
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" opacity={0.6} />
+                  {sortedHabitations.slice(0, 15).map((hab) => {
+                    const riskLevel = getHabitRiskLevel(hab);
+                    const isCritical = riskLevel === "CRITICAL" || riskLevel === "IMMEDIATE";
+                    return (
+                      <CircleMarker
+                        key={`preview-${hab.id}`}
+                        center={[hab.lat, hab.lng]}
+                        radius={isCritical ? 6 : 4}
+                        pathOptions={{ 
+                          color: isCritical ? "#ef4444" : "#f59e0b",
+                          fillColor: isCritical ? "#dc2626" : "#d97706",
+                          fillOpacity: 0.8, 
+                          weight: 1 
+                        }}
+                      />
+                    );
+                  })}
+                </MapContainer>
+              </div>
+
+              <div style={{ marginTop: "auto", paddingTop: "0px" }}>
                 <button className="action-btn primary" style={{ padding: "10px 20px" }} onClick={onNavigateToMap}>
                   Open Interactive GIS Map
                 </button>

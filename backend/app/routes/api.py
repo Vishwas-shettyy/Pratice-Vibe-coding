@@ -162,3 +162,102 @@ def get_route():
         })
         
     return success_response(result)
+
+# ==========================================
+# SAFE SITES API
+# ==========================================
+from app.services.safe_site_service import safe_site_service
+
+@api_bp.route("/safe-sites", methods=["GET"])
+def get_safe_sites():
+    sites = safe_site_service.get_all_safe_sites()
+    return success_response(sites, message="Safe sites operational scenario data retrieved")
+
+@api_bp.route("/safe-sites/<facility_id>", methods=["GET"])
+def get_safe_site_detail(facility_id):
+    site = safe_site_service.get_safe_site(facility_id)
+    if not site:
+        return error_response(code="NOT_FOUND", message=f"Safe site '{facility_id}' not found", status_code=404)
+    return success_response(site, message="Safe site details retrieved")
+
+# ==========================================
+# HAZARD EXPOSURE API
+# ==========================================
+from app.services.hazard_service import hazard_service
+
+@api_bp.route("/hazard-exposure", methods=["GET"])
+def get_hazard_exposures():
+    exps = hazard_service.get_all_hazard_exposures()
+    return success_response(exps, message="Hazard exposures retrieved")
+
+@api_bp.route("/hazard-exposure/<entity_type>/<entity_id>", methods=["GET"])
+def get_hazard_exposure_detail(entity_type, entity_id):
+    exp = hazard_service.get_hazard_exposure(entity_type.upper(), entity_id)
+    if not exp:
+        return error_response(code="NOT_FOUND", message=f"Hazard exposure for {entity_type} '{entity_id}' not found", status_code=404)
+    return success_response(exp, message="Hazard exposure details retrieved")
+
+# ==========================================
+# SCENARIOS API
+# ==========================================
+from app.services.scenario_service import scenario_service
+
+@api_bp.route("/scenarios", methods=["GET"])
+def get_scenarios():
+    scenario_service.get_or_create_default_scenario()
+    scens = scenario_service.repo.get_all_scenarios()
+    return success_response(scens, message="Scenarios retrieved")
+
+@api_bp.route("/scenarios/<scenario_id>", methods=["GET"])
+def get_scenario_detail(scenario_id):
+    scenario = scenario_service.repo.get_scenario(scenario_id)
+    if not scenario:
+        return error_response(code="NOT_FOUND", message=f"Scenario '{scenario_id}' not found", status_code=404)
+    return success_response(scenario, message="Scenario details retrieved")
+
+@api_bp.route("/scenarios/<scenario_id>/run", methods=["POST"])
+def run_scenario_endpoint(scenario_id):
+    try:
+        res = scenario_service.run_scenario(scenario_id)
+        return success_response(res, message="Scenario execution completed")
+    except ValueError as e:
+        return error_response(code="BAD_REQUEST", message=str(e), status_code=400)
+
+@api_bp.route("/scenarios/<scenario_id>/exposure", methods=["GET"])
+def get_scenario_exposures_api(scenario_id):
+    exps = scenario_service.repo.get_scenario_exposures(scenario_id)
+    return success_response(exps, message="Scenario exposures retrieved")
+
+@api_bp.route("/scenarios/<scenario_id>/road-impacts", methods=["GET"])
+def get_scenario_road_impacts_api(scenario_id):
+    imps = scenario_service.repo.get_scenario_road_impacts(scenario_id)
+    return success_response(imps, message="Scenario road impacts retrieved")
+
+# ==========================================
+# SCENARIO RELOCATION API
+# ==========================================
+from app.services.relocation_service import relocation_service
+
+@api_bp.route("/relocation/scenario/<scenario_id>", methods=["GET"])
+def get_scenario_relocations_api(scenario_id):
+    rels = relocation_service.repo.get_scenario_relocations(scenario_id)
+    return success_response(rels, message="Scenario relocations retrieved")
+
+@api_bp.route("/relocation/scenario/<scenario_id>/settlement/<settlement_id>", methods=["GET"])
+def get_scenario_relocation_detail(scenario_id, settlement_id):
+    rel = relocation_service.repo.get_scenario_relocation(scenario_id, settlement_id)
+    if not rel:
+        return error_response(code="NOT_FOUND", message=f"Scenario relocation for settlement '{settlement_id}' not found", status_code=404)
+    return success_response(rel, message="Scenario relocation details retrieved")
+
+@api_bp.route("/relocation/scenario/<scenario_id>/run", methods=["POST"])
+def run_scenario_relocation_endpoint(scenario_id):
+    try:
+        res = relocation_service.run_scenario_relocation(scenario_id)
+        return success_response(res, message="Scenario relocation executed successfully")
+    except Exception as e:
+        return error_response(code="INTERNAL_ERROR", message=str(e), status_code=500)
+
+
+
+

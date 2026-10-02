@@ -63,6 +63,7 @@ function App() {
   const [resources, setResources] = useState({});
   const [environmentalObservations, setEnvironmentalObservations] = useState([]);
   const [latestSimulationResult, setLatestSimulationResult] = useState(null);
+  const [isHarshCaseActive, setIsHarshCaseActive] = useState(false);
   const [loading, setLoading] = useState(true);
   const [backendOnline, setBackendOnline] = useState(false);
   const [apiError, setApiError] = useState("");
@@ -152,7 +153,7 @@ function App() {
             <div style={{ background: "var(--bg-secondary)", padding: "12px", borderRadius: "8px" }}>
               <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Risk Rating</span>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginTop: "6px" }}>
-                <strong style={{ display: "block", fontSize: "20px", color: riskScore > 80 ? "var(--accent-red)" : "var(--accent-amber)" }}>
+                <strong style={{ display: "block", fontSize: "20px", color: riskScore >= 85 ? "var(--accent-red)" : "var(--accent-amber)" }}>
                   {riskScore} / 100
                 </strong>
                 <span className={`badge ${riskLevel === "CRITICAL" ? "immediate" : riskLevel === "HIGH" ? "short" : "medium"}`}>
@@ -295,7 +296,7 @@ function App() {
             Analyzing GIS Layers & Compiling Report...
           </h3>
           <p style={{ color: "var(--text-secondary)", fontSize: "13px", marginBottom: "20px", lineHeight: 1.5 }}>
-            Processing Kaveri Basin flood zones, shelter capacity reserves ({stats.totalCapacity} beds), and AI relocation polylines.
+            Processing district hazard zones, shelter capacity reserves ({stats.totalCapacity} beds), and AI relocation polylines.
           </p>
           <div style={{ width: "100%", height: "6px", background: "var(--bg-secondary)", borderRadius: "3px", overflow: "hidden" }}>
             <div className="loading-progress-bar" />
@@ -327,7 +328,7 @@ function App() {
                 className="action-btn primary"
                 style={{ width: "100%", justifyContent: "center", padding: "12px", fontSize: "14px" }}
                 onClick={() => {
-                  const blob = new Blob(["RESQ GIS Disaster Executive Report\nGenerated: " + new Date().toISOString() + "\nStatus: Kaveri Basin High-Risk Monitored"], { type: "text/plain" });
+                  const blob = new Blob(["RESQ GIS Disaster Executive Report\nGenerated: " + new Date().toISOString() + "\nStatus: District High-Risk Monitored"], { type: "text/plain" });
                   const link = document.createElement("a");
                   link.href = URL.createObjectURL(blob);
                   link.download = "RESQ_Disaster_Report.pdf";
@@ -366,6 +367,71 @@ function App() {
     setAlerts([newSimAlert, ...alerts]);
 
     setActiveTab("overview");
+  };
+
+  const handleToggleHarshCase = async () => {
+    if (isHarshCaseActive) {
+      handleClearScenario();
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const scenarioId = "KODAGU_EXTREME_MONSOON_HARSH_CASE";
+      const scenarioRes = await api.runScenario(scenarioId);
+      const relocationRes = await api.runScenarioRelocation(scenarioId);
+      let roadImpactsRes = [];
+      try {
+        roadImpactsRes = (await api.getScenarioRoadImpacts(scenarioId)) || [];
+      } catch (err) {
+        console.warn("Failed to fetch road impacts for harsh case", err);
+      }
+
+      const harshSimResult = {
+        scenario: scenarioRes,
+        relocations: relocationRes,
+        roadImpacts: roadImpactsRes,
+        isHarshCase: true,
+        scenarioId: scenarioId,
+        timestamp: new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" }).replace(":", ""),
+        date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase(),
+      };
+
+      setLatestSimulationResult(harshSimResult);
+      setIsHarshCaseActive(true);
+
+      const harshAlert = {
+        id: `ALT-SIM-HARSH-${Date.now()}`,
+        type: "CRITICAL",
+        severity: "CRITICAL",
+        title: "HARSH CASE SCENARIO SIMULATION ACTIVE",
+        time: "Just now",
+        message: "Extreme 450mm rainfall and severe landslide stress simulation active across Kodagu. 15 settlements elevated to Critical Red Zones, 1,311 roads disrupted. Simulation only — not a live forecast.",
+      };
+      setAlerts((prev) => [harshAlert, ...prev.filter((a) => !String(a.id).startsWith("ALT-SIM-"))]);
+
+      setStats((prev) => ({
+        ...prev,
+        hazardLevel: "CRITICAL",
+        redZonesCount: 15,
+      }));
+    } catch (err) {
+      console.error("Failed to run harsh case scenario", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClearScenario = () => {
+    setLatestSimulationResult(null);
+    setIsHarshCaseActive(false);
+    setAlerts((prev) => prev.filter(a => !String(a.id).startsWith("ALT-SIM-")));
+    // Restore hazardLevel and redZonesCount from backend data or INITIAL_STATS
+    setStats((prev) => ({
+      ...prev,
+      hazardLevel: INITIAL_STATS.hazardLevel,
+      redZonesCount: INITIAL_STATS.redZonesCount
+    }));
   };
 
   // Header Titles Map
@@ -455,6 +521,8 @@ function App() {
             onExportReport={handleExportReport}
             latestAlert={latestAlert}
             backendOnline={backendOnline}
+            isHarshCaseActive={isHarshCaseActive}
+            onToggleHarshCase={handleToggleHarshCase}
           />
         </div>
 
@@ -490,6 +558,9 @@ function App() {
               onNavigateToShelters={() => setActiveTab("safesites")}
               onNavigateToResources={() => setActiveTab("resources")}
               onNavigateToRedZones={() => setActiveTab("redzones")}
+              simulationResult={latestSimulationResult}
+              onClearScenario={handleClearScenario}
+              backendOnline={backendOnline}
             />
           )}
 
@@ -500,8 +571,10 @@ function App() {
               hazardZones={hazardZones}
               evacuationRoutes={evacuationRoutes}
               environmentalObservations={environmentalObservations}
+              simulationResult={latestSimulationResult}
               onSelectHabitation={handleInspectHabitation}
               onSelectShelter={handleInspectShelter}
+              onClearScenario={handleClearScenario}
             />
           )}
 
@@ -510,6 +583,8 @@ function App() {
               habitations={habitations}
               onSelectHabitation={handleInspectHabitation}
               onUpdateStatus={handleUpdateRelocationStatus}
+              simulationResult={latestSimulationResult}
+              onClearScenario={handleClearScenario}
             />
           )}
 
@@ -526,6 +601,8 @@ function App() {
               safeSites={safeSites}
               routes={evacuationRoutes}
               onRefreshData={loadBackendData}
+              simulationResult={latestSimulationResult}
+              onClearScenario={handleClearScenario}
             />
           )}
 
@@ -552,6 +629,8 @@ function App() {
           {activeTab === "simulator" && (
             <SimulatorView
               onSimulateImpact={handleSimulateImpact}
+              onClearScenario={handleClearScenario}
+              simulationResult={latestSimulationResult}
             />
           )}
         </div>

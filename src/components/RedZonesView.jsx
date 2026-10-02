@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus }) {
+function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus, simulationResult, onClearScenario }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLevel, setFilterLevel] = useState("ALL");
 
@@ -26,20 +26,56 @@ function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus }) 
   });
 
   // Calculate Summary metrics
-  const immediateCount = safeHabitations.filter(h => String(h?.hazardLevel || "").toUpperCase() === "IMMEDIATE").length;
-  const shortTermCount = safeHabitations.filter(h => String(h?.hazardLevel || "").toUpperCase() === "SHORT-TERM").length;
-  const mediumTermCount = safeHabitations.filter(h => String(h?.hazardLevel || "").toUpperCase() === "MEDIUM-TERM").length;
+  const isHarsh = simulationResult?.scenario?.id === "KODAGU_EXTREME_MONSOON_HARSH_CASE" || simulationResult?.scenario?.label === "HARSH CASE";
+  const immediateCount = simulationResult?.relocations
+    ? simulationResult.relocations.filter(r => r.priority === 'CRITICAL').length
+    : safeHabitations.filter(h => String(h?.hazardLevel || "").toUpperCase() === "IMMEDIATE").length;
+  const shortTermCount = simulationResult?.relocations
+    ? simulationResult.relocations.filter(r => r.priority === 'HIGH' || r.priority === 'MODERATE').length
+    : safeHabitations.filter(h => String(h?.hazardLevel || "").toUpperCase() === "SHORT-TERM").length;
+  const mediumTermCount = simulationResult?.relocations
+    ? 0
+    : safeHabitations.filter(h => String(h?.hazardLevel || "").toUpperCase() === "MEDIUM-TERM").length;
+  const totalCount = simulationResult?.relocations ? simulationResult.relocations.length : safeHabitations.length;
 
-  if (!filteredHabitations.length && !searchTerm) {
+  const renderBanner = () => {
+    if (!simulationResult) return null;
     return (
-      <div className="empty-state">
-        No red-zone habitations are available. The API either returned no data or the backend is offline.
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", background: isHarsh ? "rgba(220, 38, 38, 0.08)" : "rgba(168, 85, 247, 0.1)", border: `1px solid ${isHarsh ? "rgba(220, 38, 38, 0.4)" : "#a855f7"}`, borderRadius: "8px", padding: "14px 20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ color: isHarsh ? "var(--accent-critical)" : "#a855f7", fontWeight: 700, fontSize: "13px", letterSpacing: "0.5px" }}>
+            {isHarsh ? "HARSH CASE SIMULATION ACTIVE — 16 AFFECTED SETTLEMENTS (15 CRITICAL, 1 MODERATE)" : "SCENARIO RESULT OVERLAY ACTIVE — SHOWING AFFECTED SETTLEMENTS"}
+          </div>
+          <button className="action-btn" onClick={onClearScenario} style={{ border: `1px solid ${isHarsh ? "var(--accent-critical)" : "#a855f7"}`, color: isHarsh ? "var(--accent-critical)" : "#a855f7", background: "transparent", padding: "4px 10px", fontSize: "12px" }}>
+            Exit Scenario
+          </button>
+        </div>
+        {isHarsh && (
+          <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.4 }}>
+            HARSH CASE is a deterministic simulation used to demonstrate ResQ response under extreme disaster conditions. Results are simulated and do not represent a live hazard forecast.
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  if (!filteredHabitations.length && !searchTerm && !simulationResult) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        {renderBanner()}
+        <div className="empty-state" style={{ padding: "40px", textAlign: "center", background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", color: "var(--text-muted)" }}>
+          Real Kodagu settlement operational risk data is not currently available.
+          <br/>
+          Run a scenario from the Hazard Simulator to view deterministic relocation outcomes.
+        </div>
       </div>
     );
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      {renderBanner()}
+      
       {/* OPERATIONAL SUMMARY & FILTER BAR */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", padding: "16px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
@@ -47,7 +83,7 @@ function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus }) 
           <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", borderRight: "1px solid var(--border-color)", paddingRight: "16px" }}>
               <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Total Zones</span>
-              <strong style={{ fontSize: "20px", color: "var(--text-primary)" }}>{safeHabitations.length}</strong>
+              <strong style={{ fontSize: "20px", color: "var(--text-primary)" }}>{totalCount}</strong>
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
               <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--accent-critical)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Immediate Horizon</span>
@@ -108,7 +144,57 @@ function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus }) 
 
       {/* HABITATIONS CARDS GRID */}
       <div className="grid-3-col">
-        {filteredHabitations.map((hab) => {
+        {simulationResult ? (
+          simulationResult.relocations?.map((rel) => {
+            const hab = safeHabitations.find(h => h.id === rel.settlement_id) || { name: rel.settlement_id, code: "UNKNOWN" };
+            const isCrit = rel.priority === "CRITICAL";
+            const riskColor = isCrit ? "var(--accent-critical)" : "var(--accent-warning)";
+            
+            return (
+              <div key={rel.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "6px", display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 16px", borderBottom: "1px solid var(--border-color)", background: "rgba(0,0,0,0.02)" }}>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>{hab.code}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: riskColor }}></div>
+                    <span style={{ fontSize: "10px", fontWeight: 700, color: riskColor, textTransform: "uppercase", letterSpacing: "0.5px" }}>{rel.priority} PRIORITY</span>
+                  </div>
+                </div>
+                <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px", flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <h3 style={{ fontSize: "18px", color: "var(--text-primary)", fontWeight: 700, margin: "0 0 4px 0" }}>{hab.name}</h3>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>Scenario Exposure:</span>
+                        <span style={{ fontSize: "12px", color: riskColor, fontWeight: 700 }}>HIGH</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style={{ border: "1px solid var(--border-color)", borderRadius: "6px", overflow: "hidden" }}>
+                    <div style={{ background: "rgba(0,0,0,0.02)", padding: "8px 12px", borderBottom: "1px solid var(--border-color)", fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      Relocation Assignment
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "12px", background: "var(--bg-secondary)", fontSize: "12px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: "var(--text-secondary)" }}>Destination:</span>
+                        <strong style={{ color: "var(--text-primary)" }}>{rel.recommended_site_id || "None"}</strong>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: "var(--text-secondary)" }}>Route Status:</span>
+                        <strong style={{ color: rel.route_status === "SUCCESS" ? "var(--accent-safe)" : "var(--accent-critical)" }}>{rel.route_status}</strong>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginTop: "auto", paddingTop: "8px", fontSize: "10px", color: "var(--text-muted)", fontStyle: "italic", textAlign: "right" }}>
+                    Data Status: {isHarsh ? "HARSH CASE / SCENARIO" : rel.data_status}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          filteredHabitations.map((hab) => {
           const riskScore = getRiskScore(hab);
           const riskLevel = getRiskLevel(hab);
 
@@ -235,7 +321,7 @@ function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus }) 
               </div>
             </div>
           );
-        })}
+        }))}
       </div>
     </div>
   );

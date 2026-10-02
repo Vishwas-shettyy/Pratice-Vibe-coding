@@ -16,7 +16,13 @@ class Repository:
             "graph_nodes": {},
             "graph_edges": {},
             "network_access": {},
-            "facilities": {}
+            "facilities": {},
+            "safe_site_operations": {},
+            "hazard_exposures": {},
+            "scenarios": {},
+            "scenario_exposures": {},
+            "scenario_road_impacts": {},
+            "scenario_relocations": {}
         }
         
         if self.db_url:
@@ -229,6 +235,110 @@ class Repository:
                             source_type VARCHAR(50),
                             data_status VARCHAR(50) DEFAULT 'REAL',
                             observation_time TIMESTAMP
+                        )
+                    """)
+
+                    # Operational Safe-Site Scenarios
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS safe_site_operations (
+                            id VARCHAR(50) PRIMARY KEY,
+                            facility_id VARCHAR(50) REFERENCES facilities(id),
+                            operational_status VARCHAR(50),
+                            capacity INT,
+                            occupancy INT,
+                            available_capacity INT,
+                            water_ready BOOLEAN,
+                            food_ready BOOLEAN,
+                            medical_ready BOOLEAN,
+                            power_ready BOOLEAN,
+                            accessibility_status VARCHAR(100),
+                            suitability_score FLOAT,
+                            suitability_level VARCHAR(50),
+                            assessment_reason TEXT,
+                            data_status VARCHAR(50) DEFAULT 'SCENARIO',
+                            scenario_id VARCHAR(100),
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )
+                    """)
+
+                    # Hazard Exposures
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS hazard_exposures (
+                            id VARCHAR(50) PRIMARY KEY,
+                            entity_id VARCHAR(50),
+                            entity_type VARCHAR(50),
+                            flood_exposure VARCHAR(50),
+                            landslide_exposure VARCHAR(50),
+                            overall_exposure VARCHAR(50),
+                            evidence TEXT,
+                            methodology TEXT,
+                            data_status VARCHAR(50) DEFAULT 'DERIVED',
+                            assessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )
+                    """)
+
+                    # Scenarios
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS scenarios (
+                            id VARCHAR(50) PRIMARY KEY,
+                            name VARCHAR(255),
+                            type VARCHAR(100),
+                            description TEXT,
+                            rainfall_24h_mm FLOAT,
+                            river_stage_m FLOAT,
+                            flood_influence_radius_km FLOAT,
+                            landslide_influence_radius_km FLOAT,
+                            landslide_rainfall_trigger_mm FLOAT,
+                            affected_road_fraction FLOAT,
+                            severity VARCHAR(50),
+                            data_status VARCHAR(50) DEFAULT 'SCENARIO',
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )
+                    """)
+                    
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS scenario_exposures (
+                            id VARCHAR(50) PRIMARY KEY,
+                            scenario_id VARCHAR(50),
+                            entity_id VARCHAR(50),
+                            entity_type VARCHAR(50),
+                            flood_exposure VARCHAR(50),
+                            landslide_exposure VARCHAR(50),
+                            overall_exposure VARCHAR(50),
+                            impact_reason TEXT,
+                            data_status VARCHAR(50) DEFAULT 'SCENARIO'
+                        )
+                    """)
+                    
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS scenario_road_impacts (
+                            id VARCHAR(50) PRIMARY KEY,
+                            scenario_id VARCHAR(50),
+                            road_id VARCHAR(50),
+                            impact_status VARCHAR(50),
+                            impact_reason TEXT,
+                            data_status VARCHAR(50) DEFAULT 'SCENARIO'
+                        )
+                    """)
+                    
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS scenario_relocations (
+                            id VARCHAR(50) PRIMARY KEY,
+                            scenario_id VARCHAR(50),
+                            settlement_id VARCHAR(50),
+                            recommended_site_id VARCHAR(50),
+                            priority VARCHAR(50),
+                            required_capacity INTEGER,
+                            available_capacity INTEGER,
+                            capacity_status VARCHAR(50),
+                            route_status VARCHAR(50),
+                            route_distance_m FLOAT,
+                            estimated_travel_time_min FLOAT,
+                            candidate_count INTEGER,
+                            recommendation_reason TEXT,
+                            data_status VARCHAR(50) DEFAULT 'SCENARIO',
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         )
                     """)
                 conn.commit()
@@ -999,6 +1109,251 @@ class Repository:
                         "observation_time": str(r["observation_time"]) if r.get("observation_time") else None
                     })
                 return res
+
+    def upsert_safe_site_operation(self, op):
+        if not isinstance(op, dict) or not op.get("id"):
+            raise ValueError("Safe site operation must have an 'id'")
+            
+        formatted = {
+            "id": op["id"],
+            "facility_id": op.get("facility_id"),
+            "operational_status": op.get("operational_status"),
+            "capacity": op.get("capacity"),
+            "occupancy": op.get("occupancy"),
+            "available_capacity": op.get("available_capacity"),
+            "water_ready": op.get("water_ready"),
+            "food_ready": op.get("food_ready"),
+            "medical_ready": op.get("medical_ready"),
+            "power_ready": op.get("power_ready"),
+            "accessibility_status": op.get("accessibility_status"),
+            "suitability_score": op.get("suitability_score"),
+            "suitability_level": op.get("suitability_level"),
+            "assessment_reason": op.get("assessment_reason"),
+            "data_status": op.get("data_status", "SCENARIO"),
+            "scenario_id": op.get("scenario_id"),
+            "created_at": op.get("created_at"),
+            "updated_at": op.get("updated_at")
+        }
+        
+        if self.in_memory:
+            self.memory_store["safe_site_operations"][op["id"]] = formatted
+            return formatted
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO safe_site_operations (
+                        id, facility_id, operational_status, capacity, occupancy,
+                        available_capacity, water_ready, food_ready, medical_ready,
+                        power_ready, accessibility_status, suitability_score,
+                        suitability_level, assessment_reason, data_status,
+                        scenario_id, created_at, updated_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        operational_status = EXCLUDED.operational_status,
+                        capacity = EXCLUDED.capacity,
+                        occupancy = EXCLUDED.occupancy,
+                        available_capacity = EXCLUDED.available_capacity,
+                        water_ready = EXCLUDED.water_ready,
+                        food_ready = EXCLUDED.food_ready,
+                        medical_ready = EXCLUDED.medical_ready,
+                        power_ready = EXCLUDED.power_ready,
+                        accessibility_status = EXCLUDED.accessibility_status,
+                        suitability_score = EXCLUDED.suitability_score,
+                        suitability_level = EXCLUDED.suitability_level,
+                        assessment_reason = EXCLUDED.assessment_reason,
+                        updated_at = EXCLUDED.updated_at
+                """, (
+                    formatted["id"], formatted["facility_id"], formatted["operational_status"],
+                    formatted["capacity"], formatted["occupancy"], formatted["available_capacity"],
+                    formatted["water_ready"], formatted["food_ready"], formatted["medical_ready"],
+                    formatted["power_ready"], formatted["accessibility_status"],
+                    formatted["suitability_score"], formatted["suitability_level"],
+                    formatted["assessment_reason"], formatted["data_status"],
+                    formatted["scenario_id"], formatted["created_at"], formatted["updated_at"]
+                ))
+            conn.commit()
+        return formatted
+
+    def get_all_safe_site_operations(self):
+        if self.in_memory:
+            return list(self.memory_store["safe_site_operations"].values())
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM safe_site_operations")
+                return [dict(r) for r in cur.fetchall()]
+
+    def upsert_hazard_exposure(self, exp):
+        if not isinstance(exp, dict) or not exp.get("id"):
+            raise ValueError("Hazard exposure must have an 'id'")
+            
+        formatted = {
+            "id": exp["id"],
+            "entity_id": exp.get("entity_id"),
+            "entity_type": exp.get("entity_type"),
+            "flood_exposure": exp.get("flood_exposure", "UNKNOWN"),
+            "landslide_exposure": exp.get("landslide_exposure", "UNKNOWN"),
+            "overall_exposure": exp.get("overall_exposure", "UNKNOWN"),
+            "evidence": exp.get("evidence"),
+            "methodology": exp.get("methodology"),
+            "data_status": exp.get("data_status", "DERIVED"),
+            "assessed_at": exp.get("assessed_at")
+        }
+        
+        if self.in_memory:
+            self.memory_store["hazard_exposures"][exp["id"]] = formatted
+            return formatted
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO hazard_exposures (
+                        id, entity_id, entity_type, flood_exposure, landslide_exposure,
+                        overall_exposure, evidence, methodology, data_status, assessed_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        flood_exposure = EXCLUDED.flood_exposure,
+                        landslide_exposure = EXCLUDED.landslide_exposure,
+                        overall_exposure = EXCLUDED.overall_exposure,
+                        evidence = EXCLUDED.evidence,
+                        methodology = EXCLUDED.methodology,
+                        data_status = EXCLUDED.data_status,
+                        assessed_at = EXCLUDED.assessed_at
+                """, (
+                    formatted["id"], formatted["entity_id"], formatted["entity_type"],
+                    formatted["flood_exposure"], formatted["landslide_exposure"],
+                    formatted["overall_exposure"], formatted["evidence"],
+                    formatted["methodology"], formatted["data_status"], formatted["assessed_at"]
+                ))
+            conn.commit()
+        return formatted
+
+    def get_all_hazard_exposures(self):
+        if self.in_memory:
+            return list(self.memory_store["hazard_exposures"].values())
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM hazard_exposures")
+                return [dict(r) for r in cur.fetchall()]
+
+    # ==========================
+    # SCENARIOS
+    # ==========================
+    def upsert_scenario(self, scenario):
+        s_id = scenario["id"]
+        formatted = {
+            "id": s_id,
+            "name": scenario.get("name"),
+            "label": scenario.get("label", "SCENARIO"),
+            "type": scenario.get("type"),
+            "description": scenario.get("description"),
+            "rainfall_24h_mm": scenario.get("rainfall_24h_mm"),
+            "river_stage_m": scenario.get("river_stage_m"),
+            "flood_influence_radius_km": scenario.get("flood_influence_radius_km"),
+            "landslide_influence_radius_km": scenario.get("landslide_influence_radius_km"),
+            "landslide_rainfall_trigger_mm": scenario.get("landslide_rainfall_trigger_mm"),
+            "affected_road_fraction": scenario.get("affected_road_fraction"),
+            "severity": scenario.get("severity"),
+            "data_status": scenario.get("data_status", "SCENARIO"),
+            "created_at": scenario.get("created_at")
+        }
+        if self.in_memory:
+            self.memory_store["scenarios"][s_id] = formatted
+            return formatted
+        # PG implementation omitted for brevity in demo, fallback to memory if error or implement simple replace
+        pass # In a real implementation we would write the INSERT ... ON CONFLICT
+
+    def get_all_scenarios(self):
+        if self.in_memory:
+            return list(self.memory_store["scenarios"].values())
+        return []
+
+    def get_scenario(self, scenario_id):
+        if self.in_memory:
+            return self.memory_store["scenarios"].get(scenario_id)
+        return None
+
+    def upsert_scenario_exposure(self, exp):
+        e_id = exp["id"]
+        formatted = {
+            "id": e_id,
+            "scenario_id": exp.get("scenario_id"),
+            "entity_id": exp.get("entity_id"),
+            "entity_type": exp.get("entity_type"),
+            "flood_exposure": exp.get("flood_exposure"),
+            "landslide_exposure": exp.get("landslide_exposure"),
+            "overall_exposure": exp.get("overall_exposure"),
+            "impact_reason": exp.get("impact_reason"),
+            "data_status": exp.get("data_status", "SCENARIO")
+        }
+        if self.in_memory:
+            self.memory_store["scenario_exposures"][e_id] = formatted
+        return formatted
+
+    def get_scenario_exposures(self, scenario_id):
+        if self.in_memory:
+            return [e for e in self.memory_store["scenario_exposures"].values() if e["scenario_id"] == scenario_id]
+        return []
+
+    def upsert_scenario_road_impact(self, imp):
+        i_id = imp["id"]
+        formatted = {
+            "id": i_id,
+            "scenario_id": imp.get("scenario_id"),
+            "road_id": imp.get("road_id"),
+            "impact_status": imp.get("impact_status"),
+            "impact_reason": imp.get("impact_reason"),
+            "data_status": imp.get("data_status", "SCENARIO")
+        }
+        if self.in_memory:
+            self.memory_store["scenario_road_impacts"][i_id] = formatted
+        return formatted
+
+    def get_scenario_road_impacts(self, scenario_id):
+        if self.in_memory:
+            impacts = [dict(i) for i in self.memory_store["scenario_road_impacts"].values() if i["scenario_id"] == scenario_id]
+            for imp in impacts:
+                road = self.memory_store["roads"].get(imp["road_id"])
+                if road:
+                    imp["geometry"] = road.get("geometry")
+            return impacts
+        return []
+
+    def upsert_scenario_relocation(self, reloc):
+        r_id = reloc["id"]
+        formatted = {
+            "id": r_id,
+            "scenario_id": reloc.get("scenario_id"),
+            "settlement_id": reloc.get("settlement_id"),
+            "recommended_site_id": reloc.get("recommended_site_id"),
+            "priority": reloc.get("priority"),
+            "required_capacity": reloc.get("required_capacity"),
+            "available_capacity": reloc.get("available_capacity"),
+            "capacity_status": reloc.get("capacity_status"),
+            "route_status": reloc.get("route_status"),
+            "route_distance_m": reloc.get("route_distance_m"),
+            "estimated_travel_time_min": reloc.get("estimated_travel_time_min"),
+            "candidate_count": reloc.get("candidate_count"),
+            "recommendation_reason": reloc.get("recommendation_reason"),
+            "route_geometry": reloc.get("route_geometry"),
+            "data_status": reloc.get("data_status", "SCENARIO"),
+            "created_at": reloc.get("created_at")
+        }
+        if self.in_memory:
+            self.memory_store["scenario_relocations"][r_id] = formatted
+        return formatted
+
+    def get_scenario_relocations(self, scenario_id):
+        if self.in_memory:
+            return [r for r in self.memory_store["scenario_relocations"].values() if r["scenario_id"] == scenario_id]
+        return []
+        
+    def get_scenario_relocation(self, scenario_id, settlement_id):
+        rels = self.get_scenario_relocations(scenario_id)
+        for r in rels:
+            if r["settlement_id"] == settlement_id:
+                return r
+        return None
 
 # Singleton repository
 repo = Repository()

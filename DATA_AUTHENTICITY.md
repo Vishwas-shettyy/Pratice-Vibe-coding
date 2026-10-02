@@ -108,3 +108,67 @@ ResQ ingests a primary road network routing dataset directly from OpenStreetMap 
 *   **Missing Attributes:** Fields such as `surface`, `bridge`, `maxspeed`, or `is_oneway` are captured directly from OSM tags. Missing tags are strictly preserved as `NULL` / unassigned. ResQ **NEVER** fabricates these missing attributes.
 *   **Validation Source:** If official verification of a road segment is required in the future, the Karnataka PWD / PMGSY GeoSadak open datasets are designated as secondary reference sets.
 *   **Extraction Details:** Raw data is retrieved deterministically via the `backend/scripts/ingest_osm_roads.py` script. The timestamp of the API extraction is recorded in the `observation_time` field for each road segment.
+
+---
+
+## 8. OPERATIONAL SAFE-SITE SCENARIO DATA (`data_status: "SCENARIO"`)
+
+ResQ utilizes real physical buildings from OSM (e.g., schools, hospitals, community centres) to serve as a base for operational safe-site planning. However, the operational readiness and capacities of these sites are deterministic scenarios, not verified real-world facts.
+
+### A. Separation of Concerns
+*   **Physical Facilities (`data_status: "REAL"`):** The location, type, and footprint of the building are real geographical data sourced from OpenStreetMap (`OPEN_GEO`).
+*   **Operational Operations (`data_status: "SCENARIO"`):** The operational capacity, water/food/medical readiness, and suitability classifications are simulated for the `KODAGU_MONSOON_FLOOD_LANDSLIDE_SCENARIO`.
+
+### B. Deterministic Assumptions
+*   **Capacity:** Assigned via explicit deterministic rules based on facility type (e.g., Schools = 200, Colleges = 500, Hospitals = 100, Community Centres = 300) rather than random assignment. These are **assumptions**, not surveyed capacities.
+*   **Suitability Calculation:** A transparent, rule-based suitability score is calculated by the ResQ decision engine based on available capacity and resource readiness (Water, Food, Medical, Power).
+*   **Hazard Safety NOT Guaranteed:** A high operational suitability score merely indicates the facility has beds and resources. **It does NOT mean the facility is safe from flooding or landslides.** ResQ computes hazard exposure separately in the risk engine layer before making final relocation recommendations.
+
+---
+
+## 9. HAZARD EXPOSURE LAYER (`data_status: "DERIVED"`)
+
+The Hazard Exposure Layer correlates the real geography (settlements and facilities) with the real environmental observations (rainfall, river stages).
+
+### A. Separation of Concerns
+*   **Real Observations (`data_status: "REAL"`):** Baseline readings like 184mm of rain at Bhagamandala.
+*   **Derived Exposure (`data_status: "DERIVED"`):** The calculated risk of flood or landslide for a specific geographical entity. These derived exposure calculations are explicitly prevented from modifying the underlying original geographic or observation records.
+
+### B. Strict Data Constraints & "UNKNOWN" State
+ResQ deliberately refrains from fabricating hazard exposure scores without explicit geospatial evidence:
+*   **Flood Exposure:** Set to `UNKNOWN`. While regional rainfall is available, assigning specific flood risk requires explicit terrain modelling and localized river inundation thresholds, which are not currently available in the dataset.
+*   **Landslide Exposure:** Set to `UNKNOWN`. Localised slope susceptibility maps and high-resolution DEM inputs per settlement are not present.
+*   **Methodology:** The system enforces an `UNKNOWN` exposure level rather than randomly assigning `LOW` or `MODERATE` based on generic region labels. This preserves analytical integrity.
+
+---
+
+## 10. SCENARIO HAZARD MODEL (`data_status: "SCENARIO"`)
+
+Because programmatic authoritative hazard overlays (DEM, inundation boundaries) are not currently accessible, ResQ incorporates a distinct, explicitly decoupled simulation layer for demonstration and decision-support testing.
+
+### A. Separation of Concerns
+*   The actual `hazard_exposures` derived from real geography remain strictly `UNKNOWN`. The scenario engine NEVER overwrites or modifies these real records.
+*   Scenario results are stored in isolated tables (`scenario_exposures`, `scenario_road_impacts`) and flagged strictly with `data_status: "SCENARIO"`.
+
+### B. Transparent Assumptions & Spatial Rules
+The primary scenario (`KODAGU_MONSOON_FLOOD_LANDSLIDE_SCENARIO`) runs on configurable parameters rather than hidden heuristics:
+*   **Rainfall & Trigger Assumptions:** Assumes 250mm of 24h rainfall. If this exceeds the configured landslide trigger (150mm), landslide hazard logic activates.
+*   **Geospatial Influence Radii:** Evaluates entities based on their exact geodesic distance to the nearest real-world meteorological station. Entities within 3.0km are flagged with a simulated flood risk; entities within 5.0km are flagged for simulated landslide risk.
+*   **Simulated Road Closures:** Evaluates the real OSM road network. It does NOT mutate real OSM records. Instead, a deterministic hash-based rule flags a configurable percentage (e.g., 15%) of roads as `RESTRICTED` or `BLOCKED` to simulate network degradation.
+*   **Disclaimer:** These scenario values are assumptions. Scenario exposure is NOT real-time hazard detection. Road closures are simulated. This model demonstrates how the decision engine reacts to hazards without violating geospatial data integrity.
+
+---
+
+## 11. SCENARIO RELOCATION DECISION ENGINE (`data_status: "SCENARIO"`)
+
+The Scenario Relocation Engine fuses real geographic routing with the simulated disaster state to produce deterministic, explainable evacuation assignments. 
+
+### A. Separation of Inputs
+*   **Real Data Used:** The actual geographic coordinate of the settlement, the actual coordinates of the safe-site facilities, and the real OSM road network topology.
+*   **Simulated Overlays Applied:** The derived scenario hazard exposures, the derived safe-site capacities (Phase 5B), and the simulated road restrictions (Phase 8).
+
+### B. Transparent Decision Rules
+*   **Candidate Filtering:** A facility is rejected if its operational status is `CLOSED`, it has zero scenario capacity, its own scenario hazard exposure is `HIGH`, or the routing algorithm determines the path is entirely `BLOCKED`.
+*   **Routing Penalties:** Routes dynamically avoid `RESTRICTED` scenario roads unless no other topological path exists, in which case they accept a severe distance penalty. 
+*   **Explainability:** Every generated recommendation outputs a strict, deterministic rationale string detailing exactly why a facility was selected (based on travel time, available capacity, and hazard exposure priority).
+*   **Disclaimer:** These recommendations are decision-support simulations. They are NOT live emergency evacuation orders. All outputs explicitly carry `data_status: "SCENARIO"`.

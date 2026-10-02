@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { api } from "../services/api";
 
-function RelocationPlannerView({ habitations = [], safeSites = [], routes = [], onRefreshData }) {
+function RelocationPlannerView({ habitations = [], safeSites = [], routes = [], onRefreshData, simulationResult, onClearScenario }) {
   const [selectedHabitationId, setSelectedHabitationId] = useState((Array.isArray(habitations) ? habitations[0]?.id : "") || "");
   const [selectedShelterId, setSelectedShelterId] = useState("");
   const [statusInput, setStatusInput] = useState("In Progress");
@@ -55,10 +55,94 @@ function RelocationPlannerView({ habitations = [], safeSites = [], routes = [], 
     }
   };
 
-  if (!safeHabitations.length && !safeSafeSites.length && !safeRoutes.length) {
+  if (!safeHabitations.length && !safeSafeSites.length && !safeRoutes.length && !simulationResult) {
     return (
-      <div className="empty-state">
-        Relocation planning data is currently unavailable. The backend data feed is missing or offline.
+      <div className="empty-state" style={{ padding: "40px", textAlign: "center", background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", color: "var(--text-muted)" }}>
+        Real Kodagu settlement operational risk data is not currently available.
+        <br/>
+        Run a scenario from the Hazard Simulator to view relocation planning.
+      </div>
+    );
+  }
+
+  if (simulationResult) {
+    const simRelocations = simulationResult.relocations || [];
+    const isHarsh = simulationResult?.scenario?.id === "KODAGU_EXTREME_MONSOON_HARSH_CASE" || simulationResult?.scenario?.label === "HARSH CASE";
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", background: isHarsh ? "rgba(220, 38, 38, 0.08)" : "rgba(168, 85, 247, 0.1)", border: `1px solid ${isHarsh ? "rgba(220, 38, 38, 0.4)" : "#a855f7"}`, borderRadius: "8px", padding: "14px 20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ color: isHarsh ? "var(--accent-critical)" : "#a855f7", fontWeight: 700, fontSize: "13px", letterSpacing: "0.5px" }}>
+              {isHarsh ? "HARSH CASE SIMULATION ACTIVE — 16 DETOUR RELOCATION ASSIGNMENTS" : "SCENARIO RESULT OVERLAY ACTIVE — SCENARIO RELOCATION ASSIGNMENTS"}
+            </div>
+            <button className="action-btn" onClick={onClearScenario} style={{ border: `1px solid ${isHarsh ? "var(--accent-critical)" : "#a855f7"}`, color: isHarsh ? "var(--accent-critical)" : "#a855f7", background: "transparent", padding: "4px 10px", fontSize: "12px" }}>
+              Exit Scenario
+            </button>
+          </div>
+          {isHarsh && (
+            <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.4 }}>
+              HARSH CASE is a deterministic simulation used to demonstrate ResQ response under extreme disaster conditions. Results are simulated and do not represent a live hazard forecast.
+            </div>
+          )}
+        </div>
+        <div className="grid-2-1" style={{ gridTemplateColumns: "1fr" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {simRelocations.length > 0 ? simRelocations.map((rel) => {
+              const isCrit = rel.priority === "CRITICAL";
+              const pColor = isCrit ? "var(--accent-critical)" : "var(--accent-warning)";
+              return (
+                <div key={rel.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderLeft: `4px solid ${pColor}`, borderRadius: "8px", padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <h4 style={{ fontSize: "18px", color: "var(--text-primary)", fontWeight: 700, margin: "0 0 4px 0" }}>{rel.settlement_id}</h4>
+                      <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 600 }}>Origin Settlement</div>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "4px" }}>
+                      <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--accent-blue)" }}>
+                        {rel.route_distance_m > 0 ? `${(rel.route_distance_m / 1000).toFixed(2)} km` : "--"}
+                      </div>
+                      <div style={{ fontSize: "16px", color: "var(--border-color)", fontWeight: 900 }}>&rarr;</div>
+                      <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--accent-emerald)" }}>
+                        {rel.estimated_travel_time_min > 0 ? `~${Math.round(rel.estimated_travel_time_min)} min` : "--"}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <h4 style={{ fontSize: "18px", color: "var(--text-primary)", fontWeight: 700, margin: "0 0 4px 0" }}>{rel.recommended_site_id || "None"}</h4>
+                      <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 600 }}>Recommended Destination</div>
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: "flex", gap: "16px", background: "rgba(0,0,0,0.02)", padding: "12px", borderRadius: "6px", border: "1px solid var(--border-color)", fontSize: "12px" }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: "var(--text-muted)", marginBottom: "2px", fontWeight: 600 }}>Route Status</div>
+                      <div style={{ fontWeight: 700, color: rel.route_status === "SUCCESS" ? "var(--accent-safe)" : "var(--accent-critical)" }}>{rel.route_status}</div>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: "var(--text-muted)", marginBottom: "2px", fontWeight: 600 }}>Capacity Status</div>
+                      <div style={{ fontWeight: 700, color: rel.capacity_status.includes("SUFFICIENT") ? "var(--accent-safe)" : "var(--accent-critical)" }}>{rel.capacity_status === "UNKNOWN_REQUIREMENT (SCENARIO ASSUMPTION)" ? "Unknown Req" : rel.capacity_status}</div>
+                    </div>
+                    <div style={{ flex: 2 }}>
+                      <div style={{ color: "var(--text-muted)", marginBottom: "2px", fontWeight: 600 }}>Recommendation Reason</div>
+                      <div style={{ color: "var(--text-primary)" }}>{rel.recommendation_reason}</div>
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
+                    <div style={{ fontSize: "10px", fontWeight: 700, color: pColor, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      {rel.priority} PRIORITY
+                    </div>
+                    <div style={{ fontSize: "10px", color: "var(--text-muted)", fontStyle: "italic" }}>
+                      Data Status: {isHarsh ? "HARSH CASE / SCENARIO" : rel.data_status}
+                    </div>
+                  </div>
+                </div>
+              );
+            }) : (
+              <div style={{ padding: "24px", textAlign: "center", color: "var(--text-muted)" }}>No scenario relocations generated.</div>
+            )}
+          </div>
+        </div>
       </div>
     );
   }

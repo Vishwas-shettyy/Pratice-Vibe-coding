@@ -107,7 +107,7 @@ function NavbarSidebar({ activeTab, setActiveTab, alertCount }) {
           <span className="pulse-dot"></span>
           <div>
             <div style={{ color: "#fff", fontWeight: 600, fontSize: "12px" }}>
-              SIH Control Center
+              RESQ Control Centre
             </div>
             <div style={{ color: "var(--text-muted)", fontSize: "10px" }}>
               GIS Engine v2.4 (Live)

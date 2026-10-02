@@ -7,8 +7,15 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Enable CORS for all routes (Vite frontend on 5173 / localhost)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    # Ensure SECRET_KEY is securely populated according to environment rules
+    if hasattr(config_class, "get_secret_key"):
+        app.config["SECRET_KEY"] = config_class.get_secret_key()
+    elif not app.config.get("SECRET_KEY"):
+        app.config["SECRET_KEY"] = Config.get_secret_key()
+
+    # Enable CORS for authorized origins (production Vercel frontend and local dev)
+    allowed_origins = app.config.get("CORS_ORIGINS", Config.DEFAULT_CORS_ORIGINS)
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
 
     # Register Blueprints
     from app.routes.api import api_bp

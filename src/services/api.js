@@ -92,4 +92,10 @@ export const api = {
 
   // Reports
   getReports: () => fetchAPI("/reports"),
+
+  // Scenarios & Relocation Scenario Engine
+  getScenarios: () => fetchAPI("/scenarios"),
+  runScenario: (scenarioId) => fetchAPI(`/scenarios/${scenarioId}/run`, { method: "POST" }),
+  runScenarioRelocation: (scenarioId) => fetchAPI(`/relocation/scenario/${scenarioId}/run`, { method: "POST" }),
+  getScenarioRoadImpacts: (scenarioId) => fetchAPI(`/scenarios/${scenarioId}/road-impacts`),
 };

@@ -2,7 +2,16 @@ import os
 import unittest
 from unittest.mock import patch
 from app.services.repository import Repository
-from app.services.data_service import INITIAL_HABITATIONS, INITIAL_SHELTERS, INITIAL_RESOURCES
+from app.services.data_service import INITIAL_SHELTERS, INITIAL_RESOURCES
+
+MOCK_HABITATIONS = [
+    {"id": "HAB-101", "name": "Village A", "code": "VIL-A", "district": "Mysuru", "region": "Kaveri Basin", "lat": 12.31, "lng": 76.62, "population": 680},
+    {"id": "HAB-102", "name": "Village B", "code": "VIL-B", "district": "Chamarajanagar", "region": "Mudhall Hills", "lat": 12.28, "lng": 76.67, "population": 450},
+    {"id": "HAB-103", "name": "Village C", "code": "VIL-C", "district": "Mysuru", "region": "Chamundi Slope", "lat": 12.29, "lng": 76.59, "population": 300},
+    {"id": "HAB-104", "name": "Village D", "code": "VIL-D", "district": "Mandya", "region": "KRS Lowlands", "lat": 12.34, "lng": 76.65, "population": 520},
+    {"id": "HAB-105", "name": "Village E", "code": "VIL-E", "district": "Mysuru", "region": "East Plateau", "lat": 12.25, "lng": 76.70, "population": 310},
+    {"id": "HAB-106", "name": "Village F", "code": "VIL-F", "district": "Kodagu Border", "region": "Western Edge", "lat": 12.32, "lng": 76.55, "population": 220},
+]
 
 class TestRepository(unittest.TestCase):
     def setUp(self):
@@ -14,7 +23,7 @@ class TestRepository(unittest.TestCase):
         # If PostgreSQL integration tests require a database, clearly separate them."
         # We will mock the psycopg2 connection or just use memory fallback.
         # The prompt says: fallback to in-memory mode when DATABASE_URL is absent
-        self.repo.seed_data(INITIAL_HABITATIONS, INITIAL_SHELTERS, INITIAL_RESOURCES)
+        self.repo.seed_data(MOCK_HABITATIONS, INITIAL_SHELTERS, INITIAL_RESOURCES)
 
     def test_fallback_mode(self):
         self.assertTrue(self.repo.in_memory)

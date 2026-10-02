@@ -35,7 +35,7 @@ class RoutingService:
             if not is_oneway:
                 self._graph[v].append((u, edge_id, length, "backward"))
 
-    def find_shortest_path(self, source_node_id, dest_node_id):
+    def find_shortest_path(self, source_node_id, dest_node_id, scenario_id=None):
         if self._graph is None:
             self._build_graph()
             
@@ -49,6 +49,8 @@ class RoutingService:
                 "destination_node": dest_node_id,
                 "distance_m": 0.0,
                 "distance_km": 0.0,
+                "edge_count": 0,
+                "estimated_travel_time_min": 0.0,
                 "nodes": [source_node_id],
                 "edges": [],
                 "geometry": {"type": "LineString", "coordinates": []}
@@ -61,6 +63,12 @@ class RoutingService:
         
         visited = set()
         
+        scenario_impacts = {}
+        if scenario_id:
+            impacts = self.repo.get_scenario_road_impacts(scenario_id)
+            for imp in impacts:
+                scenario_impacts[imp["road_id"]] = imp["impact_status"]
+        
         while pq:
             current_dist, u = heapq.heappop(pq)
             
@@ -71,9 +79,18 @@ class RoutingService:
             if u == dest_node_id:
                 break
                 
-            for v, edge_id, weight, direction in self._graph.get(u, []):
+            for v, edge_id, base_weight, direction in self._graph.get(u, []):
                 if v in visited:
                     continue
+                    
+                impact = scenario_impacts.get(edge_id, "OPEN")
+                if impact == "BLOCKED":
+                    continue
+                    
+                weight = base_weight
+                if impact == "RESTRICTED":
+                    weight = base_weight * 10 # Strong penalty to avoid if alternative exists
+                    
                 alt = current_dist + weight
                 if v not in distances or alt < distances[v]:
                     distances[v] = alt
@@ -137,6 +154,8 @@ class RoutingService:
             "destination_node": dest_node_id,
             "distance_m": total_dist_m,
             "distance_km": round(total_dist_m / 1000, 3),
+            "edge_count": len(path_edges),
+            "estimated_travel_time_min": round((total_dist_m / 1000) / 30 * 60, 1), # Assumption: 30 km/h average speed
             "nodes": path_nodes,
             "edges": path_edges,
             "geometry": {

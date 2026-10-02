@@ -130,8 +130,8 @@ def generate_recommendations(
     required_ambulances = 0
     for hab in habitations:
         if str(hab.get("relocationStatus", "")).lower() != "completed":
-            pop = hab.get("population", 0)
-            med = hab.get("medicalPriority", 0)
+            pop = hab.get("population") or 0
+            med = hab.get("medicalPriority") or 0
             required_buses += (pop // 50) + (1 if pop % 50 > 0 else 0)
             required_ambulances += (med // 4) + (1 if med % 4 > 0 else 0)
             

@@ -71,7 +71,7 @@ def validate_facility(elem):
         
     return True, ""
 
-def ingest_osm_facilities(repo=None):
+def ingest_osm_facilities(repo=None, force_download: bool = False):
     if repo is None:
         repo = Repository()
         
@@ -79,36 +79,46 @@ def ingest_osm_facilities(repo=None):
     data_dir.mkdir(exist_ok=True)
     cache_file = data_dir / "kodagu_osm_facilities_raw.json"
     
-    print("🌍 Fetching REAL OSM facilities data from Overpass API (this may take a minute)...")
-    data = urllib.parse.urlencode({'data': OVERPASS_QUERY}).encode('utf-8')
-    headers = {
-        'User-Agent': 'ResQ-Kodagu-Facilities-Ingestion/2.0',
-        'Accept': '*/*'
-    }
-    
     osm_data = None
     success = False
-    
-    for endpoint in ENDPOINTS:
-        print(f"Trying endpoint: {endpoint}")
-        req = urllib.request.Request(endpoint, data=data, headers=headers)
+
+    if not force_download and cache_file.exists():
         try:
-            with urllib.request.urlopen(req, timeout=120) as response:
-                content = response.read()
-                osm_data = json.loads(content.decode('utf-8'))
-                with open(cache_file, "w") as f:
-                    json.dump(osm_data, f, indent=2)
-                print(f"✅ Successfully downloaded OSM data from {endpoint}")
-                success = True
-                break
-        except urllib.error.URLError as e:
-            print(f"⚠️ Endpoint failed: {e}")
-        except json.JSONDecodeError as e:
-            print(f"⚠️ Invalid JSON response from endpoint: {e}")
-            
+            with open(cache_file, "r", encoding="utf-8") as f:
+                osm_data = json.load(f)
+            success = True
+            print(f"✅ Loaded cached OSM facilities from {cache_file}")
+        except Exception as e:
+            print(f"⚠️ Failed reading cached facilities: {e}")
+
     if not success:
-        print("❌ All Overpass endpoints failed. Aborting ingestion to prevent silent fallback.")
-        sys.exit(1)
+        print("🌍 Fetching REAL OSM facilities data from Overpass API (this may take a minute)...")
+        data = urllib.parse.urlencode({'data': OVERPASS_QUERY}).encode('utf-8')
+        headers = {
+            'User-Agent': 'ResQ-Kodagu-Facilities-Ingestion/2.0',
+            'Accept': '*/*'
+        }
+        
+        for endpoint in ENDPOINTS:
+            print(f"Trying endpoint: {endpoint}")
+            req = urllib.request.Request(endpoint, data=data, headers=headers)
+            try:
+                with urllib.request.urlopen(req, timeout=120) as response:
+                    content = response.read()
+                    osm_data = json.loads(content.decode('utf-8'))
+                    with open(cache_file, "w") as f:
+                        json.dump(osm_data, f, indent=2)
+                    print(f"✅ Successfully downloaded OSM data from {endpoint}")
+                    success = True
+                    break
+            except urllib.error.URLError as e:
+                print(f"⚠️ Endpoint failed: {e}")
+            except json.JSONDecodeError as e:
+                print(f"⚠️ Invalid JSON response from endpoint: {e}")
+                
+        if not success:
+            print("❌ All Overpass endpoints failed. Aborting ingestion to prevent silent fallback.")
+            sys.exit(1)
 
     elements = osm_data.get("elements", [])
     
