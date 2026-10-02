@@ -93,3 +93,18 @@ ResQ includes verified, source-attributed settlement and village records for Kod
 > ⚠️ **Risk Assessment Disclaimer:**
 > The real Kodagu settlement dataset contains verified baseline geography and population figures, but does **NOT** contain real hazard or risk assessments yet. Real settlement coordinates do **NOT** imply that these settlements are already fully risk-assessed. ResQ explicitly preserves `NULL` / unassigned values for unavailable hazard and demographic metrics to prevent false risk scoring.
 
+---
+
+## 7. REAL KODAGU ROAD NETWORK DATA (`data_status: "REAL"`)
+
+ResQ ingests a primary road network routing dataset directly from OpenStreetMap (`backend/data/kodagu_osm_roads_raw.json`).
+
+### A. Source Attribution & Coverage
+*   **Primary Source:** OpenStreetMap (OSM) via Overpass API.
+*   **Coverage:** Complete road topology extracted for the Kodagu District boundary, filtering out footways and pedestrian paths to isolate traversable vehicular routes.
+
+### B. Provenance Rules & Limitations
+*   **Open Geodata Classification:** OSM is considered high-quality crowdsourced/mapped spatial data (`OPEN_GEO`), but is **NOT** classified as an authoritative government road inventory.
+*   **Missing Attributes:** Fields such as `surface`, `bridge`, `maxspeed`, or `is_oneway` are captured directly from OSM tags. Missing tags are strictly preserved as `NULL` / unassigned. ResQ **NEVER** fabricates these missing attributes.
+*   **Validation Source:** If official verification of a road segment is required in the future, the Karnataka PWD / PMGSY GeoSadak open datasets are designated as secondary reference sets.
+*   **Extraction Details:** Raw data is retrieved deterministically via the `backend/scripts/ingest_osm_roads.py` script. The timestamp of the API extraction is recorded in the `observation_time` field for each road segment.

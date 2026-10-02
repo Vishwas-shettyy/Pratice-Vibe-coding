@@ -127,3 +127,38 @@ def get_environmental_observations():
 
     observations = data_service.get_environmental_observations(district=district, parameter=parameter)
     return success_response(observations, message="Environmental observations retrieved")
+
+# ==========================================
+# ROUTING API
+# ==========================================
+
+from app.services.routing_service import routing_service
+
+@api_bp.route("/routing/route", methods=["GET"])
+def get_route():
+    source_node_id = request.args.get("source_node_id")
+    dest_node_id = request.args.get("destination_node_id")
+    
+    if not source_node_id or not dest_node_id:
+        return error_response(
+            code="BAD_REQUEST",
+            message="Missing source_node_id or destination_node_id",
+            status_code=400
+        )
+        
+    result = routing_service.find_shortest_path(source_node_id, dest_node_id)
+    
+    if result.get("status") == "INVALID_NODE":
+        return error_response(
+            code="INVALID_NODE",
+            message="Source or destination node does not exist in graph",
+            status_code=404
+        )
+        
+    if result.get("status") == "NO_ROUTE":
+        return success_response({
+            "status": "NO_ROUTE",
+            "message": "No valid operational route found between nodes."
+        })
+        
+    return success_response(result)

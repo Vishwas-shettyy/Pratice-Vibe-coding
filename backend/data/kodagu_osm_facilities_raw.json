@@ -1,0 +1,1059 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-10-02T10:49:35Z",
+    "timestamp_areas_base": "2026-10-01T05:50:35Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "node",
+      "id": 1160647913,
+      "lat": 12.4149338,
+      "lon": 75.7486708,
+      "tags": {
+        "amenity": "community_centre",
+        "name": "Rotary Club"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1894554076,
+      "lat": 12.4161023,
+      "lon": 75.7470264,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Ashwini Road, Madikeri",
+        "addr:postcode": "571201",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Ashwini Hospital, Madikeri",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1900759332,
+      "lat": 12.4242382,
+      "lon": 75.7337496,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Near Patrika Bhavan, Stuart Hill, Madikeri",
+        "addr:postcode": "571201",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "emergency": "yes",
+        "name": "Rajarajeshwari Hospital",
+        "name:kn": "\u0cb0\u0cbe\u0c9c\u0cb0\u0cbe\u0c9c\u0cc7\u0cb6\u0ccd\u0cb5\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6",
+        "source": "Local Knowledge"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3925814275,
+      "lat": 12.3278576,
+      "lon": 75.8335465,
+      "tags": {
+        "amenity": "school",
+        "name": "Goverment Higher Primary School, Arekadu",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0cb9\u0cbf\u0cb0\u0cbf\u0caf \u0caa\u0ccd\u0cb0\u0cbe\u0ca5\u0cae\u0cbf\u0c95 \u0cb6\u0cbe\u0cb2\u0cc6, \u0c85\u0cb0\u0cc6\u0c95\u0cbe\u0ca1\u0cc1"
+      }
+    },
+    {
+      "type": "node",
+      "id": 4447861490,
+      "lat": 12.4210705,
+      "lon": 75.7423142,
+      "tags": {
+        "addr:postcode": "571201",
+        "addr:street": "Temple Road",
+        "amenity": "school",
+        "name": "General Thimmayya School",
+        "name:en": "General Thimmayya School",
+        "name:kn": "\u0c9c\u0ca8\u0cb0\u0cb2\u0ccd \u0ca4\u0cbf\u0cae\u0ccd\u0cae\u0caf\u0ccd\u0caf \u0cb6\u0cbe\u0cb2\u0cc6"
+      }
+    },
+    {
+      "type": "node",
+      "id": 6630526717,
+      "lat": 12.292721,
+      "lon": 75.8744983,
+      "tags": {
+        "amenity": "school",
+        "name": "St. Anne's Convent School"
+      }
+    },
+    {
+      "type": "node",
+      "id": 6938519963,
+      "lat": 12.1966985,
+      "lon": 75.8054361,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Gonicoppal Road,OppositeKsrtc Bus Stand, Virajpet, South Kodagu",
+        "addr:postcode": "571218",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Athreya Hospital, Virajpet",
+        "name:kn": "\u0c86\u0ca4\u0ccd\u0cb0\u0cc7\u0caf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 6938787935,
+      "lat": 12.425265,
+      "lon": 75.7393263,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Daswal Road",
+        "addr:postcode": "571201",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Vivus Hospital",
+        "name:kn": "\u0cb5\u0cbf\u0cb5\u0cbe\u0cb8 \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 6944418998,
+      "lat": 12.1822114,
+      "lon": 75.9308998,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Gonikoppal, Virajpet Tq",
+        "addr:postcode": "571218",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Life Line Hospital, Kodagu",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 6944560315,
+      "lat": 12.4209966,
+      "lon": 75.7369915,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Appacha Kavi Road Madikeri",
+        "addr:postcode": "571201",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Shri Akhila Ravi Ayurshala",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 6948501544,
+      "lat": 12.2423771,
+      "lon": 75.8617222,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Ammathi,S",
+        "addr:postcode": "571211",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Rural India Health Project Hospital",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7202979368,
+      "lat": 12.2656,
+      "lon": 75.8335,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Kannangala,Ontiyangadi",
+        "addr:postcode": "571211",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Government Hospital Ontiyangadi",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6 \u0c92\u0c82\u0c9f\u0cbf\u0caf\u0c82\u0c97\u0ca1\u0cbf",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7202979461,
+      "lat": 12.2289118,
+      "lon": 75.6880929,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Virajpet-Talakaveri Rd, Nariyanda",
+        "addr:postcode": "571212",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "contact:phone": "08274-259067",
+        "name": "Government Hospital, Cheyandane",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7202979470,
+      "lat": 12.2397426,
+      "lon": 75.9134221,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Mekur Hosakeri Rd, Pollibetta",
+        "addr:postcode": "571215",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Polibetta Government Hospital",
+        "name:kn": "\u0caa\u0cbe\u0cb2\u0cbf\u0cac\u0cc6\u0c9f\u0ccd\u0c9f \u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7202979473,
+      "lat": 12.3061737,
+      "lon": 75.6884194,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:postcode": "571214",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "contact:phone": "08272-237232",
+        "name": "Government Hospital Napoklu",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6 \u0ca8\u0cbe\u0caa\u0ccb\u0c95\u0ccd\u0cb2\u0cc1",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7202979515,
+      "lat": 12.085505,
+      "lon": 75.945159,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Hudikeri",
+        "addr:postcode": "571249",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Hudikeri Government Hospital",
+        "name:kn": "\u0cb9\u0cc1\u0ca6\u0cbf\u0c95\u0cc7\u0cb0\u0cbf \u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7202979527,
+      "lat": 12.185093,
+      "lon": 75.924683,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Gonikopalu",
+        "addr:postcode": "571213",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Government Hospital, Gonikoppalu",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6 \u0c97\u0ccb\u0ca3\u0cbf\u0c95\u0cca\u0caa\u0ccd\u0caa\u0cb2\u0cc1",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7562741450,
+      "lat": 12.416247,
+      "lon": 75.746946,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Ashwini Road, Stuart Hill, Madikeri",
+        "addr:postcode": "571201",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Ashwini Hospital",
+        "name:kn": "\u0c85\u0cb6\u0ccd\u0cb5\u0cbf\u0ca8\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6",
+        "source": "Local Knowledge"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7562741455,
+      "lat": 12.419382,
+      "lon": 75.741358,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Near Income Tax Office, Brahmin Valley, Madikeri",
+        "addr:postcode": "571201",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Srivalli Hospital",
+        "source": "Local Knowledge"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7562741459,
+      "lat": 12.4282309,
+      "lon": 75.7380267,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Gowli Street, Madikeri",
+        "addr:postcode": "571201",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Thopavanana Hosptial",
+        "source": "Local Knowledge"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7562741462,
+      "lat": 12.1977036,
+      "lon": 75.8051215,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Moghra Street, Virajpet",
+        "addr:postcode": "571218",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "T.N. Achaiah Hospital",
+        "source": "Local Knowledge"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7562741470,
+      "lat": 12.4243904,
+      "lon": 75.7367475,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Near State Bank Of India, Madikeri",
+        "addr:postcode": "571201",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Ayur Jeevan Ayurveda Hospital",
+        "source": "Local Knowledge"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7562741484,
+      "lat": 12.2988532,
+      "lon": 75.876884,
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Siddapura",
+        "addr:postcode": "571253",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Sacred Heart Hospital",
+        "source": "Local Knowledge"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8188036172,
+      "lat": 12.7959,
+      "lon": 75.889,
+      "tags": {
+        "addr:full": "Kodlipet, Kodagu, SH-27, Belur Somvarpet Road, Somwarpet, Somwarpet, Karnataka",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Primary Health Center",
+        "name:kn": "\u0caa\u0ccd\u0cb0\u0cbe\u0ca5\u0cae\u0cbf\u0c95 \u0c86\u0cb0\u0ccb\u0c97\u0ccd\u0caf \u0c95\u0cc7\u0c82\u0ca6\u0ccd\u0cb0"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8188036506,
+      "lat": 12.649761,
+      "lon": 75.881408,
+      "tags": {
+        "addr:full": "Gowdalli, Karnataka",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Primary Health Centre",
+        "name:kn": "\u0caa\u0ccd\u0cb0\u0cbe\u0ca5\u0cae\u0cbf\u0c95 \u0c86\u0cb0\u0ccb\u0c97\u0ccd\u0caf \u0c95\u0cc7\u0c82\u0ca6\u0ccd\u0cb0"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8188037198,
+      "lat": 12.4931023,
+      "lon": 75.9502364,
+      "tags": {
+        "addr:full": "SH 91, Kudige, Karnataka",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Government Hospital Kudige",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8188037288,
+      "lat": 12.4597096,
+      "lon": 75.9593478,
+      "tags": {
+        "addr:full": "RADHA KRISHNA LAYOUT, Kushalnagar, Karnataka",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "SLR Health Care"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8188037304,
+      "lat": 12.4552121,
+      "lon": 75.9673945,
+      "tags": {
+        "addr:full": "Bypass Rd, Kushalnagar, Karnataka",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Bharath Ayurveda Chikitsalaya"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8188037343,
+      "lat": 12.4503676,
+      "lon": 75.9694703,
+      "tags": {
+        "addr:full": "Karnataka",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Kaveri Hospital",
+        "name:kn": "\u0c95\u0cbe\u0cb5\u0cc7\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8188037468,
+      "lat": 12.4187855,
+      "lon": 75.741458,
+      "tags": {
+        "addr:full": "Stuart Hill, Madikeri, Karnataka",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "name": "Government Hospital",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8196805342,
+      "lat": 12.493903,
+      "lon": 75.949536,
+      "tags": {
+        "addr:full": "Kudige, Kodagu, SH-91, Kushal Nagar Kudumangalore Road, Somwarpet, Somwarpet, Karnataka",
+        "addr:state": "Karnataka",
+        "amenity": "college",
+        "name": "Government Pre University College",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0caa\u0ca6\u0cb5\u0cbf \u0caa\u0cc2\u0cb0\u0ccd\u0cb5 \u0c95\u0cbe\u0cb2\u0cc7\u0c9c\u0cc1"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8196805567,
+      "lat": 12.4597299,
+      "lon": 75.9527671,
+      "tags": {
+        "addr:full": "Kushalnagar, Karnataka",
+        "addr:state": "Karnataka",
+        "amenity": "college",
+        "name": "Government Junior College",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c9c\u0cc2\u0ca8\u0cbf\u0caf\u0cb0\u0ccd \u0c95\u0cbe\u0cb2\u0cc7\u0c9c\u0cc1"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8196805610,
+      "lat": 12.4512488,
+      "lon": 75.9420371,
+      "tags": {
+        "addr:full": "Baichanalli, Karnataka",
+        "addr:state": "Karnataka",
+        "amenity": "college",
+        "name": "Government Polytechnic Kushalanagar",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0caa\u0cbe\u0cb2\u0cbf\u0c9f\u0cc6\u0c95\u0ccd\u0ca8\u0c95\u0ccd"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8196805615,
+      "lat": 12.448861,
+      "lon": 75.940958,
+      "tags": {
+        "addr:full": "Beside Mandovi Motors, Madapatna, Mysore - Madikeri Road, Kushalnagar, Karnataka",
+        "addr:state": "Karnataka",
+        "amenity": "college",
+        "check_date": "2024-04-29",
+        "name": "Government Engineering College",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c87\u0c82\u0c9c\u0cbf\u0ca8\u0cc0\u0caf\u0cb0\u0cbf\u0c82\u0c97\u0ccd \u0c95\u0cbe\u0cb2\u0cc7\u0c9c\u0cc1"
+      }
+    },
+    {
+      "type": "node",
+      "id": 11248335792,
+      "lat": 12.4976536,
+      "lon": 75.9534988,
+      "tags": {
+        "amenity": "school",
+        "check_date": "2023-10-08",
+        "source": "survey"
+      }
+    },
+    {
+      "type": "node",
+      "id": 11248335795,
+      "lat": 12.505371,
+      "lon": 75.9320282,
+      "tags": {
+        "amenity": "school",
+        "check_date": "2023-10-08"
+      }
+    },
+    {
+      "type": "way",
+      "id": 92384882,
+      "center": {
+        "lat": 12.4323705,
+        "lon": 75.7250395
+      },
+      "nodes": [
+        1072418727,
+        1072419717,
+        1072421921,
+        1072419768,
+        1072423012,
+        1072420628,
+        1072421661,
+        1072422123,
+        1072422765,
+        1072418237,
+        1072419230,
+        1072418027,
+        1072422359,
+        1072418489,
+        1072422608,
+        1072421010,
+        1072418344,
+        1072422387,
+        1072419894,
+        1072422994,
+        1072421498,
+        1072418655,
+        1072422201,
+        1072420374,
+        1072421888,
+        1072418948,
+        1072417828,
+        1072420163,
+        1072422254,
+        1072417885,
+        1072418530,
+        1072419554,
+        1072419346,
+        1072420756,
+        1072421735,
+        1072422827,
+        1072422529,
+        1072418197,
+        1072418263,
+        1072419164,
+        1072419806,
+        1072421277,
+        1072422478,
+        1072417676,
+        1072418836,
+        1072420586,
+        1072422101,
+        1072419049,
+        1072420416,
+        1072418727
+      ],
+      "tags": {
+        "amenity": "college",
+        "name": "Field Marshall K. M. Cariappa College",
+        "name:kn": "\u0c95\u0cc6.\u0c8e\u0c82. \u0c95\u0cbe\u0cb0\u0cbf\u0caf\u0caa\u0ccd\u0caa \u0c95\u0cbe\u0cb2\u0cc7\u0c9c\u0cc1"
+      }
+    },
+    {
+      "type": "way",
+      "id": 92384950,
+      "center": {
+        "lat": 12.4256594,
+        "lon": 75.7415137
+      },
+      "nodes": [
+        1072418169,
+        1072419709,
+        1072421247,
+        1072422083,
+        1072417662,
+        1072419150,
+        1072420567,
+        1072419001,
+        1072420261,
+        1072422351,
+        1072417971,
+        1072418599,
+        1072419635,
+        1072421851,
+        1072422922,
+        1072420041,
+        1072418169
+      ],
+      "tags": {
+        "amenity": "college",
+        "name": "Government Junior College",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c9c\u0cc2\u0ca8\u0cbf\u0caf\u0cb0\u0ccd \u0c95\u0cbe\u0cb2\u0cc7\u0c9c\u0cc1"
+      }
+    },
+    {
+      "type": "way",
+      "id": 232301593,
+      "center": {
+        "lat": 12.1960117,
+        "lon": 75.800731
+      },
+      "nodes": [
+        2406630856,
+        2406631020,
+        2406630995,
+        2406631085,
+        2406631003,
+        2406630796,
+        2406631076,
+        2406630752,
+        2406631078,
+        2406630861,
+        2406631022,
+        2406630795,
+        2406630997,
+        2406630963,
+        2406631031,
+        2406631019,
+        2406631004,
+        2406630842,
+        2406630859,
+        2406630862,
+        2406630901,
+        2406630937,
+        2406630856
+      ],
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Virajpet General Hospital, Virajpet",
+        "addr:postcode": "571218",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "description": "Sub-District Hospital",
+        "emergency": "yes",
+        "name": "Virajpet Government Hospital",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "way",
+      "id": 253642958,
+      "center": {
+        "lat": 12.1996884,
+        "lon": 75.8021182
+      },
+      "nodes": [
+        2595475092,
+        2595475093,
+        2595475064,
+        2595475088,
+        2595475068,
+        2595475076,
+        2595475070,
+        3267009226,
+        3267009225,
+        2595475086,
+        2595475098,
+        2595475085,
+        2595475087,
+        2595475072,
+        2595475095,
+        2595475097,
+        2595475089,
+        2595475074,
+        2595475090,
+        2595475096,
+        2595475078,
+        3267009230,
+        3267009229,
+        3267009228,
+        3267009227,
+        2595475092
+      ],
+      "tags": {
+        "amenity": "college",
+        "name": "St. Anne's College",
+        "name:kn": "\u0cb8\u0cc8\u0c82\u0c9f\u0ccd \u0c85\u0ca8\u0ccd\u0cb8\u0ccd \u0c95\u0cbe\u0cb2\u0cc7\u0c9c\u0cc1"
+      }
+    },
+    {
+      "type": "way",
+      "id": 342276955,
+      "center": {
+        "lat": 12.2420019,
+        "lon": 75.8514104
+      },
+      "nodes": [
+        3492990141,
+        3492990140,
+        3492990142,
+        3492990143,
+        3492990141
+      ],
+      "tags": {
+        "amenity": "school",
+        "education": "school",
+        "name": "High School, Ammatti",
+        "name:kn": "\u0c85\u0cae\u0ccd\u0cae\u0ca4\u0ccd\u0ca4\u0cbf \u0caa\u0ccd\u0cb0\u0ccc\u0ca1 \u0cb6\u0cbe\u0cb2\u0cc6"
+      }
+    },
+    {
+      "type": "way",
+      "id": 342276956,
+      "center": {
+        "lat": 12.2402775,
+        "lon": 75.8546121
+      },
+      "nodes": [
+        3492990136,
+        3492990134,
+        3492990133,
+        3492990132,
+        3492990131,
+        3492990130,
+        3492990135,
+        3492990138,
+        3492990139,
+        3492990137,
+        3492990136
+      ],
+      "tags": {
+        "amenity": "community_centre",
+        "name": "Kodava Samaja, Ammatti",
+        "name:kn": "\u0c85\u0cae\u0ccd\u0cae\u0ca4\u0ccd\u0ca4\u0cbf \u0c95\u0cca\u0ca1\u0cb5 \u0cb8\u0cae\u0cbe\u0c9c"
+      }
+    },
+    {
+      "type": "way",
+      "id": 376194789,
+      "center": {
+        "lat": 12.2346021,
+        "lon": 75.6409305
+      },
+      "nodes": [
+        3796478133,
+        3796478328,
+        3796478134,
+        3796478139,
+        3796478133
+      ],
+      "tags": {
+        "amenity": "school",
+        "building": "yes",
+        "name": "Yavakapady Government School",
+        "name:kn": "\u0caf\u0cb5\u0c95\u0caa\u0cbe\u0ca1\u0cbf \u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0cb6\u0cbe\u0cb2\u0cc6"
+      }
+    },
+    {
+      "type": "way",
+      "id": 488381759,
+      "center": {
+        "lat": 12.454357,
+        "lon": 75.7075008
+      },
+      "nodes": [
+        4806911808,
+        4806911810,
+        4806911819,
+        4806911802,
+        4806911818,
+        4806911811,
+        4806911804,
+        4806911807,
+        4806911805,
+        4806911806,
+        4806911815,
+        4806911817,
+        4806911816,
+        4806911814,
+        4806911812,
+        4806911809,
+        4806911803,
+        4806911813,
+        4806911808
+      ],
+      "tags": {
+        "amenity": "school",
+        "name": "Javahar Navodaya Vidyalaya",
+        "name:kn": "\u0c9c\u0cb5\u0cbe\u0cb9\u0cb0 \u0ca8\u0cb5\u0ccb\u0ca6\u0caf \u0cb5\u0cbf\u0ca6\u0ccd\u0caf\u0cbe\u0cb2\u0caf"
+      }
+    },
+    {
+      "type": "way",
+      "id": 771558694,
+      "center": {
+        "lat": 12.7230509,
+        "lon": 75.895613
+      },
+      "nodes": [
+        7202723442,
+        7202723465,
+        7202723467,
+        7202723466,
+        7202723440,
+        7202723464,
+        7202723463,
+        7202723441,
+        7202723443,
+        7202723448,
+        7202723462,
+        7202723450,
+        7202723445,
+        7202723456,
+        7202723455,
+        7202723458,
+        7202723457,
+        7202723446,
+        7202723451,
+        7202723461,
+        7202723460,
+        7202723459,
+        7202723449,
+        7202723444,
+        7202723454,
+        7202723447,
+        7202723453,
+        7202723452,
+        7202723442
+      ],
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "SH 8, Sanivarasanthe",
+        "addr:postcode": "571235",
+        "addr:state": "Karnataka",
+        "addr:subdistrict": "Somvarpet",
+        "amenity": "hospital",
+        "building": "yes",
+        "name": "Sanivarasanthe Government Hospital",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6 \u0cb6\u0ca8\u0cbf\u0cb5\u0cbe\u0cb0\u0cb8\u0c82\u0ca4\u0cc6",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "way",
+      "id": 771584232,
+      "center": {
+        "lat": 12.495341,
+        "lon": 75.5703086
+      },
+      "nodes": [
+        7202977876,
+        7202977875,
+        7202977866,
+        7202977867,
+        7202977871,
+        7202977870,
+        7202977869,
+        7202977868,
+        7202977873,
+        7202977872,
+        7202977865,
+        7202977874,
+        7202977876
+      ],
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Madikeri-Mangalore Road, Sampaje",
+        "addr:postcode": "574234",
+        "addr:state": "Karnataka",
+        "addr:subdistrict": "Madikeri",
+        "amenity": "hospital",
+        "building": "hospital",
+        "contact:phone": "08272-202193",
+        "healthcare": "hospital",
+        "name": "Sampaje Hospital",
+        "name:kn": "\u0cb8\u0c82\u0caa\u0cbe\u0c9c\u0cc6 \u0c85\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6",
+        "source": "OpenGovernmentData"
+      }
+    },
+    {
+      "type": "way",
+      "id": 808769218,
+      "center": {
+        "lat": 12.2967584,
+        "lon": 75.8746943
+      },
+      "nodes": [
+        7562741272,
+        7562741269,
+        7562741270,
+        7562741271,
+        7562741272
+      ],
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "Siddapura",
+        "addr:postcode": "571253",
+        "addr:state": "Karnataka",
+        "amenity": "hospital",
+        "building": "yes",
+        "name": "Siddapura Public Hospital",
+        "name:kn": "\u0cb8\u0cbf\u0ca6\u0ccd\u0ca6\u0cbe\u0caa\u0cc1\u0cb0 \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6",
+        "source": "Local Knowledge"
+      }
+    },
+    {
+      "type": "way",
+      "id": 1053230051,
+      "center": {
+        "lat": 12.601054,
+        "lon": 75.845679
+      },
+      "nodes": [
+        9679093371,
+        9679093372,
+        9679093373,
+        9679093374,
+        9679093375,
+        9679093376,
+        9679093377,
+        9679093378,
+        9679093380,
+        9679093379,
+        9679093371
+      ],
+      "tags": {
+        "amenity": "community_centre",
+        "building": "yes",
+        "name": "Vokkaliga Samudaya Bhavana",
+        "name:kn": "\u0c92\u0c95\u0ccd\u0c95\u0cb2\u0cbf\u0c97 \u0cb8\u0cae\u0cc1\u0ca6\u0cbe\u0caf \u0cad\u0cb5\u0ca8"
+      }
+    },
+    {
+      "type": "way",
+      "id": 1227720152,
+      "center": {
+        "lat": 12.3189272,
+        "lon": 75.6492683
+      },
+      "nodes": [
+        11384909252,
+        11384909253,
+        11384909254,
+        11384909255,
+        11384909252
+      ],
+      "tags": {
+        "addr:city": "Yemmemadu",
+        "addr:district": "Kodagu",
+        "addr:postcode": "571214",
+        "amenity": "school",
+        "denomination": "sunni",
+        "name": "Nusrathul Islam Madrasa",
+        "name:kn": "\u0ca8\u0cc1\u0cb8\u0ccd\u0cb0\u0ca4\u0cc1\u0cb2\u0ccd \u0c87\u0cb8\u0ccd\u0cb2\u0cbe\u0c82 \u0cae\u0ca6\u0ccd\u0cb0\u0cb8",
+        "religion": "muslim"
+      }
+    },
+    {
+      "type": "way",
+      "id": 1378701483,
+      "center": {
+        "lat": 12.4422027,
+        "lon": 75.7379196
+      },
+      "nodes": [
+        12766524350,
+        12766524349,
+        12766524348,
+        12766524347,
+        12766524346,
+        12766524345,
+        12766524344,
+        12766524343,
+        12766524342,
+        12766524341,
+        12766524340,
+        12766524339,
+        12766524338,
+        12766524337,
+        12766524336,
+        12766524335,
+        12766524334,
+        12766524333,
+        12766524332,
+        12766524331,
+        12766524330,
+        12766524329,
+        12766524328,
+        12766524327,
+        12766524326,
+        12766524325,
+        12766524324,
+        12766524323,
+        12766524322,
+        12766524321,
+        12766524320,
+        12766524319,
+        12766524318,
+        12766524317,
+        12766524316,
+        12766524315,
+        12766524314,
+        12766524350
+      ],
+      "tags": {
+        "amenity": "college",
+        "name": "Kodagu Institute of Medical Sciences"
+      }
+    },
+    {
+      "type": "relation",
+      "id": 10164839,
+      "center": {
+        "lat": 12.4187649,
+        "lon": 75.7424932
+      },
+      "members": [
+        {
+          "type": "way",
+          "ref": 735273518,
+          "role": "inner"
+        },
+        {
+          "type": "way",
+          "ref": 735273516,
+          "role": "inner"
+        },
+        {
+          "type": "way",
+          "ref": 735273517,
+          "role": "outer"
+        }
+      ],
+      "tags": {
+        "addr:district": "Kodagu",
+        "addr:full": "District Hospital, Madikeri, Kodagu District",
+        "addr:postcode": "571201",
+        "addr:state": "Karnataka",
+        "addr:subdistrict": "Madikeri",
+        "amenity": "hospital",
+        "building": "yes",
+        "description": "District Hospital",
+        "emergency": "yes",
+        "name": "Madikeri District Hospital",
+        "name:kn": "\u0cb8\u0cb0\u0ccd\u0c95\u0cbe\u0cb0\u0cbf \u0c86\u0cb8\u0ccd\u0caa\u0ca4\u0ccd\u0cb0\u0cc6",
+        "source": "OpenGovernmentData",
+        "type": "multipolygon"
+      }
+    }
+  ]
+}

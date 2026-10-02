@@ -11,7 +11,12 @@ class Repository:
             "habitations": {},
             "shelters": {},
             "resources": {},
-            "observations": {}
+            "observations": {},
+            "roads": {},
+            "graph_nodes": {},
+            "graph_edges": {},
+            "network_access": {},
+            "facilities": {}
         }
         
         if self.db_url:
@@ -133,6 +138,97 @@ class Repository:
                             source_dataset VARCHAR(100),
                             source_type VARCHAR(50),
                             data_status VARCHAR(50) DEFAULT 'REAL'
+                        )
+                    """)
+
+                    # Roads Table
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS roads (
+                            id VARCHAR(50) PRIMARY KEY,
+                            name VARCHAR(255),
+                            highway_class VARCHAR(100),
+                            geometry JSONB,
+                            surface VARCHAR(100),
+                            bridge BOOLEAN,
+                            is_oneway BOOLEAN,
+                            access VARCHAR(100),
+                            maxspeed VARCHAR(50),
+                            source_name VARCHAR(100),
+                            source_url VARCHAR(255),
+                            source_dataset VARCHAR(100),
+                            source_type VARCHAR(50),
+                            data_status VARCHAR(50) DEFAULT 'REAL',
+                            observation_time TIMESTAMP
+                        )
+                    """)
+
+                    # Graph Nodes Table
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS graph_nodes (
+                            id VARCHAR(50) PRIMARY KEY,
+                            lat FLOAT,
+                            lng FLOAT,
+                            source_name VARCHAR(100),
+                            source_type VARCHAR(50),
+                            data_status VARCHAR(50) DEFAULT 'REAL'
+                        )
+                    """)
+
+                    # Graph Edges Table
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS graph_edges (
+                            id VARCHAR(50) PRIMARY KEY,
+                            from_node VARCHAR(50) REFERENCES graph_nodes(id),
+                            to_node VARCHAR(50) REFERENCES graph_nodes(id),
+                            osm_way_id VARCHAR(50),
+                            name VARCHAR(255),
+                            highway_class VARCHAR(100),
+                            geometry JSONB,
+                            length_m FLOAT,
+                            surface VARCHAR(100),
+                            bridge BOOLEAN,
+                            is_oneway BOOLEAN,
+                            access VARCHAR(100),
+                            maxspeed VARCHAR(50),
+                            source_name VARCHAR(100),
+                            source_type VARCHAR(50),
+                            data_status VARCHAR(50) DEFAULT 'REAL'
+                        )
+                    """)
+
+                    # Network Access Table (Derived Relationship)
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS network_access (
+                            id VARCHAR(100) PRIMARY KEY,
+                            entity_id VARCHAR(50),
+                            entity_type VARCHAR(50),
+                            graph_node_id VARCHAR(50) REFERENCES graph_nodes(id),
+                            access_distance_m FLOAT,
+                            component_id VARCHAR(50),
+                            is_operational BOOLEAN,
+                            connection_method VARCHAR(100),
+                            source_type VARCHAR(50) DEFAULT 'DERIVED',
+                            data_status VARCHAR(50) DEFAULT 'DERIVED'
+                        )
+                    """)
+
+                    # Facilities Table (REAL PHYSICAL CANDIDATES)
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS facilities (
+                            id VARCHAR(50) PRIMARY KEY,
+                            osm_element_id VARCHAR(50),
+                            name VARCHAR(255),
+                            district VARCHAR(100),
+                            taluk VARCHAR(100),
+                            lat FLOAT,
+                            lng FLOAT,
+                            facility_type VARCHAR(100),
+                            source_name VARCHAR(100),
+                            source_url VARCHAR(255),
+                            source_dataset VARCHAR(100),
+                            source_type VARCHAR(50),
+                            data_status VARCHAR(50) DEFAULT 'REAL',
+                            observation_time TIMESTAMP
                         )
                     """)
                 conn.commit()
@@ -576,6 +672,333 @@ class Repository:
 
     def get_observations_by_parameter(self, parameter_name):
         return self.get_observations(parameter_name=parameter_name)
+
+    def upsert_road(self, road):
+        if not isinstance(road, dict) or not road.get("id"):
+            raise ValueError("Road record must be a dict containing a unique 'id' field.")
+
+        formatted = {
+            "id": road["id"],
+            "name": road.get("name"),
+            "highway_class": road.get("highway_class") or road.get("highwayClass"),
+            "geometry": road.get("geometry"),
+            "surface": road.get("surface"),
+            "bridge": road.get("bridge"),
+            "is_oneway": road.get("is_oneway") or road.get("isOneway"),
+            "access": road.get("access"),
+            "maxspeed": road.get("maxspeed"),
+            "source_name": road.get("source_name") or road.get("sourceName"),
+            "source_url": road.get("source_url") or road.get("sourceUrl"),
+            "source_dataset": road.get("source_dataset") or road.get("sourceDataset"),
+            "source_type": road.get("source_type") or road.get("sourceType"),
+            "data_status": road.get("data_status") or road.get("dataStatus") or "REAL",
+            "observation_time": road.get("observation_time") or road.get("observationTime")
+        }
+
+        if self.in_memory:
+            self.memory_store["roads"][road["id"]] = formatted
+            return dict(formatted)
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO roads (
+                        id, name, highway_class, geometry, surface, bridge, is_oneway, access,
+                        maxspeed, source_name, source_url, source_dataset, source_type, data_status, observation_time
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        name = EXCLUDED.name,
+                        highway_class = EXCLUDED.highway_class,
+                        geometry = EXCLUDED.geometry,
+                        surface = EXCLUDED.surface,
+                        bridge = EXCLUDED.bridge,
+                        is_oneway = EXCLUDED.is_oneway,
+                        access = EXCLUDED.access,
+                        maxspeed = EXCLUDED.maxspeed,
+                        source_name = EXCLUDED.source_name,
+                        source_url = EXCLUDED.source_url,
+                        source_dataset = EXCLUDED.source_dataset,
+                        source_type = EXCLUDED.source_type,
+                        data_status = EXCLUDED.data_status,
+                        observation_time = EXCLUDED.observation_time
+                """, (
+                    formatted["id"], formatted["name"], formatted["highway_class"], Json(formatted["geometry"]) if formatted["geometry"] else None,
+                    formatted["surface"], formatted["bridge"], formatted["is_oneway"], formatted["access"],
+                    formatted["maxspeed"], formatted["source_name"], formatted["source_url"],
+                    formatted["source_dataset"], formatted["source_type"], formatted["data_status"],
+                    formatted["observation_time"]
+                ))
+            conn.commit()
+        return dict(formatted)
+
+    def get_all_roads(self):
+        if self.in_memory:
+            return list(self.memory_store["roads"].values())
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM roads")
+                rows = cur.fetchall()
+                res = []
+                for r in rows:
+                    res.append({
+                        "id": r["id"],
+                        "name": r["name"],
+                        "highway_class": r["highway_class"],
+                        "geometry": r["geometry"],
+                        "surface": r["surface"],
+                        "bridge": r["bridge"],
+                        "is_oneway": r["is_oneway"],
+                        "access": r["access"],
+                        "maxspeed": r["maxspeed"],
+                        "source_name": r["source_name"],
+                        "source_url": r["source_url"],
+                        "source_dataset": r["source_dataset"],
+                        "source_type": r["source_type"],
+                        "data_status": r["data_status"],
+                        "observation_time": str(r["observation_time"]) if r.get("observation_time") else None
+                    })
+                return res
+
+    def upsert_graph_node(self, node):
+        if not isinstance(node, dict) or not node.get("id"):
+            raise ValueError("Graph node must have an 'id'")
+            
+        formatted = {
+            "id": node["id"],
+            "lat": node.get("lat"),
+            "lng": node.get("lng"),
+            "source_name": node.get("source_name", "OpenStreetMap"),
+            "source_type": node.get("source_type", "OPEN_GEO"),
+            "data_status": node.get("data_status", "REAL")
+        }
+        
+        if self.in_memory:
+            self.memory_store["graph_nodes"][node["id"]] = formatted
+            return formatted
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO graph_nodes (id, lat, lng, source_name, source_type, data_status)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        lat = EXCLUDED.lat,
+                        lng = EXCLUDED.lng
+                """, (
+                    formatted["id"], formatted["lat"], formatted["lng"],
+                    formatted["source_name"], formatted["source_type"], formatted["data_status"]
+                ))
+            conn.commit()
+        return formatted
+
+    def upsert_graph_edge(self, edge):
+        if not isinstance(edge, dict) or not edge.get("id"):
+            raise ValueError("Graph edge must have an 'id'")
+            
+        formatted = {
+            "id": edge["id"],
+            "from_node": edge.get("from_node"),
+            "to_node": edge.get("to_node"),
+            "osm_way_id": edge.get("osm_way_id"),
+            "name": edge.get("name"),
+            "highway_class": edge.get("highway_class"),
+            "geometry": edge.get("geometry"),
+            "length_m": edge.get("length_m"),
+            "surface": edge.get("surface"),
+            "bridge": edge.get("bridge"),
+            "is_oneway": edge.get("is_oneway"),
+            "access": edge.get("access"),
+            "maxspeed": edge.get("maxspeed"),
+            "source_name": edge.get("source_name", "OpenStreetMap"),
+            "source_type": edge.get("source_type", "OPEN_GEO"),
+            "data_status": edge.get("data_status", "REAL")
+        }
+        
+        if self.in_memory:
+            self.memory_store["graph_edges"][edge["id"]] = formatted
+            return formatted
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO graph_edges (
+                        id, from_node, to_node, osm_way_id, name, highway_class,
+                        geometry, length_m, surface, bridge, is_oneway, access,
+                        maxspeed, source_name, source_type, data_status
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        from_node = EXCLUDED.from_node,
+                        to_node = EXCLUDED.to_node,
+                        osm_way_id = EXCLUDED.osm_way_id,
+                        name = EXCLUDED.name,
+                        highway_class = EXCLUDED.highway_class,
+                        geometry = EXCLUDED.geometry,
+                        length_m = EXCLUDED.length_m,
+                        surface = EXCLUDED.surface,
+                        bridge = EXCLUDED.bridge,
+                        is_oneway = EXCLUDED.is_oneway,
+                        access = EXCLUDED.access,
+                        maxspeed = EXCLUDED.maxspeed
+                """, (
+                    formatted["id"], formatted["from_node"], formatted["to_node"], formatted["osm_way_id"],
+                    formatted["name"], formatted["highway_class"], Json(formatted["geometry"]) if formatted["geometry"] else None,
+                    formatted["length_m"], formatted["surface"], formatted["bridge"], formatted["is_oneway"],
+                    formatted["access"], formatted["maxspeed"], formatted["source_name"],
+                    formatted["source_type"], formatted["data_status"]
+                ))
+            conn.commit()
+        return formatted
+
+    def get_all_graph_nodes(self):
+        if self.in_memory:
+            return list(self.memory_store["graph_nodes"].values())
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM graph_nodes")
+                return [dict(r) for r in cur.fetchall()]
+
+    def get_all_graph_edges(self):
+        if self.in_memory:
+            return list(self.memory_store["graph_edges"].values())
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM graph_edges")
+                return [dict(r) for r in cur.fetchall()]
+
+    def upsert_network_access(self, access):
+        if not isinstance(access, dict) or not access.get("id"):
+            raise ValueError("Network access record must have an 'id'")
+            
+        formatted = {
+            "id": access["id"],
+            "entity_id": access.get("entity_id"),
+            "entity_type": access.get("entity_type"),
+            "graph_node_id": access.get("graph_node_id"),
+            "access_distance_m": access.get("access_distance_m"),
+            "component_id": access.get("component_id"),
+            "is_operational": access.get("is_operational"),
+            "connection_method": access.get("connection_method"),
+            "source_type": access.get("source_type", "DERIVED"),
+            "data_status": access.get("data_status", "DERIVED")
+        }
+        
+        if self.in_memory:
+            self.memory_store["network_access"][access["id"]] = formatted
+            return formatted
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO network_access (
+                        id, entity_id, entity_type, graph_node_id, access_distance_m,
+                        component_id, is_operational, connection_method, source_type, data_status
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        entity_id = EXCLUDED.entity_id,
+                        entity_type = EXCLUDED.entity_type,
+                        graph_node_id = EXCLUDED.graph_node_id,
+                        access_distance_m = EXCLUDED.access_distance_m,
+                        component_id = EXCLUDED.component_id,
+                        is_operational = EXCLUDED.is_operational,
+                        connection_method = EXCLUDED.connection_method,
+                        source_type = EXCLUDED.source_type,
+                        data_status = EXCLUDED.data_status
+                """, (
+                    formatted["id"], formatted["entity_id"], formatted["entity_type"],
+                    formatted["graph_node_id"], formatted["access_distance_m"],
+                    formatted["component_id"], formatted["is_operational"],
+                    formatted["connection_method"], formatted["source_type"], formatted["data_status"]
+                ))
+            conn.commit()
+        return formatted
+
+    def get_all_network_access(self):
+        if self.in_memory:
+            return list(self.memory_store["network_access"].values())
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM network_access")
+                return [dict(r) for r in cur.fetchall()]
+
+    def upsert_facility(self, facility):
+        if not isinstance(facility, dict) or not facility.get("id"):
+            raise ValueError("Facility must have an 'id'")
+            
+        formatted = {
+            "id": facility["id"],
+            "osm_element_id": facility.get("osm_element_id"),
+            "name": facility.get("name"),
+            "district": facility.get("district", "Kodagu"),
+            "taluk": facility.get("taluk"),
+            "lat": facility.get("lat"),
+            "lng": facility.get("lng"),
+            "facility_type": facility.get("facility_type"),
+            "source_name": facility.get("source_name", "OpenStreetMap"),
+            "source_url": facility.get("source_url"),
+            "source_dataset": facility.get("source_dataset"),
+            "source_type": facility.get("source_type", "OPEN_GEO"),
+            "data_status": facility.get("data_status", "REAL"),
+            "observation_time": facility.get("observation_time")
+        }
+        
+        if self.in_memory:
+            self.memory_store["facilities"][facility["id"]] = formatted
+            return formatted
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO facilities (
+                        id, osm_element_id, name, district, taluk, lat, lng,
+                        facility_type, source_name, source_url, source_dataset,
+                        source_type, data_status, observation_time
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        name = EXCLUDED.name,
+                        district = EXCLUDED.district,
+                        taluk = EXCLUDED.taluk,
+                        lat = EXCLUDED.lat,
+                        lng = EXCLUDED.lng,
+                        facility_type = EXCLUDED.facility_type,
+                        source_url = EXCLUDED.source_url,
+                        observation_time = EXCLUDED.observation_time
+                """, (
+                    formatted["id"], formatted["osm_element_id"], formatted["name"],
+                    formatted["district"], formatted["taluk"], formatted["lat"], formatted["lng"],
+                    formatted["facility_type"], formatted["source_name"], formatted["source_url"],
+                    formatted["source_dataset"], formatted["source_type"], formatted["data_status"],
+                    formatted["observation_time"]
+                ))
+            conn.commit()
+        return formatted
+
+    def get_all_facilities(self):
+        if self.in_memory:
+            return list(self.memory_store["facilities"].values())
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM facilities")
+                rows = cur.fetchall()
+                res = []
+                for r in rows:
+                    res.append({
+                        "id": r["id"],
+                        "osm_element_id": r["osm_element_id"],
+                        "name": r["name"],
+                        "district": r["district"],
+                        "taluk": r["taluk"],
+                        "lat": r["lat"],
+                        "lng": r["lng"],
+                        "facility_type": r["facility_type"],
+                        "source_name": r["source_name"],
+                        "source_url": r["source_url"],
+                        "source_dataset": r["source_dataset"],
+                        "source_type": r["source_type"],
+                        "data_status": r["data_status"],
+                        "observation_time": str(r["observation_time"]) if r.get("observation_time") else None
+                    })
+                return res
 
 # Singleton repository
 repo = Repository()
