@@ -57,6 +57,7 @@ class Repository:
                             code VARCHAR(50),
                             district VARCHAR(100),
                             region VARCHAR(100),
+                            region_type VARCHAR(50) DEFAULT 'RESQ_DERIVED',
                             taluk VARCHAR(100),
                             lat FLOAT,
                             lng FLOAT,
@@ -78,9 +79,19 @@ class Repository:
                             source_url VARCHAR(255),
                             source_dataset VARCHAR(100),
                             source_type VARCHAR(50),
+                            coordinate_source_name VARCHAR(100),
+                            coordinate_source_url VARCHAR(255),
+                            coordinate_source_dataset VARCHAR(100),
+                            coordinate_source_type VARCHAR(50),
                             data_status VARCHAR(50) DEFAULT 'DEMO'
                         )
                     """)
+                    # Ensure additive columns exist on pre-existing tables
+                    cur.execute("ALTER TABLE habitations ADD COLUMN IF NOT EXISTS region_type VARCHAR(50) DEFAULT 'RESQ_DERIVED';")
+                    cur.execute("ALTER TABLE habitations ADD COLUMN IF NOT EXISTS coordinate_source_name VARCHAR(100);")
+                    cur.execute("ALTER TABLE habitations ADD COLUMN IF NOT EXISTS coordinate_source_url VARCHAR(255);")
+                    cur.execute("ALTER TABLE habitations ADD COLUMN IF NOT EXISTS coordinate_source_dataset VARCHAR(100);")
+                    cur.execute("ALTER TABLE habitations ADD COLUMN IF NOT EXISTS coordinate_source_type VARCHAR(50);")
 
                     # Hazard Details Table (1:1 with habitations)
                     cur.execute("""
@@ -285,6 +296,11 @@ class Repository:
             "source_url": hab.get("source_url") or hab.get("sourceUrl"),
             "source_dataset": hab.get("source_dataset") or hab.get("sourceDataset"),
             "source_type": hab.get("source_type") or hab.get("sourceType"),
+            "region_type": hab.get("region_type") or hab.get("regionType") or "RESQ_DERIVED",
+            "coordinate_source_name": hab.get("coordinate_source_name") or hab.get("coordinateSourceName"),
+            "coordinate_source_url": hab.get("coordinate_source_url") or hab.get("coordinateSourceUrl"),
+            "coordinate_source_dataset": hab.get("coordinate_source_dataset") or hab.get("coordinateSourceDataset"),
+            "coordinate_source_type": hab.get("coordinate_source_type") or hab.get("coordinateSourceType"),
             "data_status": hab.get("data_status") or hab.get("dataStatus") or "DEMO",
             "hazardDetails": hab.get("hazardDetails") or {}
         }
@@ -293,6 +309,11 @@ class Repository:
         formatted["sourceUrl"] = formatted["source_url"]
         formatted["sourceDataset"] = formatted["source_dataset"]
         formatted["sourceType"] = formatted["source_type"]
+        formatted["regionType"] = formatted["region_type"]
+        formatted["coordinateSourceName"] = formatted["coordinate_source_name"]
+        formatted["coordinateSourceUrl"] = formatted["coordinate_source_url"]
+        formatted["coordinateSourceDataset"] = formatted["coordinate_source_dataset"]
+        formatted["coordinateSourceType"] = formatted["coordinate_source_type"]
 
         if self.in_memory:
             self.memory_store["habitations"][hab["id"]] = formatted
@@ -302,17 +323,20 @@ class Repository:
             with conn.cursor() as cur:
                 cur.execute("""
                     INSERT INTO habitations (
-                        id, name, code, district, region, taluk, lat, lng, population,
+                        id, name, code, district, region, region_type, taluk, lat, lng, population,
                         affected_population, elderly, children, medical_priority, hazard_type,
                         hazard_level, assigned_shelter_id, distance_to_shelter_km, relocation_status,
                         evacuation_progress, road_condition, priority, response_status,
-                        source_name, source_url, source_dataset, source_type, data_status
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        source_name, source_url, source_dataset, source_type,
+                        coordinate_source_name, coordinate_source_url, coordinate_source_dataset, coordinate_source_type,
+                        data_status
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (id) DO UPDATE SET
                         name = EXCLUDED.name,
                         code = EXCLUDED.code,
                         district = EXCLUDED.district,
                         region = EXCLUDED.region,
+                        region_type = EXCLUDED.region_type,
                         taluk = EXCLUDED.taluk,
                         lat = EXCLUDED.lat,
                         lng = EXCLUDED.lng,
@@ -321,16 +345,22 @@ class Repository:
                         source_url = EXCLUDED.source_url,
                         source_dataset = EXCLUDED.source_dataset,
                         source_type = EXCLUDED.source_type,
+                        coordinate_source_name = EXCLUDED.coordinate_source_name,
+                        coordinate_source_url = EXCLUDED.coordinate_source_url,
+                        coordinate_source_dataset = EXCLUDED.coordinate_source_dataset,
+                        coordinate_source_type = EXCLUDED.coordinate_source_type,
                         data_status = EXCLUDED.data_status
                 """, (
                     formatted["id"], formatted["name"], formatted["code"], formatted["district"],
-                    formatted["region"], formatted["taluk"], formatted["lat"], formatted["lng"],
+                    formatted["region"], formatted["region_type"], formatted["taluk"], formatted["lat"], formatted["lng"],
                     formatted["population"], formatted["affectedPopulation"], formatted["elderly"],
                     formatted["children"], formatted["medicalPriority"], formatted["hazardType"],
                     formatted["hazardLevel"], formatted["assignedShelterId"], formatted["distanceToShelterKm"],
                     formatted["relocationStatus"], formatted["evacuationProgress"], formatted["roadCondition"],
                     formatted["priority"], formatted["responseStatus"], formatted["source_name"],
                     formatted["source_url"], formatted["source_dataset"], formatted["source_type"],
+                    formatted["coordinate_source_name"], formatted["coordinate_source_url"],
+                    formatted["coordinate_source_dataset"], formatted["coordinate_source_type"],
                     formatted["data_status"]
                 ))
             conn.commit()

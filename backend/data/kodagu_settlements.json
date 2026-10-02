@@ -6,6 +6,7 @@
     "district": "Kodagu",
     "taluk": "Madikeri",
     "region": "Central Kodagu Highlands",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.4244,
     "lng": 75.7382,
     "population": 33386,
@@ -13,6 +14,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -22,6 +27,7 @@
     "district": "Kodagu",
     "taluk": "Madikeri",
     "region": "Upper Kaveri Basin",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.3908,
     "lng": 75.5348,
     "population": 2154,
@@ -29,6 +35,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -38,6 +48,7 @@
     "district": "Kodagu",
     "taluk": "Madikeri",
     "region": "Kaveri River Plain",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.3384,
     "lng": 75.7876,
     "population": 3820,
@@ -45,6 +56,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -54,6 +69,7 @@
     "district": "Kodagu",
     "taluk": "Madikeri",
     "region": "Kaveri Basin Lowlands",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.3021,
     "lng": 75.6987,
     "population": 3180,
@@ -61,6 +77,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -70,6 +90,7 @@
     "district": "Kodagu",
     "taluk": "Madikeri",
     "region": "Northern Madikeri Slopes",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.4789,
     "lng": 75.7192,
     "population": 1840,
@@ -77,6 +98,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -86,6 +111,7 @@
     "district": "Kodagu",
     "taluk": "Madikeri",
     "region": "Madikeri North Ridge",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.4512,
     "lng": 75.7015,
     "population": 1420,
@@ -93,6 +119,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -102,6 +132,7 @@
     "district": "Kodagu",
     "taluk": "Somwarpet",
     "region": "North Kodagu Plateau",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.5982,
     "lng": 75.8643,
     "population": 7218,
@@ -109,6 +140,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -118,6 +153,7 @@
     "district": "Kodagu",
     "taluk": "Somwarpet",
     "region": "Eastern Kaveri Border Plain",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.459,
     "lng": 75.961,
     "population": 15326,
@@ -125,6 +161,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -134,6 +174,7 @@
     "district": "Kodagu",
     "taluk": "Somwarpet",
     "region": "Central Somwarpet Coffee Belt",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.4831,
     "lng": 75.834,
     "population": 6410,
@@ -141,6 +182,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -150,6 +195,7 @@
     "district": "Kodagu",
     "taluk": "Somwarpet",
     "region": "Northern Border Foothills",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.7523,
     "lng": 75.9189,
     "population": 3120,
@@ -157,6 +203,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -166,6 +216,7 @@
     "district": "Kodagu",
     "taluk": "Somwarpet",
     "region": "Kushalnagar North Hinterland",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.4721,
     "lng": 75.8942,
     "population": 2150,
@@ -173,6 +224,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -182,6 +237,7 @@
     "district": "Kodagu",
     "taluk": "Virajpet",
     "region": "South Kodagu Valley",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.1972,
     "lng": 75.8042,
     "population": 17246,
@@ -189,6 +245,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -198,6 +258,7 @@
     "district": "Kodagu",
     "taluk": "Virajpet",
     "region": "South-Eastern Commercial Corridor",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.1812,
     "lng": 75.9234,
     "population": 7320,
@@ -205,6 +266,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -214,6 +279,7 @@
     "district": "Kodagu",
     "taluk": "Virajpet",
     "region": "Southern Agricultural Zone",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.1465,
     "lng": 75.9412,
     "population": 6840,
@@ -221,6 +287,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -230,6 +300,7 @@
     "district": "Kodagu",
     "taluk": "Virajpet",
     "region": "Brahmagiri Slopes Corridor",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.0621,
     "lng": 75.9734,
     "population": 2940,
@@ -237,6 +308,10 @@
     "source_url": "https://censusindia.gov.in",
     "source_dataset": "District Census Handbook - Kodagu (Census 2011)",
     "source_type": "CENSUS",
+    "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan / NRDMS GIS",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   },
   {
@@ -246,6 +321,7 @@
     "district": "Kodagu",
     "taluk": "Virajpet",
     "region": "Western Slope Foothills",
+    "region_type": "RESQ_DERIVED",
     "lat": 12.1245,
     "lng": 75.821,
     "population": null,
@@ -253,6 +329,10 @@
     "source_url": "https://www.openstreetmap.org",
     "source_dataset": "OSM Settlement Node Survey",
     "source_type": "OSM",
+    "coordinate_source_name": "OpenStreetMap & KSDMA Survey",
+    "coordinate_source_url": "https://www.openstreetmap.org",
+    "coordinate_source_dataset": "OSM Settlement Node Survey",
+    "coordinate_source_type": "OSM",
     "data_status": "REAL"
   }
 ]

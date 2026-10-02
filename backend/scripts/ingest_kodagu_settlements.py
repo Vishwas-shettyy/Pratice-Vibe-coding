@@ -35,6 +35,10 @@ REQUIRED_FIELDS = [
     "source_url",
     "source_dataset",
     "source_type",
+    "coordinate_source_name",
+    "coordinate_source_url",
+    "coordinate_source_dataset",
+    "coordinate_source_type",
     "data_status",
 ]
 
@@ -95,7 +99,15 @@ def validate_settlement_record(record: dict) -> tuple[bool, str]:
     if not source_name or not source_url or not source_dataset:
         return False, "Incomplete source provenance (source_name, source_url, and source_dataset required)"
 
-    # 6. Population validation (if present, must be non-negative int; or None/null)
+    # 6. Coordinate provenance validation
+    coord_src_type = str(record.get("coordinate_source_type")).strip().upper()
+    if coord_src_type not in VALID_SOURCE_TYPES:
+        return False, f"Invalid coordinate_source_type '{coord_src_type}'; MUST be one of {VALID_SOURCE_TYPES}"
+
+    if source_type == "CENSUS" and coord_src_type == "CENSUS":
+        return False, "Census cannot be claimed as coordinate_source_type for WGS84 point coordinates (must specify GIS/OSM gazetteer)"
+
+    # 7. Population validation (if present, must be non-negative int; or None/null)
     pop = record.get("population")
     if pop is not None:
         if not isinstance(pop, int) or pop < 0:

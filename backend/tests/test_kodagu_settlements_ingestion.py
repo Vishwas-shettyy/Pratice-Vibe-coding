@@ -53,6 +53,8 @@ class TestKodaguSettlementIngestion(unittest.TestCase):
             "name": "Bhagamandala",
             "district": "Kodagu",
             "taluk": "Madikeri",
+            "region": "Upper Kaveri Basin",
+            "region_type": "RESQ_DERIVED",
             "lat": 12.3908,
             "lng": 75.5348,
             "population": 2154,
@@ -60,6 +62,10 @@ class TestKodaguSettlementIngestion(unittest.TestCase):
             "source_url": "https://censusindia.gov.in",
             "source_dataset": "District Census Handbook - Kodagu",
             "source_type": "CENSUS",
+            "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan",
+            "coordinate_source_url": "https://www.openstreetmap.org",
+            "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+            "coordinate_source_type": "OSM",
             "data_status": "REAL",
         }
         is_valid, reason = validate_settlement_record(valid_rec)
@@ -79,6 +85,10 @@ class TestKodaguSettlementIngestion(unittest.TestCase):
             "source_url": "https://censusindia.gov.in",
             "source_dataset": "District Census Handbook - Kodagu",
             "source_type": "CENSUS",
+            "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan",
+            "coordinate_source_url": "https://www.openstreetmap.org",
+            "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+            "coordinate_source_type": "OSM",
             "data_status": "REAL",
         }
         is_valid, reason = validate_settlement_record(bad_district_rec)
@@ -100,6 +110,10 @@ class TestKodaguSettlementIngestion(unittest.TestCase):
             "source_url": "https://censusindia.gov.in",
             "source_dataset": "District Census Handbook",
             "source_type": "CENSUS",
+            "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan",
+            "coordinate_source_url": "https://www.openstreetmap.org",
+            "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+            "coordinate_source_type": "OSM",
             "data_status": "REAL",
         }
         is_valid, reason = validate_settlement_record(bad_lat_rec)
@@ -127,6 +141,10 @@ class TestKodaguSettlementIngestion(unittest.TestCase):
             "source_url": "",  # Empty URL
             "source_dataset": "District Census Handbook",
             "source_type": "CENSUS",
+            "coordinate_source_name": "OpenStreetMap & ISRO Bhuvan",
+            "coordinate_source_url": "https://www.openstreetmap.org",
+            "coordinate_source_dataset": "OSM / Bhuvan Settlement Gazetteer",
+            "coordinate_source_type": "OSM",
             "data_status": "REAL",
         }
         is_valid, reason = validate_settlement_record(no_url_rec)
@@ -138,6 +156,31 @@ class TestKodaguSettlementIngestion(unittest.TestCase):
         is_valid, reason = validate_settlement_record(demo_status_rec)
         self.assertFalse(is_valid)
         self.assertIn("MUST be 'REAL'", reason)
+
+    def test_coordinate_provenance_validation(self):
+        # Incorrectly claiming Census as coordinate_source_type for WGS84 decimal point coordinates
+        false_census_coord_rec = {
+            "id": "SET-TEST-05",
+            "code": "603204",
+            "name": "Bhagamandala",
+            "district": "Kodagu",
+            "taluk": "Madikeri",
+            "lat": 12.3908,
+            "lng": 75.5348,
+            "population": 2154,
+            "source_name": "Census of India 2011",
+            "source_url": "https://censusindia.gov.in",
+            "source_dataset": "District Census Handbook",
+            "source_type": "CENSUS",
+            "coordinate_source_name": "Census of India 2011",
+            "coordinate_source_url": "https://censusindia.gov.in",
+            "coordinate_source_dataset": "District Census Handbook",
+            "coordinate_source_type": "CENSUS",  # False claim: Census does not publish decimal GPS point coords
+            "data_status": "REAL",
+        }
+        is_valid, reason = validate_settlement_record(false_census_coord_rec)
+        self.assertFalse(is_valid)
+        self.assertIn("Census cannot be claimed as coordinate_source_type", reason)
 
     def test_missing_population_handling(self):
         # Record with null/None population (e.g. Kottai Settlement)
@@ -154,6 +197,10 @@ class TestKodaguSettlementIngestion(unittest.TestCase):
             "source_url": "https://www.openstreetmap.org",
             "source_dataset": "OSM Settlement Node Survey",
             "source_type": "OSM",
+            "coordinate_source_name": "OpenStreetMap & KSDMA Survey",
+            "coordinate_source_url": "https://www.openstreetmap.org",
+            "coordinate_source_dataset": "OSM Settlement Node Survey",
+            "coordinate_source_type": "OSM",
             "data_status": "REAL",
         }
         is_valid, reason = validate_settlement_record(null_pop_rec)
@@ -213,7 +260,29 @@ class TestKodaguSettlementIngestion(unittest.TestCase):
             self.assertIsNotNone(rh.get("source_name"))
             self.assertIsNotNone(rh.get("source_url"))
             self.assertIsNotNone(rh.get("source_dataset"))
-            self.assertIn(rh.get("source_type"), ["CENSUS", "GOVERNMENT", "OSM", "KSDMA"])
+            self.assertIsNotNone(rh.get("coordinate_source_name"))
+            self.assertIsNotNone(rh.get("coordinate_source_url"))
+            self.assertIsNotNone(rh.get("coordinate_source_dataset"))
+            self.assertIsNotNone(rh.get("coordinate_source_type"))
+            self.assertEqual(rh.get("region_type"), "RESQ_DERIVED")
+
+            # Records 1-15 (Census source) must have OSM/GIS coordinate source type
+            if rh.get("source_type") == "CENSUS":
+                self.assertNotEqual(rh.get("coordinate_source_type"), "CENSUS")
+                self.assertIn(rh.get("coordinate_source_type"), ["OSM", "GOVERNMENT", "KSDMA"])
+
+    def test_kottai_remains_osm_sourced_and_null_pop(self):
+        json_path = backend_dir / "data" / "kodagu_settlements.json"
+        ingest_kodagu_settlements(json_path=json_path, repo=self.repo)
+
+        habs = {h["id"]: h for h in self.repo.get_all_habitations()}
+        kottai = habs.get("SET-KOD-VIR-05")
+
+        self.assertIsNotNone(kottai)
+        self.assertEqual(kottai["name"], "Kottai Settlement")
+        self.assertEqual(kottai["source_type"], "OSM")
+        self.assertEqual(kottai["coordinate_source_type"], "OSM")
+        self.assertIsNone(kottai["population"])
 
 
 if __name__ == "__main__":
