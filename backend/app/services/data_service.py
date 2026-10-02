@@ -341,6 +341,25 @@ class DataService:
             except Exception as e:
                 print(f"⚠️ Failed to auto-seed real observations: {e}")
 
+        # Auto-seed real Kodagu settlements
+        try:
+            settlements_path = os.path.abspath(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    "..",
+                    "..",
+                    "data",
+                    "kodagu_settlements.json",
+                )
+            )
+            if os.path.exists(settlements_path):
+                with open(settlements_path, "r", encoding="utf-8") as f:
+                    settlement_records = json.load(f)
+                    for s in settlement_records:
+                        self.repo.upsert_habitation(s)
+        except Exception as e:
+            print(f"⚠️ Failed to auto-seed real Kodagu settlements: {e}")
+
         # Load state dynamically
         self.alerts = INITIAL_ALERTS  # Alerts can remain mostly dynamic based on current state
 
@@ -359,8 +378,8 @@ class DataService:
     def get_dashboard_stats(self):
         habs = self.habitations
         shelts = self.shelters
-        total_pop = sum(h["population"] for h in habs)
-        affected_pop = sum(h["affectedPopulation"] for h in habs)
+        total_pop = sum((h.get("population") or 0) for h in habs)
+        affected_pop = sum((h.get("affectedPopulation") or 0) for h in habs)
         red_zones = sum(
             1 for h in habs if h.get("riskLevel") in ["CRITICAL", "HIGH"]
         )
@@ -368,7 +387,7 @@ class DataService:
         total_occupied = sum(s["occupied"] for s in shelts)
         surplus_capacity = total_capacity - total_occupied
         relocated_count = sum(
-            int(h["population"] * (h.get("evacuationProgress", 0) / 100))
+            int((h.get("population") or 0) * ((h.get("evacuationProgress") or 0) / 100))
             for h in habs
         )
 

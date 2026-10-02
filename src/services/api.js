@@ -84,6 +84,12 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
+  // Environmental Observations (Real Data Feed)
+  getEnvironmentalObservations: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAPI(`/environmental-observations${query ? `?${query}` : ""}`);
+  },
+
   // Reports
   getReports: () => fetchAPI("/reports"),
 };

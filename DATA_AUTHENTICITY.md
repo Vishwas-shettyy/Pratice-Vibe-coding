@@ -67,3 +67,31 @@ python backend/scripts/ingest_real_data.py
 ```
 
 The script enforces strict data quality validation (Karnataka coordinate bounds, non-negative rainfall checks, ISO timestamps, and mandatory source metadata) and uses idempotent `ON CONFLICT (id) DO UPDATE` database operations.
+
+---
+
+## 6. REAL KODAGU SETTLEMENT DATA (`data_status: "REAL"`)
+
+ResQ includes verified, source-attributed settlement and village records for Kodagu district (`backend/data/kodagu_settlements.json`).
+
+### A. Source Attribution & Coverage
+* **Sources:** Census of India 2011 (District Census Handbook - Kodagu), Karnataka State Disaster Management Authority (KSDMA), and OpenStreetMap (OSM) Node Surveys.
+* **Coverage:** 16 verified settlement and village locations across all three taluks of Kodagu district:
+  - **Madikeri Taluk:** Madikeri Town, Bhagamandala, Murnad, Napoklu, Makkandur, Hebbettageri
+  - **Somwarpet Taluk:** Somwarpet Town, Kushalnagar, Suntikoppa, Shanivarsanthe, Kodagarahalli
+  - **Virajpet Taluk:** Virajpet Town, Gonikoppal, Ponnampet, Hudikeri, Kottai Settlement
+
+### B. Genuine Real Fields vs. Unavailable Operational Fields
+
+| Category | Fields Populated (`REAL`) | Status | Notes |
+| :--- | :--- | :--- | :--- |
+| **Identity & Admin** | `id`, `code`, `name`, `district`, `taluk`, `region` | **GENUINELY REAL** | Verified Census / KSDMA administrative names and codes |
+| **Geographic Location** | `lat`, `lng` | **GENUINELY REAL** | Precise geographic centerpoint coordinates (WGS84) |
+| **Population** | `population` | **GENUINELY REAL / NULL** | Sourced from Census 2011; `NULL` for unverified settlements (e.g., Kottai Settlement) |
+| **Source Provenance** | `source_name`, `source_url`, `source_dataset`, `source_type`, `data_status` | **GENUINELY REAL** | Complete lineage tracking (`CENSUS`, `GOVERNMENT`, `OSM`) |
+| **Vulnerability & Hazard** | `affected_population`, `elderly`, `children`, `medical_priority`, `slope_index`, `flood_risk`, `landslide_risk` | **INTENTIONALLY UNAVAILABLE** | Preserved as `NULL` / unassigned. ResQ does NOT fabricate fake hazard or vulnerability data for real settlements. |
+| **Operational & Status** | `hazard_type`, `hazard_level`, `evacuation_progress`, `road_condition`, `relocation_status`, `response_status` | **INTENTIONALLY UNAVAILABLE** | Preserved as `NULL` / empty fallback until real operational inputs are available. |
+
+> ⚠️ **Risk Assessment Disclaimer:**
+> Real settlement coordinates and population figures do **NOT** imply that these settlements are already fully risk-assessed. ResQ explicitly preserves `NULL` / unassigned values for unavailable hazard and demographic metrics to prevent false risk scoring.
+

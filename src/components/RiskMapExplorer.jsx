@@ -57,6 +57,7 @@ function RiskMapExplorer({
   safeSites = [],
   hazardZones = [],
   evacuationRoutes = [],
+  environmentalObservations = [],
   onSelectHabitation,
   onSelectShelter
 }) {
@@ -65,12 +66,14 @@ function RiskMapExplorer({
     habitations: true,
     safeSites: true,
     routes: true,
+    realObservations: true,
   });
 
   const safeHabitations = Array.isArray(habitations) ? habitations : [];
   const safeSafeSites = Array.isArray(safeSites) ? safeSites : [];
   const safeHazardZones = Array.isArray(hazardZones) ? hazardZones : [];
   const safeRoutes = Array.isArray(evacuationRoutes) ? evacuationRoutes : [];
+  const safeObservations = Array.isArray(environmentalObservations) ? environmentalObservations : [];
 
   const center = [12.2958, 76.6394];
 
@@ -309,10 +312,80 @@ function RiskMapExplorer({
                 </Popup>
               </Marker>
             ))}
+          {/* REAL ENVIRONMENTAL OBSERVATION MARKERS */}
+          {layers.realObservations &&
+            safeObservations.map((obs) => {
+              const paramName = obs.parameter_name || obs.parameterName || obs.parameter;
+              const paramVal = obs.parameter_value ?? obs.parameterValue ?? obs.observed_value;
+              const unit = obs.parameter_unit || obs.parameterUnit || obs.unit || "";
+              const stationName = obs.station_name || obs.stationName || "Observatory";
+              const sourceName = obs.source_name || obs.sourceName || "Government Data";
+              const obsTime = obs.observation_time || obs.observationTime || "";
+
+              let interpText = "REAL OBSERVATION";
+              if (paramName === "RAINFALL_24H_MM") {
+                if (paramVal >= 204.5) interpText = "EXTREMELY HEAVY (IMD)";
+                else if (paramVal >= 115.6) interpText = "VERY HEAVY (IMD)";
+                else if (paramVal >= 64.5) interpText = "HEAVY (IMD)";
+                else if (paramVal >= 15.6) interpText = "MODERATE (IMD)";
+                else interpText = "LIGHT (IMD)";
+              } else if (paramName === "RIVER_STAGE_M") {
+                interpText = "THRESHOLD METADATA REQUIRED (CWC)";
+              } else if (paramName === "RESERVOIR_INFLOW_CUSECS") {
+                interpText = "CONTEXT ONLY (CWC)";
+              } else if (paramName === "TERRAIN_ELEVATION_M") {
+                interpText = "REFERENCE ELEVATION (OSM/BHUVAN)";
+              }
+
+              return (
+                <CircleMarker
+                  key={obs.id || `${obs.lat}-${obs.lng}`}
+                  center={[obs.lat, obs.lng]}
+                  radius={7}
+                  pathOptions={{
+                    color: "#0369a1",
+                    fillColor: "#06b6d4",
+                    fillOpacity: 0.85,
+                    weight: 2,
+                  }}
+                >
+                  <Popup className="risk-map-popup">
+                    <div className="risk-popup-card">
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                        <strong className="risk-popup-title" style={{ color: "#0284c7", margin: 0 }}>{stationName}</strong>
+                        <span className="badge safe" style={{ fontSize: "9px", padding: "2px 4px" }}>REAL DATA</span>
+                      </div>
+                      <div className="risk-popup-row">
+                        <span>Parameter:</span>
+                        <strong>{paramName}</strong>
+                      </div>
+                      <div className="risk-popup-row">
+                        <span>Observed Value:</span>
+                        <strong>{paramVal} {unit}</strong>
+                      </div>
+                      <div className="risk-popup-row">
+                        <span>Interpretation:</span>
+                        <strong style={{ color: "#0284c7" }}>{interpText}</strong>
+                      </div>
+                      <div className="risk-popup-row">
+                        <span>Source:</span>
+                        <strong>{sourceName}</strong>
+                      </div>
+                      {obsTime && (
+                        <div className="risk-popup-row">
+                          <span>Timestamp:</span>
+                          <strong>{obsTime.split("T")[0]}</strong>
+                        </div>
+                      )}
+                    </div>
+                  </Popup>
+                </CircleMarker>
+              );
+            })}
         </MapContainer>
 
         {/* MAP LAYER CONTROLS */}
-        <div style={{ position: "absolute", top: "16px", right: "16px", zIndex: 400, background: "var(--bg-card)", border: "1px solid var(--border-color)", padding: "14px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "10px", minWidth: "220px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+        <div style={{ position: "absolute", top: "16px", right: "16px", zIndex: 400, background: "var(--bg-card)", border: "1px solid var(--border-color)", padding: "14px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "10px", minWidth: "230px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
           <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", paddingBottom: "6px", borderBottom: "1px solid var(--border-color)" }}>GIS Layers</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px", color: "var(--text-primary)", fontWeight: 500 }}>
@@ -330,6 +403,10 @@ function RiskMapExplorer({
             <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px", color: "var(--text-primary)", fontWeight: 500 }}>
               <input type="checkbox" checked={layers.routes} onChange={() => toggleLayer("routes")} style={{ accentColor: "var(--accent-blue)" }} />
               Evacuation Routes
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px", color: "var(--text-primary)", fontWeight: 500 }}>
+              <input type="checkbox" checked={layers.realObservations} onChange={() => toggleLayer("realObservations")} style={{ accentColor: "#06b6d4" }} />
+              Real Environmental Signals ({safeObservations.length})
             </label>
           </div>
         </div>
@@ -351,6 +428,11 @@ function RiskMapExplorer({
           <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>
             <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#10b981", border: "1px solid #065f46" }}></div>
             Low Risk / Safe
+          </div>
+          <div style={{ width: "1px", height: "14px", background: "var(--border-color)" }}></div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>
+            <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#06b6d4", border: "1px solid #0369a1" }}></div>
+            Real Observatory Feed
           </div>
           <div style={{ width: "1px", height: "14px", background: "var(--border-color)" }}></div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>

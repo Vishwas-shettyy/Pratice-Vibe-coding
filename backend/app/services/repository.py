@@ -57,6 +57,7 @@ class Repository:
                             code VARCHAR(50),
                             district VARCHAR(100),
                             region VARCHAR(100),
+                            taluk VARCHAR(100),
                             lat FLOAT,
                             lng FLOAT,
                             population INT,
@@ -72,7 +73,12 @@ class Repository:
                             evacuation_progress INT,
                             road_condition VARCHAR(255),
                             priority VARCHAR(100),
-                            response_status VARCHAR(100)
+                            response_status VARCHAR(100),
+                            source_name VARCHAR(100),
+                            source_url VARCHAR(255),
+                            source_dataset VARCHAR(100),
+                            source_type VARCHAR(50),
+                            data_status VARCHAR(50) DEFAULT 'DEMO'
                         )
                     """)
 
@@ -215,6 +221,7 @@ class Repository:
                         "code": r["code"],
                         "district": r["district"],
                         "region": r["region"],
+                        "taluk": r.get("taluk") if isinstance(r, dict) and "taluk" in r else None,
                         "lat": r["lat"],
                         "lng": r["lng"],
                         "population": r["population"],
@@ -222,15 +229,21 @@ class Repository:
                         "elderly": r["elderly"],
                         "children": r["children"],
                         "medicalPriority": r["medical_priority"],
-                        "hazardType": r["hazard_type"],
-                        "hazardLevel": r["hazard_level"],
+                        "hazardType": r["hazard_type"] or "",
+                        "hazardLevel": r["hazard_level"] or "",
                         "assignedShelterId": r["assigned_shelter_id"],
                         "distanceToShelterKm": r["distance_to_shelter_km"],
-                        "relocationStatus": r["relocation_status"],
+                        "relocationStatus": r["relocation_status"] or "",
                         "evacuationProgress": r["evacuation_progress"],
-                        "roadCondition": r["road_condition"],
-                        "priority": r["priority"],
-                        "responseStatus": r["response_status"],
+                        "roadCondition": r["road_condition"] or "",
+                        "priority": r["priority"] or "",
+                        "responseStatus": r["response_status"] or "",
+                        "source_name": r.get("source_name") if isinstance(r, dict) and "source_name" in r else None,
+                        "source_url": r.get("source_url") if isinstance(r, dict) and "source_url" in r else None,
+                        "source_dataset": r.get("source_dataset") if isinstance(r, dict) and "source_dataset" in r else None,
+                        "source_type": r.get("source_type") if isinstance(r, dict) and "source_type" in r else None,
+                        "data_status": r.get("data_status") if isinstance(r, dict) and "data_status" in r else "DEMO",
+                        "dataStatus": r.get("data_status") if isinstance(r, dict) and "data_status" in r else "DEMO",
                         "hazardDetails": {
                             "slopeIndex": r["slope_index"],
                             "elevation": r["hd_elevation"],
@@ -240,6 +253,88 @@ class Repository:
                         }
                     })
                 return res
+
+    def upsert_habitation(self, hab):
+        if not isinstance(hab, dict) or not hab.get("id"):
+            raise ValueError("Habitation record must be a dict containing a unique 'id' field.")
+
+        formatted = {
+            "id": hab["id"],
+            "name": hab.get("name"),
+            "code": hab.get("code"),
+            "district": hab.get("district"),
+            "region": hab.get("region"),
+            "taluk": hab.get("taluk"),
+            "lat": hab.get("lat"),
+            "lng": hab.get("lng"),
+            "population": hab.get("population"),
+            "affectedPopulation": hab.get("affectedPopulation") if hab.get("affectedPopulation") is not None else hab.get("affected_population"),
+            "elderly": hab.get("elderly"),
+            "children": hab.get("children"),
+            "medicalPriority": hab.get("medicalPriority") if hab.get("medicalPriority") is not None else hab.get("medical_priority"),
+            "hazardType": hab.get("hazardType") or hab.get("hazard_type") or "",
+            "hazardLevel": hab.get("hazardLevel") or hab.get("hazard_level") or "",
+            "assignedShelterId": hab.get("assignedShelterId") or hab.get("assigned_shelter_id"),
+            "distanceToShelterKm": hab.get("distanceToShelterKm") if hab.get("distanceToShelterKm") is not None else hab.get("distance_to_shelter_km"),
+            "relocationStatus": hab.get("relocationStatus") or hab.get("relocation_status") or "",
+            "evacuationProgress": hab.get("evacuationProgress") if hab.get("evacuationProgress") is not None else hab.get("evacuation_progress"),
+            "roadCondition": hab.get("roadCondition") or hab.get("road_condition") or "",
+            "priority": hab.get("priority") or "",
+            "responseStatus": hab.get("responseStatus") or hab.get("response_status") or "",
+            "source_name": hab.get("source_name") or hab.get("sourceName"),
+            "source_url": hab.get("source_url") or hab.get("sourceUrl"),
+            "source_dataset": hab.get("source_dataset") or hab.get("sourceDataset"),
+            "source_type": hab.get("source_type") or hab.get("sourceType"),
+            "data_status": hab.get("data_status") or hab.get("dataStatus") or "DEMO",
+            "hazardDetails": hab.get("hazardDetails") or {}
+        }
+        formatted["dataStatus"] = formatted["data_status"]
+        formatted["sourceName"] = formatted["source_name"]
+        formatted["sourceUrl"] = formatted["source_url"]
+        formatted["sourceDataset"] = formatted["source_dataset"]
+        formatted["sourceType"] = formatted["source_type"]
+
+        if self.in_memory:
+            self.memory_store["habitations"][hab["id"]] = formatted
+            return dict(formatted)
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO habitations (
+                        id, name, code, district, region, taluk, lat, lng, population,
+                        affected_population, elderly, children, medical_priority, hazard_type,
+                        hazard_level, assigned_shelter_id, distance_to_shelter_km, relocation_status,
+                        evacuation_progress, road_condition, priority, response_status,
+                        source_name, source_url, source_dataset, source_type, data_status
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        name = EXCLUDED.name,
+                        code = EXCLUDED.code,
+                        district = EXCLUDED.district,
+                        region = EXCLUDED.region,
+                        taluk = EXCLUDED.taluk,
+                        lat = EXCLUDED.lat,
+                        lng = EXCLUDED.lng,
+                        population = EXCLUDED.population,
+                        source_name = EXCLUDED.source_name,
+                        source_url = EXCLUDED.source_url,
+                        source_dataset = EXCLUDED.source_dataset,
+                        source_type = EXCLUDED.source_type,
+                        data_status = EXCLUDED.data_status
+                """, (
+                    formatted["id"], formatted["name"], formatted["code"], formatted["district"],
+                    formatted["region"], formatted["taluk"], formatted["lat"], formatted["lng"],
+                    formatted["population"], formatted["affectedPopulation"], formatted["elderly"],
+                    formatted["children"], formatted["medicalPriority"], formatted["hazardType"],
+                    formatted["hazardLevel"], formatted["assignedShelterId"], formatted["distanceToShelterKm"],
+                    formatted["relocationStatus"], formatted["evacuationProgress"], formatted["roadCondition"],
+                    formatted["priority"], formatted["responseStatus"], formatted["source_name"],
+                    formatted["source_url"], formatted["source_dataset"], formatted["source_type"],
+                    formatted["data_status"]
+                ))
+            conn.commit()
+        return dict(formatted)
 
     def get_resources(self):
         if self.in_memory:

@@ -61,6 +61,7 @@ function App() {
   const [alerts, setAlerts] = useState(ALERTS_DATA);
   const [recommendations, setRecommendations] = useState([]);
   const [resources, setResources] = useState({});
+  const [environmentalObservations, setEnvironmentalObservations] = useState([]);
   const [latestSimulationResult, setLatestSimulationResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [backendOnline, setBackendOnline] = useState(false);
@@ -71,7 +72,7 @@ function App() {
     try {
       setLoading(true);
       setApiError("");
-      const [backendStats, backendAreas, backendShelters, backendAlerts, backendMap, backendResources, backendRecommendations] = await Promise.all([
+      const [backendStats, backendAreas, backendShelters, backendAlerts, backendMap, backendResources, backendRecommendations, backendObs] = await Promise.all([
         api.getDashboardStats(),
         api.getRiskAreas(),
         api.getShelters(),
@@ -79,6 +80,7 @@ function App() {
         api.getMapData(),
         api.getResources(),
         api.getRecommendations().catch(e => { console.warn("Failed to fetch recommendations", e); return []; }),
+        api.getEnvironmentalObservations().catch(e => { console.warn("Failed to fetch environmental observations", e); return []; }),
       ]);
 
       setStats(normalizeDashboardStats(backendStats));
@@ -86,6 +88,7 @@ function App() {
       setSafeSites(Array.isArray(backendShelters) ? backendShelters : SAFE_SITES_DATA);
       setAlerts(Array.isArray(backendAlerts) ? backendAlerts : ALERTS_DATA);
       setRecommendations(Array.isArray(backendRecommendations) ? backendRecommendations : []);
+      if (Array.isArray(backendObs)) setEnvironmentalObservations(backendObs);
       if (backendMap?.hazardZones) setHazardZones(backendMap.hazardZones);
       if (backendMap?.evacuationRoutes) setEvacuationRoutes(backendMap.evacuationRoutes);
       setResources(backendResources || {});
@@ -100,6 +103,7 @@ function App() {
       setSafeSites(SAFE_SITES_DATA);
       setAlerts(ALERTS_DATA);
       setRecommendations([]);
+      setEnvironmentalObservations([]);
     } finally {
       setLoading(false);
     }
@@ -479,6 +483,7 @@ function App() {
               habitations={habitations}
               safeSites={safeSites}
               recommendations={recommendations}
+              environmentalObservations={environmentalObservations}
               onSelectHabitation={handleInspectHabitation}
               onNavigateToMap={() => setActiveTab("map")}
               onNavigateToPlanner={() => setActiveTab("relocation")}
@@ -494,6 +499,7 @@ function App() {
               safeSites={safeSites}
               hazardZones={hazardZones}
               evacuationRoutes={evacuationRoutes}
+              environmentalObservations={environmentalObservations}
               onSelectHabitation={handleInspectHabitation}
               onSelectShelter={handleInspectShelter}
             />

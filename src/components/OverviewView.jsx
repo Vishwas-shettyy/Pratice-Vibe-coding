@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 
 function OverviewView({
   stats = {},
   habitations = [],
   safeSites = [],
   recommendations = [],
+  environmentalObservations = [],
   onSelectHabitation,
   onNavigateToMap,
   onNavigateToPlanner,
@@ -12,6 +13,12 @@ function OverviewView({
   onNavigateToResources,
   onNavigateToRedZones
 }) {
+  const [selectedDistrict, setSelectedDistrict] = useState("Kodagu");
+
+  const filteredObs = (Array.isArray(environmentalObservations) ? environmentalObservations : []).filter((obs) => {
+    if (selectedDistrict === "ALL") return true;
+    return (obs.district || "").toLowerCase() === selectedDistrict.toLowerCase();
+  });
   const hasHabitations = Array.isArray(habitations) && habitations.length > 0;
   const hasSafeSites = Array.isArray(safeSites) && safeSites.length > 0;
   const safeStats = {
@@ -202,6 +209,123 @@ function OverviewView({
               Launch Relocation Planner
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* REAL ENVIRONMENTAL INTELLIGENCE FEED */}
+      <div className="glass-panel" style={{ display: "flex", flexDirection: "column", padding: "0", overflow: "hidden" }}>
+        <div style={{ padding: "18px 24px", borderBottom: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <h3 style={{ fontSize: "17px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Real Environmental Intelligence</h3>
+              <span className="badge safe" style={{ background: "rgba(16, 185, 129, 0.15)", color: "var(--accent-low)", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
+                REAL DATA FEED
+              </span>
+            </div>
+            <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "3px", margin: 0 }}>
+              Live & source-attributed observations from IMD Hydro-Met, CWC India-WRIS, and OSM/Bhuvan
+            </p>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)" }}>District Filter:</span>
+            <select
+              value={selectedDistrict}
+              onChange={(e) => setSelectedDistrict(e.target.value)}
+              style={{ background: "var(--bg-secondary)", color: "var(--text-primary)", border: "1px solid var(--border-color)", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", outline: "none", cursor: "pointer" }}
+            >
+              <option value="Kodagu">Kodagu (Primary Basin)</option>
+              <option value="Mysuru">Mysuru</option>
+              <option value="Mandya">Mandya</option>
+              <option value="Chamarajanagar">Chamarajanagar</option>
+              <option value="Hassan">Hassan</option>
+              <option value="ALL">All Districts ({environmentalObservations.length})</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={{ padding: "0" }}>
+          {filteredObs.length === 0 ? (
+            <div style={{ padding: "28px 24px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
+              No real environmental observations currently loaded for {selectedDistrict}.
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "0" }}>
+              {filteredObs.slice(0, 6).map((obs, index) => {
+                const paramName = obs.parameter_name || obs.parameterName || obs.parameter;
+                const paramVal = obs.parameter_value ?? obs.parameterValue ?? obs.observed_value;
+                const unit = obs.parameter_unit || obs.parameterUnit || obs.unit || "";
+                const sourceName = obs.source_name || obs.sourceName || "Government Source";
+                const sourceType = obs.source_type || obs.sourceType || "OPEN_DATA";
+                const obsTime = obs.observation_time || obs.observationTime || "2024-07-18";
+                const stationName = obs.station_name || obs.stationName || "Observatory";
+                const district = obs.district || "Karnataka";
+
+                // Format interpretation label
+                let interpLabel = "OBSERVED";
+                let interpBg = "rgba(59, 130, 246, 0.12)";
+                let interpColor = "var(--accent-info)";
+
+                if (paramName === "RAINFALL_24H_MM") {
+                  if (paramVal >= 204.5) { interpLabel = "EXTREMELY HEAVY"; interpColor = "var(--accent-critical)"; interpBg = "rgba(239, 68, 68, 0.15)"; }
+                  else if (paramVal >= 115.6) { interpLabel = "VERY HEAVY"; interpColor = "var(--accent-high)"; interpBg = "rgba(249, 115, 22, 0.15)"; }
+                  else if (paramVal >= 64.5) { interpLabel = "HEAVY"; interpColor = "var(--accent-warning)"; interpBg = "rgba(245, 158, 11, 0.15)"; }
+                  else if (paramVal >= 15.6) { interpLabel = "MODERATE"; interpColor = "var(--accent-info)"; interpBg = "rgba(59, 130, 246, 0.15)"; }
+                  else { interpLabel = "LIGHT"; interpColor = "var(--accent-safe)"; interpBg = "rgba(16, 185, 129, 0.15)"; }
+                } else if (paramName === "RIVER_STAGE_M") {
+                  interpLabel = "THRESHOLD METADATA REQUIRED";
+                  interpColor = "var(--text-secondary)";
+                  interpBg = "rgba(148, 163, 184, 0.12)";
+                } else if (paramName === "RESERVOIR_INFLOW_CUSECS") {
+                  interpLabel = "CONTEXT ONLY";
+                  interpColor = "var(--accent-cyan)";
+                  interpBg = "rgba(6, 182, 212, 0.12)";
+                } else if (paramName === "TERRAIN_ELEVATION_M") {
+                  interpLabel = "REFERENCE ONLY";
+                  interpColor = "var(--text-muted)";
+                  interpBg = "rgba(100, 116, 139, 0.12)";
+                }
+
+                return (
+                  <div
+                    key={obs.id || index}
+                    style={{
+                      padding: "16px 20px",
+                      borderRight: "1px solid var(--border-color)",
+                      borderBottom: "1px solid var(--border-color)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "10px",
+                      background: "var(--bg-card)"
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                        {district} &middot; {paramName}
+                      </span>
+                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 6px", borderRadius: "3px", background: interpBg, color: interpColor }}>
+                        {interpLabel}
+                      </span>
+                    </div>
+
+                    <div>
+                      <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>{stationName}</div>
+                      <div style={{ fontSize: "22px", fontWeight: 800, fontFamily: "var(--font-mono)", color: "var(--text-primary)", marginTop: "4px" }}>
+                        {typeof paramVal === "number" ? paramVal.toLocaleString() : paramVal} <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-muted)" }}>{unit}</span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: "8px", fontSize: "11px", color: "var(--text-muted)", borderTop: "1px solid var(--border-color)" }}>
+                      <span title={sourceName} style={{ fontWeight: 600, color: "var(--text-secondary)" }}>
+                        {sourceName} ({sourceType})
+                      </span>
+                      <span>{obsTime.split("T")[0]}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

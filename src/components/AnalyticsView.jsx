@@ -71,13 +71,15 @@ function AnalyticsView({ habitations = [], shelters = [], stats = {}, resources 
 
   const shortagesCount = (busesReq > busesAvail ? 1 : 0) + (ambReq > ambAvail ? 1 : 0);
 
+  const getScore = (h) => Number(h?.riskScore ?? h?.risk_score ?? h?.risk_assessment?.risk_score ?? 0);
+
   // Sorting
-  const sortedByRisk = [...safeHabitations].sort((a, b) => b.riskScore - a.riskScore);
+  const sortedByRisk = [...safeHabitations].sort((a, b) => getScore(b) - getScore(a));
   const highestRiskHab = sortedByRisk[0];
   const lowestRiskHab = sortedByRisk[sortedByRisk.length - 1];
-  const avgRisk = Math.round(sortedByRisk.reduce((acc, h) => acc + (h.riskScore || 0), 0) / (sortedByRisk.length || 1));
+  const avgRisk = Math.round(sortedByRisk.reduce((acc, h) => acc + getScore(h), 0) / (sortedByRisk.length || 1));
 
-  const sortedShelters = [...safeShelters].sort((a, b) => a.available - b.available);
+  const sortedShelters = [...safeShelters].sort((a, b) => (Number(a.available || 0) - Number(b.available || 0)));
 
   // 1. Habitation Risk Score Bar Chart Data
   const riskBarData = {
@@ -85,10 +87,11 @@ function AnalyticsView({ habitations = [], shelters = [], stats = {}, resources 
     datasets: [
       {
         label: "Risk Score (0-100)",
-        data: safeHabitations.map((h) => h.riskScore),
-        backgroundColor: safeHabitations.map((h) =>
-          h.riskScore > 80 ? "#ef4444" : h.riskScore > 65 ? "#f59e0b" : "#3b82f6"
-        ),
+        data: safeHabitations.map((h) => getScore(h)),
+        backgroundColor: safeHabitations.map((h) => {
+          const s = getScore(h);
+          return s > 80 ? "#ef4444" : s > 65 ? "#f59e0b" : "#3b82f6";
+        }),
         borderRadius: 6,
       },
     ],
