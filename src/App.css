@@ -894,21 +894,25 @@ button {
 
 /* REUSABLE CENTERED OPERATIONAL MODAL OVERLAY SYSTEM */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(10, 15, 26, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 20px;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(10, 15, 26, 0.82) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  pointer-events: auto !important;
   animation: modalOverlayFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -922,17 +926,19 @@ button {
 }
 
 .modal-content {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  width: 100%;
-  max-width: 580px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  position: relative;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  width: 100% !important;
+  max-width: 560px !important;
+  max-height: 90vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  overflow: hidden !important;
+  position: relative !important;
+  margin: auto !important;
+  pointer-events: auto !important;
   animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -948,48 +954,48 @@ button {
 }
 
 .modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 24px;
-  border-bottom: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.02);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 18px 24px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
 }
 
 .modal-title-text {
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 0.3px;
-  margin: 0;
+  font-family: var(--font-display) !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  letter-spacing: 0.3px !important;
+  margin: 0 !important;
 }
 
 .modal-close-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted);
-  font-size: 24px;
-  line-height: 1;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--text-muted) !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
 }
 
 .modal-close-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
 }
 
 .modal-body {
-  padding: 24px;
-  overflow-y: auto;
-  max-height: calc(90vh - 70px);
+  padding: 24px !important;
+  overflow-y: auto !important;
+  max-height: calc(90vh - 70px) !important;
 }
 
 /* ANIMATION UTILITIES */
@@ -1016,19 +1022,19 @@ button {
 
 /* LIGHT MODE OVERRIDES FOR MODAL */
 [data-theme="light"] .modal-overlay {
-  background: rgba(15, 23, 42, 0.65);
+  background: rgba(15, 23, 42, 0.65) !important;
 }
 
 [data-theme="light"] .modal-content {
-  background: #ffffff;
-  border-color: var(--border-color);
-  box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.2);
+  background: #ffffff !important;
+  border-color: var(--border-color) !important;
+  box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.2) !important;
 }
 
 [data-theme="light"] .modal-header {
-  background: #f8fafc;
+  background: #f8fafc !important;
 }
 
 [data-theme="light"] .modal-close-btn:hover {
-  background: rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.08) !important;
 }
