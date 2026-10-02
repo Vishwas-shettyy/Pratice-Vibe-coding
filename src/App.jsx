@@ -38,9 +38,9 @@ const normalizeDashboardStats = (rawStats = {}) => ({
 function App() {
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Theme State (Dark / Light) with Persistence
+  // Theme State (Dark / Light) with Persistence - Dark mode default
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("apex_theme") || "light";
+    return localStorage.getItem("apex_theme") || "dark";
   });
 
   useEffect(() => {
@@ -233,10 +233,10 @@ function App() {
           <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "8px" }}>
             <div style={{ fontWeight: 700, marginBottom: "10px", color: "var(--accent-cyan)", fontSize: "13px" }}>Relief Logistics Stock</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "12px" }}>
-              <div>💧 Water: <strong>{site.waterStockLiters?.toLocaleString()} L</strong></div>
-              <div>🍲 Food Rations: <strong>{site.foodMealsStock?.toLocaleString()} Meals</strong></div>
-              <div>🚑 Medical Teams: <strong>{site.medicalTeams} Units</strong></div>
-              <div>⚡ Gensets: <strong>{site.powerGenerators} Units</strong></div>
+              <div>Water: <strong>{site.waterStockLiters?.toLocaleString()} L</strong></div>
+              <div>Food Rations: <strong>{site.foodMealsStock?.toLocaleString()} Meals</strong></div>
+              <div>Medical Teams: <strong>{site.medicalTeams} Units</strong></div>
+              <div>Gensets: <strong>{site.powerGenerators} Units</strong></div>
             </div>
           </div>
 

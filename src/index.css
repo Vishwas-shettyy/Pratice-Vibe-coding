@@ -1,86 +1,56 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ==========================================================================
+   ResQ Emergency Operations Center (EOC) / GIS Intelligence Design System
+   Primary Theme: Dark Mode (Charcoal / Navy-Black Foundation)
+   Secondary Theme: Light Mode
+   ========================================================================== */
 
 :root,
-[data-theme="light"] {
-  /* Palette - Light (RESQ Primary) */
-  --bg-primary: #F4F6F8;
-  --bg-secondary: #FFFFFF;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F9FAFB;
-  --bg-sidebar: #FFFFFF;
+[data-theme="dark"] {
+  /* Dark Mode Palette (Primary ResQ EOC Experience) */
+  --bg-primary: #0b0f19;
+  --bg-secondary: #111827;
+  --bg-card: #111827;
+  --bg-card-hover: #1e293b;
+  --bg-sidebar: #0d1322;
+  --bg-header: #0d1322;
 
-  --border-color: #E2E8F0;
+  --border-color: #1e293b;
+  --border-color-subtle: #334155;
   --border-color-glow: transparent;
 
-  --text-primary: #1A1D21;
-  --text-secondary: #4A5568;
-  --text-muted: #718096;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
 
-  /* RESQ Brand Blue Accent */
-  --accent-active: #0B3C6F;
-  --accent-blue: #0B3C6F;
-  --accent-cyan: #1F3A93;
+  /* ResQ Operational Accents */
+  --accent-active: #38bdf8;
+  --accent-blue: #0284c7;
+  --accent-cyan: #06b6d4;
 
-  /* Severity / Accents (Accessible tones) */
-  --accent-critical: #DC2626;
-  --accent-warning: #D97706;
-  --accent-safe: #059669;
-  --accent-red: #DC2626;
-  --accent-amber: #D97706;
-  --accent-emerald: #059669;
+  /* Strict Operational Status Colors */
+  --accent-critical: #ef4444; /* CRITICAL = Red */
+  --accent-high: #f97316;     /* HIGH = Orange */
+  --accent-warning: #f59e0b;  /* MODERATE = Amber */
+  --accent-moderate: #f59e0b;
+  --accent-safe: #10b981;     /* LOW = Green */
+  --accent-low: #10b981;
+  --accent-info: #3b82f6;    /* INFO = Neutral Blue */
+  --accent-red: #ef4444;
+  --accent-amber: #f59e0b;
+  --accent-emerald: #10b981;
   --accent-red-glow: transparent;
 
   /* Typography */
-  --font-main: "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif;
-  --font-display: "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
 
-  /* Flat Design */
-  --radius-base: 4px;
-  --radius-sm: 2px;
-  --space-xs: 6px;
-  --space-sm: 12px;
-  --space-md: 20px;
-
-  --card-shadow: none;
-
-  color-scheme: light;
-}
-
-[data-theme="dark"] {
-  /* Palette - Dark (RESQ Neutral Secondary) */
-  --bg-primary: #181818;
-  --bg-secondary: #222222;
-  --bg-card: #222222;
-  --bg-card-hover: #2A2A2A;
-  --bg-sidebar: #222222;
-
-  --border-color: #383838;
-  --border-color-glow: transparent;
-
-  --text-primary: #E8E8E8;
-  --text-secondary: #A3A3A3;
-  --text-muted: #737373;
-
-  /* RESQ Brand Blue Accent (same hue as light, but accessible if needed) */
-  --accent-active: #3B82F6;
-  --accent-blue: #3B82F6;
-  --accent-cyan: #60A5FA;
-
-  --accent-critical: #EF4444;
-  --accent-warning: #F59E0B;
-  --accent-safe: #10B981;
-  --accent-red: #EF4444;
-  --accent-amber: #F59E0B;
-  --accent-emerald: #10B981;
-  --accent-red-glow: transparent;
-
-  --font-main: "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif;
-  --font-display: "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-
-  --radius-base: 4px;
-  --radius-sm: 2px;
+  /* Sharp Operational Layout Tokens */
+  --radius-base: 6px;
+  --radius-sm: 4px;
+  --radius-lg: 8px;
   --space-xs: 6px;
   --space-sm: 12px;
   --space-md: 20px;
@@ -90,11 +60,61 @@
   color-scheme: dark;
 }
 
+[data-theme="light"] {
+  /* Light Mode Palette (Secondary Support Theme) */
+  --bg-primary: #f1f5f9;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --bg-header: #ffffff;
+
+  --border-color: #cbd5e1;
+  --border-color-subtle: #e2e8f0;
+  --border-color-glow: transparent;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  /* Operational Accents - Light Mode */
+  --accent-active: #0284c7;
+  --accent-blue: #0284c7;
+  --accent-cyan: #0891b2;
+
+  --accent-critical: #dc2626;
+  --accent-high: #ea580c;
+  --accent-warning: #d97706;
+  --accent-moderate: #d97706;
+  --accent-safe: #059669;
+  --accent-low: #059669;
+  --accent-info: #2563eb;
+  --accent-red: #dc2626;
+  --accent-amber: #d97706;
+  --accent-emerald: #059669;
+  --accent-red-glow: transparent;
+
+  --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+
+  --radius-base: 6px;
+  --radius-sm: 4px;
+  --radius-lg: 8px;
+  --space-xs: 6px;
+  --space-sm: 12px;
+  --space-md: 20px;
+
+  --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+
+  color-scheme: light;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 html,
@@ -116,7 +136,7 @@ button,
 input,
 select,
 textarea {
-  font: inherit;
+  font-family: var(--font-main);
 }
 
 button:focus-visible,
@@ -131,14 +151,14 @@ a:focus-visible {
 button:disabled,
 input:disabled,
 select:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Custom Scrollbar */
+/* Custom Operational Scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -146,33 +166,98 @@ select:disabled {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.4);
-  border-radius: 4px;
+  background: var(--border-color);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.7);
+  background: var(--text-muted);
 }
 
-/* Glassmorphism Panel in Light/Dark Mode */
+/* Operational Panel Standard */
 .glass-panel {
   background: var(--bg-card) !important;
   border: 1px solid var(--border-color) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-base) !important;
+  box-shadow: var(--card-shadow) !important;
 }
 
-/* Light mode card item overrides */
-[data-theme="light"] .habitation-card-item {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.1);
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
 }
 
-[data-theme="light"] .habitation-card-item:hover {
-  background: #f8fafc;
-  border-color: var(--accent-blue);
+.badge.immediate,
+.badge.critical,
+.badge.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--accent-critical);
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-[data-theme="light"] .stat-card {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.1);
+.badge.high,
+.badge.short {
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--accent-high);
+  border: 1px solid rgba(249, 115, 22, 0.3);
+}
+
+.badge.moderate,
+.badge.medium,
+.badge.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--accent-moderate);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge.low,
+.badge.safe,
+.badge.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-low);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge.info {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent-info);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Operational Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th {
+  text-align: left;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+tr:hover td {
+  background: var(--bg-card-hover);
 }

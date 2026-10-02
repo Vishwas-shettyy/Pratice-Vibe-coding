@@ -261,6 +261,103 @@ def calculate_risk(area: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def classify_rainfall_intensity(value: float) -> str:
+    """Classify 24-hour accumulated rainfall (mm) using standard IMD intensity bands."""
+    if value < 2.5:
+        return "VERY_LIGHT"
+    elif value <= 15.5:
+        return "LIGHT"
+    elif value <= 64.4:
+        return "MODERATE"
+    elif value <= 115.5:
+        return "HEAVY"
+    elif value <= 204.4:
+        return "VERY_HEAVY"
+    else:
+        return "EXTREMELY_HEAVY"
+
+
+def interpret_observation(obs: dict[str, Any]) -> dict[str, Any]:
+    """Convert a raw observation into a source-attributed, interpreted environmental evidence item.
+
+    Maintains complete provenance without producing arbitrary numeric risk scores.
+    """
+    if not isinstance(obs, dict):
+        return {}
+
+    param = (obs.get("parameter_name") or obs.get("parameterName") or "").strip()
+    raw_val = (
+        obs.get("parameter_value")
+        if obs.get("parameter_value") is not None
+        else obs.get("parameterValue")
+    )
+    unit = obs.get("parameter_unit") or obs.get("parameterUnit") or ""
+
+    base = {
+        "id": obs.get("id"),
+        "station_name": obs.get("station_name") or obs.get("stationName"),
+        "district": obs.get("district"),
+        "river_basin": obs.get("river_basin") or obs.get("riverBasin"),
+        "lat": obs.get("lat"),
+        "lng": obs.get("lng"),
+        "parameter": param,
+        "observed_value": raw_val,
+        "unit": unit,
+        "source_name": obs.get("source_name") or obs.get("sourceName"),
+        "source_url": obs.get("source_url") or obs.get("sourceUrl"),
+        "source_dataset": obs.get("source_dataset") or obs.get("sourceDataset"),
+        "source_type": obs.get("source_type") or obs.get("sourceType"),
+        "data_status": obs.get("data_status") or obs.get("dataStatus") or "REAL",
+        "observation_time": obs.get("observation_time") or obs.get("observationTime"),
+    }
+
+    if param == "RAINFALL_24H_MM":
+        val_float = _coerce_float(raw_val, 0.0)
+        base.update({
+            "evidence_type": "REAL_OBSERVATION",
+            "interpretation": classify_rainfall_intensity(val_float),
+            "interpretation_source": "IMD",
+            "interpretation_status": "INTERPRETED_INTENSITY",
+        })
+    elif param == "RIVER_STAGE_M":
+        base.update({
+            "evidence_type": "REAL_OBSERVATION",
+            "interpretation": "STAGE_MONITORED",
+            "interpretation_source": "CWC",
+            "interpretation_status": "THRESHOLD_METADATA_REQUIRED",
+            "note": "Quantitative threshold comparison unavailable; local Gauge Zero MSL height metadata required.",
+        })
+    elif param == "RESERVOIR_INFLOW_CUSECS":
+        base.update({
+            "evidence_type": "REAL_OBSERVATION",
+            "interpretation": "INFLOW_MONITORED",
+            "interpretation_source": "CWC",
+            "interpretation_status": "CONTEXT_ONLY",
+            "note": "Volumetric inflow rate reported without static capacity thresholds.",
+        })
+    elif param == "TERRAIN_ELEVATION_M":
+        base.update({
+            "evidence_type": "TOPOGRAPHIC_REFERENCE",
+            "interpretation": "ELEVATION_BENCHMARK",
+            "interpretation_source": "OSM_BHUVAN",
+            "interpretation_status": "REFERENCE_ONLY",
+            "note": "Elevation provides topographic reference; does not directly infer landslide risk.",
+        })
+    else:
+        base.update({
+            "evidence_type": "REAL_OBSERVATION",
+            "interpretation": "UNCLASSIFIED",
+            "interpretation_source": base.get("source_name", "UNKNOWN"),
+            "interpretation_status": "RAW_VALUE",
+        })
+
+    return base
+
+
+def interpret_observations(observations: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [interpret_observation(o) for o in observations if isinstance(o, dict)]
+
+
 def get_environmental_signals(area: dict[str, Any], repo: Any = None) -> dict[str, Any]:
     """Retrieve real environmental observations for the district/region of a given habitation.
 
@@ -273,6 +370,7 @@ def get_environmental_signals(area: dict[str, Any], repo: Any = None) -> dict[st
             "district": None,
             "observations_count": 0,
             "real_measurements": [],
+            "interpreted_evidence": [],
             "summary": {},
         }
 
@@ -283,6 +381,7 @@ def get_environmental_signals(area: dict[str, Any], repo: Any = None) -> dict[st
             "district": None,
             "observations_count": 0,
             "real_measurements": [],
+            "interpreted_evidence": [],
             "summary": {},
         }
 
@@ -300,6 +399,7 @@ def get_environmental_signals(area: dict[str, Any], repo: Any = None) -> dict[st
             "district": district,
             "observations_count": 0,
             "real_measurements": [],
+            "interpreted_evidence": [],
             "summary": {},
         }
 
@@ -316,6 +416,7 @@ def get_environmental_signals(area: dict[str, Any], repo: Any = None) -> dict[st
             "district": district,
             "observations_count": 0,
             "real_measurements": [],
+            "interpreted_evidence": [],
             "summary": {},
         }
 
@@ -356,11 +457,14 @@ def get_environmental_signals(area: dict[str, Any], repo: Any = None) -> dict[st
     if elevation_vals:
         summary["max_elevation_m"] = max(elevation_vals)
 
+    interpreted_evidence = interpret_observations(real_obs)
+
     return {
         "has_real_signals": True,
         "district": district,
         "observations_count": len(real_obs),
         "real_measurements": real_obs,
+        "interpreted_evidence": interpreted_evidence,
         "summary": summary,
     }
 
