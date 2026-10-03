@@ -281,7 +281,7 @@ class Repository:
                     # Scenarios
                     cur.execute("""
                         CREATE TABLE IF NOT EXISTS scenarios (
-                            id VARCHAR(50) PRIMARY KEY,
+                            id VARCHAR(100) PRIMARY KEY,
                             name VARCHAR(255),
                             type VARCHAR(100),
                             description TEXT,
@@ -299,9 +299,9 @@ class Repository:
                     
                     cur.execute("""
                         CREATE TABLE IF NOT EXISTS scenario_exposures (
-                            id VARCHAR(50) PRIMARY KEY,
-                            scenario_id VARCHAR(50),
-                            entity_id VARCHAR(50),
+                            id VARCHAR(255) PRIMARY KEY,
+                            scenario_id VARCHAR(100),
+                            entity_id VARCHAR(100),
                             entity_type VARCHAR(50),
                             flood_exposure VARCHAR(50),
                             landslide_exposure VARCHAR(50),
@@ -313,9 +313,9 @@ class Repository:
                     
                     cur.execute("""
                         CREATE TABLE IF NOT EXISTS scenario_road_impacts (
-                            id VARCHAR(50) PRIMARY KEY,
-                            scenario_id VARCHAR(50),
-                            road_id VARCHAR(50),
+                            id VARCHAR(255) PRIMARY KEY,
+                            scenario_id VARCHAR(100),
+                            road_id VARCHAR(100),
                             impact_status VARCHAR(50),
                             impact_reason TEXT,
                             data_status VARCHAR(50) DEFAULT 'SCENARIO'
@@ -324,10 +324,10 @@ class Repository:
                     
                     cur.execute("""
                         CREATE TABLE IF NOT EXISTS scenario_relocations (
-                            id VARCHAR(50) PRIMARY KEY,
-                            scenario_id VARCHAR(50),
-                            settlement_id VARCHAR(50),
-                            recommended_site_id VARCHAR(50),
+                            id VARCHAR(255) PRIMARY KEY,
+                            scenario_id VARCHAR(100),
+                            settlement_id VARCHAR(100),
+                            recommended_site_id VARCHAR(100),
                             priority VARCHAR(50),
                             required_capacity INTEGER,
                             available_capacity INTEGER,
@@ -341,7 +341,22 @@ class Repository:
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         )
                     """)
+                    # Schema migrations for existing production tables
+                    cur.execute("ALTER TABLE scenarios ALTER COLUMN id TYPE VARCHAR(100);")
                     cur.execute("ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS label VARCHAR(100);")
+
+                    cur.execute("ALTER TABLE scenario_exposures ALTER COLUMN id TYPE VARCHAR(255);")
+                    cur.execute("ALTER TABLE scenario_exposures ALTER COLUMN scenario_id TYPE VARCHAR(100);")
+                    cur.execute("ALTER TABLE scenario_exposures ALTER COLUMN entity_id TYPE VARCHAR(100);")
+
+                    cur.execute("ALTER TABLE scenario_road_impacts ALTER COLUMN id TYPE VARCHAR(255);")
+                    cur.execute("ALTER TABLE scenario_road_impacts ALTER COLUMN scenario_id TYPE VARCHAR(100);")
+                    cur.execute("ALTER TABLE scenario_road_impacts ALTER COLUMN road_id TYPE VARCHAR(100);")
+
+                    cur.execute("ALTER TABLE scenario_relocations ALTER COLUMN id TYPE VARCHAR(255);")
+                    cur.execute("ALTER TABLE scenario_relocations ALTER COLUMN scenario_id TYPE VARCHAR(100);")
+                    cur.execute("ALTER TABLE scenario_relocations ALTER COLUMN settlement_id TYPE VARCHAR(100);")
+                    cur.execute("ALTER TABLE scenario_relocations ALTER COLUMN recommended_site_id TYPE VARCHAR(100);")
                     cur.execute("ALTER TABLE scenario_relocations ADD COLUMN IF NOT EXISTS route_geometry JSONB;")
                 conn.commit()
         except Exception as e:
