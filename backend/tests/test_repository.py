@@ -469,6 +469,16 @@ class TestRepository(unittest.TestCase):
         self.assertEqual(params_list[1][0], "osm_way_batch_2")
         mock_conn.__enter__.return_value.commit.assert_called_once()
 
+    @patch('app.services.repository.psycopg2')
+    def test_postgres_count_roads(self, mock_psycopg2):
+        mock_conn = mock_psycopg2.connect.return_value
+        mock_cur = mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value
+        mock_cur.fetchone.return_value = [172]
+
+        repo = Repository(db_url="postgres://user:pass@localhost:5432/db")
+        count = repo.count_roads()
+        self.assertEqual(count, 172)
+        mock_cur.execute.assert_called_with("SELECT COUNT(*) FROM roads")
 
 if __name__ == '__main__':
     unittest.main()

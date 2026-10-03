@@ -884,6 +884,16 @@ class Repository:
 
     upsert_roads_batch = upsert_roads
 
+    def count_roads(self):
+        if self.in_memory:
+            return len(self.memory_store["roads"])
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT COUNT(*) FROM roads")
+                row = cur.fetchone()
+                return row[0] if row else 0
+
     def get_all_roads(self):
         if self.in_memory:
             return list(self.memory_store["roads"].values())

@@ -97,7 +97,10 @@ class ScenarioService:
 
     def get_scenario_road_impacts(self, scenario_id):
         imps = self.repo.get_scenario_road_impacts(scenario_id)
-        if not imps:
+        habitations = self.repo.get_all_habitations()
+        is_real_kodagu = any(str(h.get("id", "")).startswith("SET-KOD-") for h in habitations)
+        road_count = self.repo.count_roads() if hasattr(self.repo, "count_roads") else len(self.repo.get_all_roads())
+        if not imps or (is_real_kodagu and (road_count < 2857 or len(imps) < 2857)):
             self.run_scenario(scenario_id)
             imps = self.repo.get_scenario_road_impacts(scenario_id)
         return imps
@@ -134,7 +137,8 @@ class ScenarioService:
                     ingest_osm_facilities(self.repo)
                 except Exception:
                     pass
-            if not self.repo.get_all_roads():
+            road_count = self.repo.count_roads() if hasattr(self.repo, "count_roads") else len(self.repo.get_all_roads())
+            if road_count < 2857:
                 try:
                     from scripts.ingest_osm_roads import ingest_osm_roads
                     ingest_osm_roads(self.repo)
