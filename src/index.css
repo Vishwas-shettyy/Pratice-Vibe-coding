@@ -2,37 +2,37 @@
 
 :root {
   /* White Theme - Emergency Operations Centre / GIS */
-  --bg-primary: #F7F8FA;
-  --bg-secondary: #F7F8FA;
+  --bg-primary: #F5F7FA;
+  --bg-secondary: #F8FAFC;
   --bg-card: #FFFFFF;
-  --bg-card-hover: #F9FAFB;
+  --bg-card-hover: #F8FAFC;
   --bg-sidebar: #FFFFFF;
   --bg-header: #FFFFFF;
 
-  --border-color: #E2E6EB;
-  --border-color-subtle: #E2E6EB;
+  --border-color: rgba(148, 163, 184, 0.25);
+  --border-color-subtle: rgba(148, 163, 184, 0.15);
   --border-color-glow: transparent;
 
-  --text-primary: #17202A;
-  --text-secondary: #5F6B76;
-  --text-muted: #8A949E;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
 
   /* ResQ Accent */
-  --accent-active: #2563EB;
-  --accent-blue: #2563EB;
-  --accent-cyan: #06B6D4;
+  --accent-active: #3b82f6;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
 
   /* Operational Status Accents */
-  --accent-critical: #DC2626;
-  --accent-high: #D97706;
-  --accent-warning: #D97706;
-  --accent-moderate: #D97706;
-  --accent-safe: #16A34A;
-  --accent-low: #16A34A;
-  --accent-info: #2563EB;
-  --accent-red: #DC2626;
-  --accent-amber: #D97706;
-  --accent-emerald: #16A34A;
+  --accent-critical: #ef4444;
+  --accent-high: #f97316;
+  --accent-warning: #f59e0b;
+  --accent-moderate: #f59e0b;
+  --accent-safe: #10b981;
+  --accent-low: #10b981;
+  --accent-info: #3b82f6;
+  --accent-red: #ef4444;
+  --accent-amber: #f59e0b;
+  --accent-emerald: #10b981;
   --accent-red-glow: transparent;
 
   /* Typography */
@@ -41,14 +41,14 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Flat Design Tokens */
-  --radius-base: 4px;
-  --radius-sm: 2px;
+  --radius-base: 16px;
+  --radius-sm: 8px;
   --space-xs: 6px;
   --space-sm: 12px;
   --space-md: 20px;
 
-  --card-shadow: none;
-
+  --card-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+  
   color-scheme: light;
 }
 
@@ -108,32 +108,258 @@ select:disabled {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(138, 148, 158, 0.4);
+  background: rgba(148, 163, 184, 0.4);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(138, 148, 158, 0.7);
+  background: rgba(148, 163, 184, 0.7);
 }
 
 /* Operational Glassmorphism Panel - Actually solid white for this theme */
 .glass-panel {
   background: var(--bg-card) !important;
   border: 1px solid var(--border-color) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow) !important;
+  border-radius: var(--radius-base) !important;
 }
 
 .habitation-card-item {
   background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.1);
+  border-color: rgba(148, 163, 184, 0.25);
 }
 
 .habitation-card-item:hover {
-  background: #f9fafb;
+  background: #f8fafc;
   border-color: var(--accent-blue);
 }
 
 .stat-card {
   background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-base);
+  box-shadow: var(--card-shadow);
+}
+
+/* Leaflet Overrides for Glassy/Clean Look */
+.leaflet-container {
+  background: #f8fafc !important;
+}
+.leaflet-bar {
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+.leaflet-bar a {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-color-subtle) !important;
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+}
+.leaflet-bar a:hover {
+  background-color: var(--bg-secondary) !important;
+}
+.leaflet-bar a:last-child {
+  border-bottom: none !important;
+}
+.leaflet-control-layers {
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+  border-radius: 8px !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: var(--text-primary) !important;
+}
+
+/* =========================================================
+   PREMIUM EOC INTERACTION SYSTEM
+========================================================= */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* 1. Global Cards & Panels */
+  .glass-panel, .stat-card {
+    transition: transform 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out, background-color 200ms ease-out !important;
+  }
+  
+  .glass-panel:hover, .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06) !important;
+    border-color: rgba(148, 163, 184, 0.35) !important;
+    background-color: #fafbfc !important;
+  }
+
+  /* Stat Card Icons on hover */
+  .glass-panel:hover .stat-icon-container,
+  .stat-card:hover .stat-icon-container {
+    filter: brightness(1.05) saturate(1.1);
+    transform: scale(1.02);
+  }
+  .stat-icon-container {
+    transition: all 200ms ease-out;
+  }
+
+  /* 2. Interactive Rows (Habitations, Pipelines, Shelters) */
+  .habitation-card-item, .interactive-row {
+    transition: transform 160ms ease-out, box-shadow 160ms ease-out, border-color 160ms ease-out, background-color 160ms ease-out;
+    border-left: 3px solid transparent !important;
+  }
+  
+  .habitation-card-item:hover, .interactive-row:hover {
+    transform: translateY(-1px);
+    background-color: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+    border-left-color: var(--accent-blue) !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  }
+
+  .row-chevron, .habitation-card-item svg {
+    transition: transform 160ms ease-out;
+  }
+  .habitation-card-item:hover svg, .interactive-row:hover .row-chevron {
+    transform: translateX(3px);
+    stroke: var(--accent-blue);
+  }
+
+  /* 3. Action / Recommendation Cards */
+  .action-card {
+    transition: all 200ms ease-out;
+  }
+  .action-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.3) !important;
+    background-color: rgba(59, 130, 246, 0.015) !important;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.06) !important;
+  }
+  .action-card:hover .action-btn {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
+
+  /* 4. Buttons (Primary & Secondary) */
+  .action-btn {
+    transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 180ms ease-out, background-color 180ms ease-out, border-color 180ms ease-out, filter 180ms ease-out !important;
+    transform-origin: center center;
+    will-change: transform;
+  }
+  .action-btn:hover {
+    transform: scale(1.03) !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    filter: brightness(1.02);
+  }
+  .action-btn:active {
+    transform: scale(0.98) !important;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
+  }
+  
+  /* Emergency / Red Button */
+  .emergency-btn {
+    transition: all 200ms ease-out !important;
+  }
+  .emergency-btn:hover {
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2), 0 6px 16px rgba(239, 68, 68, 0.15) !important;
+    transform: scale(1.03) !important;
+    background-color: rgba(220, 38, 38, 0.08) !important;
+  }
+  
+  /* Harsh Case Button */
+  .harsh-case-btn {
+    transition: all 200ms cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  }
+  .harsh-case-btn:hover {
+    transform: scale(1.03) !important;
+    filter: brightness(1.15);
+  }
+
+  /* Button Icons */
+  .btn-icon-right {
+    transition: transform 180ms ease-out;
+  }
+  .action-btn:hover .btn-icon-right {
+    transform: translateX(2px);
+  }
+  
+  .btn-icon-search {
+    transition: transform 180ms ease-out;
+  }
+  .btn-icon-search:hover {
+    transform: scale(1.05);
+  }
+
+  /* 5. Map UI Elements */
+  .leaflet-bar a {
+    transition: background-color 160ms ease-out, color 160ms ease-out !important;
+  }
+  .leaflet-control-layers {
+    transition: transform 160ms ease-out, box-shadow 160ms ease-out !important;
+  }
+  .leaflet-control-layers:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08) !important;
+  }
+  .leaflet-interactive {
+    transition: stroke-width 0.2s, stroke-opacity 0.2s, fill-opacity 0.2s;
+  }
+  .leaflet-interactive:hover {
+    stroke-opacity: 1 !important;
+    fill-opacity: 1 !important;
+  }
+
+  /* 6. Navigation items */
+  .nav-pill {
+    transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 220ms, box-shadow 220ms, color 220ms !important;
+    transform-origin: center center;
+    will-change: transform;
+  }
+  .nav-pill:hover {
+    transform: scale(1.07) !important;
+    background-color: rgba(59, 130, 246, 0.08) !important;
+    color: var(--accent-blue) !important;
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.08), 0 6px 16px rgba(59, 130, 246, 0.1) !important;
+  }
+  .nav-pill.active {
+    transform: scale(1.04) !important;
+  }
+  .nav-pill.active:hover {
+    transform: scale(1.08) !important;
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2), 0 8px 20px rgba(59, 130, 246, 0.25) !important;
+  }
+  
+  .nav-pill svg {
+    transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .nav-pill:hover svg {
+    transform: scale(1.1);
+  }
+
+  /* 7. Logos and Titles */
+  .resq-logo-interactive {
+    transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 240ms;
+    transform-origin: center left;
+    will-change: transform;
+  }
+  .resq-logo-interactive:hover {
+    transform: scale(1.06);
+    filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.15));
+  }
+  
+  .title-interactive {
+    transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform-origin: center left;
+  }
+  .title-interactive:hover {
+    transform: scale(1.015);
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY: REDUCED MOTION
+========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .glass-panel, .stat-card, .interactive-row, .habitation-card-item, .action-card, .action-btn, .emergency-btn, .harsh-case-btn, .nav-pill, .leaflet-control-layers, .row-chevron, .habitation-card-item svg, .btn-icon-right, .btn-icon-search, .stat-icon-container {
+    transform: none !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* Preserve color/border transitions safely */
+  .nav-pill { transition: background-color 0.1s !important; }
 }

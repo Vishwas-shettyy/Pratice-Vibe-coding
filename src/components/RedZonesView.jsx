@@ -77,7 +77,7 @@ function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus, si
       {renderBanner()}
       
       {/* OPERATIONAL SUMMARY & FILTER BAR */}
-      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", padding: "16px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+      <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
 
           <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
@@ -151,7 +151,7 @@ function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus, si
             const riskColor = isCrit ? "var(--accent-critical)" : "var(--accent-warning)";
             
             return (
-              <div key={rel.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "6px", display: "flex", flexDirection: "column" }}>
+              <div key={rel.id} className="glass-panel" style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 16px", borderBottom: "1px solid var(--border-color)", background: "rgba(0,0,0,0.02)" }}>
                   <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>{hab.code}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -217,7 +217,7 @@ function RedZonesView({ habitations = [], onSelectHabitation, onUpdateStatus, si
           const currentStatusColor = statusColors[hab.relocationStatus] || "var(--accent-blue)";
 
           return (
-            <div key={hab.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "6px", display: "flex", flexDirection: "column" }}>
+            <div key={hab.id} className="glass-panel" style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
 
               {/* TOP STRIP - RELOCATION HORIZON */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 16px", borderBottom: "1px solid var(--border-color)", background: "rgba(0,0,0,0.02)" }}>

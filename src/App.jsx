@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-import NavbarSidebar from "./components/NavbarSidebar";
+
 import HeaderTopbar from "./components/HeaderTopbar";
 import OverviewView from "./components/OverviewView";
 import RiskMapExplorer from "./components/RiskMapExplorer";
@@ -495,31 +495,25 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* LEFT SIDEBAR NAVIGATION */}
-      <NavbarSidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        alertCount={alerts.filter((a) => a.status === "ACTIVE").length}
-      />
-
       {/* MAIN CONTENT CONTAINER */}
-      <main className="app-main">
-        {/* TOP HEADER (Fixed) */}
-        <div style={{ flex: "none", zIndex: 90 }}>
-          <HeaderTopbar
-            title={headerInfo.title}
-            subtitle={headerInfo.subtitle}
-            onTriggerEmergency={handleTriggerEmergency}
-            onExportReport={handleExportReport}
-            latestAlert={latestAlert}
-            backendOnline={backendOnline}
-            isHarshCaseActive={isHarshCaseActive}
-            onToggleHarshCase={handleToggleHarshCase}
-          />
-        </div>
+      <main className="app-main" style={{ display: "flex", flexDirection: "column", height: "100dvh", overflowY: "auto", overflowX: "hidden" }} id="main-scroll-container">
+        {/* TOP HEADER (Sticky) */}
+        <HeaderTopbar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          alertCount={alerts.filter((a) => a.status === "ACTIVE").length}
+          title={headerInfo.title}
+          subtitle={headerInfo.subtitle}
+          onTriggerEmergency={handleTriggerEmergency}
+          onExportReport={handleExportReport}
+          latestAlert={latestAlert}
+          backendOnline={backendOnline}
+          isHarshCaseActive={isHarshCaseActive}
+          onToggleHarshCase={handleToggleHarshCase}
+        />
 
         {/* SCROLLING CONTENT */}
-        <div className="app-content">
+        <div className="app-content" style={{ flex: 1, minHeight: 0 }}>
           {/* DYNAMIC TAB VIEWS */}
           <div className="view-container">
           {apiError && (

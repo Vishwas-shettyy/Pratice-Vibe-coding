@@ -101,7 +101,7 @@ function OverviewView({
                   <span style={{ fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: "4px", background: bannerColor, color: "#fff", letterSpacing: "1px" }}>
                     {isHarsh ? "HARSH CASE" : "SCENARIO SIMULATION"}
                   </span>
-                  <h3 style={{ fontSize: "18px", fontWeight: 700, color: bannerColor, margin: 0 }}>
+                  <h3 style={{ fontSize: "20px", fontWeight: 800, fontFamily: "var(--font-display)", color: bannerColor, margin: 0 }}>
                     {isHarsh ? "HARSH CASE ACTIVE — Extreme Flood + Landslide Simulation" : `SCENARIO RESULT: ${simulationResult.scenario?.scenario_name || "Simulation"}`}
                   </h3>
                 </div>
@@ -162,59 +162,100 @@ function OverviewView({
 
       {/* KPI COMMAND STRIP */}
       <div className="stats-grid">
-        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-critical)", position: "relative" }}>
-          {!backendOnline && <div style={{ position: "absolute", top: "12px", right: "12px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO / FALLBACK DATA</div>}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Population at Risk</span>
-            <svg width="16" height="16" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "12px", position: "relative", padding: "20px" }}>
+          {!backendOnline && <div style={{ position: "absolute", top: "20px", right: "20px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO</div>}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ width: "48px", height: "48px", background: "rgba(239, 68, 68, 0.1)", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="24" height="24" fill="none" stroke="var(--accent-critical)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "4px" }}>Population at Risk</div>
+              <div style={{ fontSize: "28px", fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.1 }}>
+                {safeStats.populationAtRisk.toLocaleString()}
+              </div>
+            </div>
+            {/* Sparkline Mock */}
+            <div style={{ width: "60px", height: "30px", opacity: 0.6 }}>
+              <svg viewBox="0 0 60 30" width="100%" height="100%">
+                <polyline fill="none" stroke="var(--accent-critical)" strokeWidth="2" points="0,25 15,20 30,28 45,10 60,15" strokeLinejoin="round" strokeLinecap="round"/>
+              </svg>
+            </div>
           </div>
-          <div style={{ fontSize: "32px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.2 }}>
-            {safeStats.populationAtRisk.toLocaleString()}
-          </div>
-          <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-            Across {habitations.length} vulnerable habitations
-          </div>
-        </div>
-
-        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-critical)", position: "relative" }}>
-          {!backendOnline && <div style={{ position: "absolute", top: "12px", right: "12px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO / FALLBACK DATA</div>}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Red Zones</span>
-            <svg width="16" height="16" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-          </div>
-          <div style={{ fontSize: "32px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.2 }}>
-            {safeStats.redZonesCount}
-          </div>
-          <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-            Immediate action required
+          <div style={{ fontSize: "12px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "6px" }}>
+            <svg width="14" height="14" fill="none" stroke="var(--accent-critical)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+            <span style={{ color: "var(--accent-critical)", fontWeight: 600 }}>+12%</span> vs last hour
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-warning)", position: "relative" }}>
-          {!backendOnline && <div style={{ position: "absolute", top: "12px", right: "12px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO / FALLBACK DATA</div>}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Safe Shelters</span>
-            <svg width="16" height="16" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "12px", position: "relative", padding: "20px" }}>
+          {!backendOnline && <div style={{ position: "absolute", top: "20px", right: "20px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO</div>}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ width: "48px", height: "48px", background: "rgba(249, 115, 22, 0.1)", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="24" height="24" fill="none" stroke="var(--accent-high)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "4px" }}>Red Zones</div>
+              <div style={{ fontSize: "28px", fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.1 }}>
+                {safeStats.redZonesCount}
+              </div>
+            </div>
+            <div style={{ width: "60px", height: "30px", opacity: 0.6 }}>
+              <svg viewBox="0 0 60 30" width="100%" height="100%">
+                <polyline fill="none" stroke="var(--accent-high)" strokeWidth="2" points="0,20 20,25 40,15 60,10" strokeLinejoin="round" strokeLinecap="round"/>
+              </svg>
+            </div>
           </div>
-          <div style={{ fontSize: "32px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.2 }}>
-            {safeStats.safeSitesCount}
-          </div>
-          <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-            Verified high-ground shelters
+          <div style={{ fontSize: "12px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "6px" }}>
+            <svg width="14" height="14" fill="none" stroke="var(--accent-high)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+            <span style={{ color: "var(--accent-high)", fontWeight: 600 }}>+2</span> new zones identified
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", borderTop: "3px solid var(--accent-safe)", position: "relative" }}>
-          {!backendOnline && <div style={{ position: "absolute", top: "12px", right: "12px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO / FALLBACK DATA</div>}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Available Capacity</span>
-            <svg width="16" height="16" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "12px", position: "relative", padding: "20px" }}>
+          {!backendOnline && <div style={{ position: "absolute", top: "20px", right: "20px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO</div>}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ width: "48px", height: "48px", background: "rgba(59, 130, 246, 0.1)", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="24" height="24" fill="none" stroke="var(--accent-blue)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "4px" }}>Safe Shelters</div>
+              <div style={{ fontSize: "28px", fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.1 }}>
+                {safeStats.safeSitesCount}
+              </div>
+            </div>
+            <div style={{ width: "60px", height: "30px", opacity: 0.6 }}>
+              <svg viewBox="0 0 60 30" width="100%" height="100%">
+                <polyline fill="none" stroke="var(--accent-blue)" strokeWidth="2" points="0,15 30,15 60,15" strokeLinejoin="round" strokeLinecap="round"/>
+              </svg>
+            </div>
           </div>
-          <div style={{ fontSize: "32px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.2 }}>
-            {safeStats.totalCapacity.toLocaleString()}
+          <div style={{ fontSize: "12px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "6px" }}>
+            <svg width="14" height="14" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14"/></svg>
+            No change
           </div>
-          <div style={{ fontSize: "12px", color: "var(--accent-safe)", fontWeight: 600 }}>
-            +{safeStats.surplusCapacity} capacity surplus
+        </div>
+
+        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "12px", position: "relative", padding: "20px" }}>
+          {!backendOnline && <div style={{ position: "absolute", top: "20px", right: "20px", fontSize: "9px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-secondary)", padding: "2px 6px", borderRadius: "4px" }}>DEMO</div>}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ width: "48px", height: "48px", background: "rgba(16, 185, 129, 0.1)", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="24" height="24" fill="none" stroke="var(--accent-safe)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "4px" }}>Available Capacity</div>
+              <div style={{ fontSize: "28px", fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.1 }}>
+                {safeStats.totalCapacity.toLocaleString()}
+              </div>
+            </div>
+            <div style={{ width: "60px", height: "30px", opacity: 0.6 }}>
+              <svg viewBox="0 0 60 30" width="100%" height="100%">
+                <polyline fill="none" stroke="var(--accent-safe)" strokeWidth="2" points="0,25 20,20 40,22 60,10" strokeLinejoin="round" strokeLinecap="round"/>
+              </svg>
+            </div>
+          </div>
+          <div style={{ fontSize: "12px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "6px" }}>
+            <svg width="14" height="14" fill="none" stroke="var(--accent-safe)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+            <span style={{ color: "var(--accent-safe)", fontWeight: 600 }}>+{safeStats.surplusCapacity}</span> capacity surplus
           </div>
         </div>
       </div>
@@ -222,20 +263,20 @@ function OverviewView({
       {/* REGIONAL RISK & PRIORITY HABITATIONS */}
       <div className="grid-2-1">
         {/* GIS LAUNCH PANEL */}
-        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", padding: "0", overflow: "hidden" }}>
-          <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-color)" }}>
-            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>Regional Risk & Hazard Assessment</h3>
-            <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>Real-time GIS hazard layers & vulnerable habitations</p>
+        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+            <div>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "4px" }}>Regional Risk & Hazard Assessment</h3>
+              <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>Real-time GIS hazard layers & vulnerable habitations</p>
+            </div>
           </div>
 
-          <div style={{ padding: "24px", flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-secondary)", position: "relative" }}>
-            {/* Grid background effect */}
-            <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(var(--border-color) 1px, transparent 1px)", backgroundSize: "24px 24px", opacity: 0.5 }} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", position: "relative" }}>
 
             <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", height: "100%", justifyContent: "center", gap: "24px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span className="pulse-red" style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent-red)", display: "inline-block" }}></span>
-                <span style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px", color: "var(--accent-red)" }}>GIS STATUS: LIVE</span>
+                <span className="pulse-red" style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent-safe)", display: "inline-block" }}></span>
+                <span style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px", color: "var(--accent-safe)", background: "rgba(16, 185, 129, 0.1)", padding: "4px 8px", borderRadius: "12px" }}>LIVE DATA</span>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
@@ -251,12 +292,11 @@ function OverviewView({
 
               {/* COMPACT MAP PREVIEW */}
               <div style={{ 
-                height: "140px", 
+                height: "200px", 
                 width: "100%", 
-                borderRadius: "6px", 
+                borderRadius: "12px", 
                 overflow: "hidden", 
-                border: "1px solid rgba(255,255,255,0.1)",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                border: "1px solid var(--border-color)",
                 opacity: 0.9,
                 pointerEvents: "none" // PREVIEW ONLY
               }}>
@@ -268,7 +308,31 @@ function OverviewView({
                   attributionControl={false}
                   style={{ height: "100%", width: "100%", background: "#0f172a" }}
                 >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" opacity={0.6} />
+                  <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}" opacity={1} />
+                  {/* Floating map controls (left) and checklist (right) added here just visually */}
+                  <div style={{ position: "absolute", top: 10, left: 10, zIndex: 400, display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ background: "#fff", border: "1px solid var(--border-color)", borderRadius: "6px", padding: 6, boxShadow: "0 2px 5px rgba(0,0,0,0.1)", cursor: "pointer" }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+                    </div>
+                    <div style={{ background: "#fff", border: "1px solid var(--border-color)", borderRadius: "6px", padding: 6, boxShadow: "0 2px 5px rgba(0,0,0,0.1)", cursor: "pointer" }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14"/></svg>
+                    </div>
+                  </div>
+                  <div style={{ position: "absolute", top: 10, right: 10, zIndex: 400, background: "#fff", border: "1px solid var(--border-color)", borderRadius: "8px", padding: "10px", boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 700, marginBottom: "8px", color: "var(--text-primary)" }}>Map Layers</div>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "11px", color: "var(--text-secondary)", marginBottom: 4 }}>
+                      <input type="checkbox" defaultChecked /> Rainfall
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "11px", color: "var(--text-secondary)", marginBottom: 4 }}>
+                      <input type="checkbox" defaultChecked /> Flood Risk
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "11px", color: "var(--text-secondary)", marginBottom: 4 }}>
+                      <input type="checkbox" defaultChecked /> Landslide Risk
+                    </label>
+                  </div>
+                  <div style={{ position: "absolute", bottom: 10, left: 10, zIndex: 400, background: "rgba(255,255,255,0.8)", padding: "2px 8px", fontSize: "10px", border: "1px solid var(--border-color)", borderRadius: "4px" }}>
+                    Scale: 10km | __
+                  </div>
                   {sortedHabitations.slice(0, 15).map((hab) => {
                     const riskLevel = getHabitRiskLevel(hab);
                     const isCritical = riskLevel === "CRITICAL" || riskLevel === "IMMEDIATE";
@@ -276,11 +340,11 @@ function OverviewView({
                       <CircleMarker
                         key={`preview-${hab.id}`}
                         center={[hab.lat, hab.lng]}
-                        radius={isCritical ? 6 : 4}
+                        radius={isCritical ? 7 : 5}
                         pathOptions={{ 
-                          color: isCritical ? "#ef4444" : "#f59e0b",
-                          fillColor: isCritical ? "#dc2626" : "#d97706",
-                          fillOpacity: 0.8, 
+                          color: isCritical ? "#dc2626" : "#ea580c",
+                          fillColor: isCritical ? "#ef4444" : "#f97316",
+                          fillOpacity: 0.6, 
                           weight: 1 
                         }}
                       />
@@ -299,13 +363,15 @@ function OverviewView({
         </div>
 
         {/* PRIORITY QUEUE */}
-        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", padding: "0", overflow: "hidden" }}>
-          <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-color)" }}>
-            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>Priority Habitations</h3>
-            <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>Relocation queue by hazard rating</p>
+        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+            <div>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "4px" }}>Priority Habitations</h3>
+              <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>Relocation queue by hazard rating</p>
+            </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {sortedHabitations.slice(0, 4).map((hab, index) => {
               const riskLevel = getHabitRiskLevel(hab);
               const isCritical = riskLevel === "CRITICAL" || riskLevel === "IMMEDIATE";
@@ -313,35 +379,37 @@ function OverviewView({
               const statusColor = isCritical ? "var(--accent-critical)" : isHigh ? "var(--accent-warning)" : "var(--accent-blue)";
 
               return (
-                <div key={hab.id} onClick={() => onSelectHabitation(hab)} style={{ display: "flex", alignItems: "center", padding: "16px 24px", borderBottom: "1px solid var(--border-color)", cursor: "pointer", transition: "background 0.2s ease" }} onMouseOver={(e) => e.currentTarget.style.background = "var(--bg-secondary)"} onMouseOut={(e) => e.currentTarget.style.background = "transparent"}>
-                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-muted)", width: "24px", marginRight: "12px" }}>
-                    {String(index + 1).padStart(2, "0")}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "4px" }}>{hab.name}</div>
-                    <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{hab.population} people</div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>{getHabitRiskScore(hab)} <span style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 500 }}>/ 100</span></div>
-                    <div style={{ fontSize: "10px", fontWeight: 700, color: statusColor, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                      {riskLevel}
+                <div key={hab.id} onClick={() => onSelectHabitation(hab)} className="habitation-card-item" style={{ display: "flex", alignItems: "center", padding: "16px", border: "1px solid var(--border-color)", borderRadius: "12px", cursor: "pointer", transition: "all 0.2s ease" }}>
+                  <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div style={{ fontSize: "10px", fontWeight: 700, padding: "4px 8px", borderRadius: "6px", background: isCritical ? "rgba(239, 68, 68, 0.1)" : isHigh ? "rgba(249, 115, 22, 0.1)" : "rgba(245, 158, 11, 0.1)", color: statusColor, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      {riskLevel === "IMMEDIATE" || riskLevel === "CRITICAL" ? "VERY HIGH" : riskLevel}
                     </div>
+                    <div>
+                      <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "2px" }}>{hab.name}</div>
+                      <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{hab.population} at-risk</div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right", display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div>
+                      <div style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "2px" }}>{getHabitRiskScore(hab)} <span style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 500 }}>/ 100</span></div>
+                    </div>
+                    <svg width="16" height="16" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
                   </div>
                 </div>
               )
             })}
           </div>
 
-          <div style={{ padding: "16px 24px", background: "rgba(0,0,0,0.02)", textAlign: "center", marginTop: "auto" }}>
-            <button className="action-btn" style={{ width: "100%", justifyContent: "center", fontSize: "13px" }} onClick={onNavigateToPlanner}>
-              Launch Relocation Planner
+          <div style={{ marginTop: "auto", paddingTop: "8px" }}>
+            <button className="action-btn" style={{ width: "100%", justifyContent: "center", fontSize: "13px", background: "var(--bg-secondary)", border: "1px solid var(--border-color)", color: "var(--text-primary)" }} onClick={onNavigateToPlanner}>
+              View All Priority Habitations
             </button>
           </div>
         </div>
       </div>
 
       {/* REAL ENVIRONMENTAL INTELLIGENCE FEED */}
-      <div className="glass-panel" style={{ display: "flex", flexDirection: "column", padding: "0", overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
         <div style={{ padding: "18px 24px", borderBottom: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -378,7 +446,7 @@ function OverviewView({
               No real environmental observations currently loaded for {selectedDistrict}.
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "0" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
               {filteredObs.slice(0, 6).map((obs, index) => {
                 const paramName = obs.parameter_name || obs.parameterName || obs.parameter;
                 const paramVal = obs.parameter_value ?? obs.parameterValue ?? obs.observed_value;
@@ -417,35 +485,36 @@ function OverviewView({
                 return (
                   <div
                     key={obs.id || index}
+                    className="glass-panel"
                     style={{
-                      padding: "16px 20px",
-                      borderRight: "1px solid var(--border-color)",
-                      borderBottom: "1px solid var(--border-color)",
+                      padding: "24px",
                       display: "flex",
                       flexDirection: "column",
-                      gap: "10px",
-                      background: "var(--bg-card)"
+                      gap: "16px"
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                        {district} &middot; {paramName}
-                      </span>
-                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 6px", borderRadius: "3px", background: interpBg, color: interpColor }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <div style={{ width: "32px", height: "32px", background: "var(--bg-secondary)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="16" height="16" fill="none" stroke="var(--text-secondary)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                      </div>
+                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "4px 8px", borderRadius: "6px", background: interpBg, color: interpColor, letterSpacing: "0.5px" }}>
                         {interpLabel}
                       </span>
                     </div>
 
                     <div>
-                      <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>{stationName}</div>
-                      <div style={{ fontSize: "22px", fontWeight: 800, fontFamily: "var(--font-mono)", color: "var(--text-primary)", marginTop: "4px" }}>
-                        {typeof paramVal === "number" ? paramVal.toLocaleString() : paramVal} <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-muted)" }}>{unit}</span>
+                      <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>
+                        {district} &middot; {paramName}
+                      </div>
+                      <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>{stationName}</div>
+                      <div style={{ fontSize: "28px", fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--text-primary)", marginTop: "4px" }}>
+                        {typeof paramVal === "number" ? paramVal.toLocaleString() : paramVal} <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--text-muted)" }}>{unit}</span>
                       </div>
                     </div>
 
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: "8px", fontSize: "11px", color: "var(--text-muted)", borderTop: "1px solid var(--border-color)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: "12px", fontSize: "11px", color: "var(--text-muted)" }}>
                       <span title={sourceName} style={{ fontWeight: 600, color: "var(--text-secondary)" }}>
-                        {sourceName} ({sourceType})
+                        {sourceName}
                       </span>
                       <span>{obsTime.split("T")[0]}</span>
                     </div>
@@ -458,10 +527,10 @@ function OverviewView({
       </div>
 
       {/* OPERATIONAL RECOMMENDATIONS (Phase 3D) */}
-      <div className="glass-panel" style={{ display: "flex", flexDirection: "column", padding: "0", overflow: "hidden" }}>
-        <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "16px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div>
-            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>Operational Recommendations</h3>
+            <h3 style={{ fontSize: "20px", fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "4px" }}>Operational Recommendations</h3>
             <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>Decision-support actions generated by hazard intelligence</p>
           </div>
           {recommendations.length > 0 && (
@@ -478,13 +547,13 @@ function OverviewView({
               <div style={{ fontSize: "13px", color: "var(--text-muted)" }}>Current hazard conditions do not require additional operational action.</div>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "0" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
               {recommendations.slice(0, 3).map((rec, index) => {
                 const priorityColor = getRecommendationColor(rec.priority);
                 const priorityBg = getRecommendationBg(rec.priority);
 
                 return (
-                  <div key={rec.id} style={{ padding: "24px", borderRight: index < 2 ? "1px solid var(--border-color)" : "none", borderBottom: "1px solid var(--border-color)", display: "flex", flexDirection: "column", gap: "16px" }}>
+                  <div key={rec.id} className="glass-panel" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
 
                     {/* Header */}
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -549,13 +618,15 @@ function OverviewView({
       <div className="grid-1-1">
 
         {/* RELOCATION PROGRESS */}
-        <div className="glass-panel" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "24px" }}>
-          <div>
-            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>Evacuation & Relocation Progress</h3>
-            <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>Live tracking of population transferred to safe havens</p>
+        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+            <div>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "4px" }}>Evacuation & Relocation Progress</h3>
+              <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>Live tracking of population transferred to safe havens</p>
+            </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", background: "var(--bg-secondary)", padding: "20px", border: "1px solid var(--border-color)", borderRadius: "8px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", background: "var(--bg-secondary)", padding: "20px", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
               <div>
                 <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "8px" }}>Relocation Target</div>
@@ -568,21 +639,21 @@ function OverviewView({
               </div>
             </div>
 
-            <div style={{ width: "100%", height: "8px", background: "rgba(0,0,0,0.06)", borderRadius: "4px", overflow: "hidden" }}>
+            <div style={{ width: "100%", height: "8px", background: "var(--bg-card)", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--border-color)" }}>
               <div style={{ width: `${(safeStats.relocatedCount / (safeStats.populationAtRisk || 1)) * 100}%`, height: "100%", background: "var(--accent-blue)" }}></div>
             </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
-            <div style={{ border: "1px solid var(--border-color)", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ border: "1px solid var(--border-color)", padding: "16px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "6px", background: "var(--bg-card)" }}>
               <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Evacuated</div>
               <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--accent-safe)" }}>{safeStats.relocatedCount.toLocaleString()}</div>
             </div>
-            <div style={{ border: "1px solid var(--border-color)", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ border: "1px solid var(--border-color)", padding: "16px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "6px", background: "var(--bg-card)" }}>
               <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>In Transit</div>
               <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--accent-warning)" }}>420</div>
             </div>
-            <div style={{ border: "1px solid var(--border-color)", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ border: "1px solid var(--border-color)", padding: "16px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "6px", background: "var(--bg-card)" }}>
               <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Pending</div>
               <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)" }}>{Math.max(0, safeStats.populationAtRisk - safeStats.relocatedCount).toLocaleString()}</div>
             </div>
@@ -590,10 +661,12 @@ function OverviewView({
         </div>
 
         {/* SYSTEM EXECUTION PIPELINE */}
-        <div className="glass-panel" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "20px" }}>
-          <div>
-            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>System Execution Pipeline</h3>
-            <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>Automated decision workflow</p>
+        <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+            <div>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "4px" }}>System Execution Pipeline</h3>
+              <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>Automated decision workflow</p>
+            </div>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -603,7 +676,7 @@ function OverviewView({
               { step: "03", title: "Capacity Matching", desc: "Pair habitations to nearest available safe shelters", done: true },
               { step: "04", title: "Evacuation Dispatch", desc: "Live vehicle dispatch & route visualizer", done: false }
             ].map((st) => (
-              <div key={st.step} style={{ display: "flex", alignItems: "center", gap: "16px", padding: "14px", border: "1px solid var(--border-color)", borderRadius: "8px", background: "var(--bg-secondary)" }}>
+              <div key={st.step} style={{ display: "flex", alignItems: "center", gap: "16px", padding: "16px", border: "1px solid var(--border-color)", borderRadius: "12px", background: "var(--bg-secondary)" }}>
                 <div style={{ fontSize: "12px", fontWeight: 700, color: st.done ? "var(--text-secondary)" : "var(--text-muted)", width: "16px" }}>
                   {st.step}
                 </div>

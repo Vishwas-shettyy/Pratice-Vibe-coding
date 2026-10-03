@@ -20,7 +20,7 @@ function SafeSitesView({ safeSites = [], onSelectShelter }) {
   return (
     <div className="safe-sites-view" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* PAGE HEADER & SUMMARY STRIP */}
-      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", padding: "16px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+      <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
           <div>
@@ -73,7 +73,7 @@ function SafeSitesView({ safeSites = [], onSelectShelter }) {
           const statusColor = isFull ? "var(--accent-critical)" : isActive ? "var(--accent-safe)" : "var(--accent-warning)";
 
           return (
-            <div key={shelter.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "6px", display: "flex", flexDirection: "column" }}>
+            <div key={shelter.id} className="glass-panel" style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
 
               {/* CARD HEADER */}
               <div style={{ padding: "16px 24px", borderBottom: "1px solid var(--border-color)", background: "rgba(0,0,0,0.02)" }}>

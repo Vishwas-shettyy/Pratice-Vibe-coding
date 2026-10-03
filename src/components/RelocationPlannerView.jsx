@@ -151,7 +151,7 @@ function RelocationPlannerView({ habitations = [], safeSites = [], routes = [], 
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
 
       {/* OPERATIONAL SUMMARY & HABITATION SELECTOR */}
-      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", padding: "16px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+      <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -211,7 +211,7 @@ function RelocationPlannerView({ habitations = [], safeSites = [], routes = [], 
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
           {/* DISPATCH FLOW (ORIGIN -> DESTINATION) */}
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="glass-panel" style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "12px 20px", background: "rgba(0,0,0,0.02)", borderBottom: "1px solid var(--border-color)", fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
               Operational Logistics Flow
             </div>
@@ -262,17 +262,17 @@ function RelocationPlannerView({ habitations = [], safeSites = [], routes = [], 
 
           {/* TRANSPORT LOGISTICS */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
-            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column" }}>
+            <div className="glass-panel" style={{ display: "flex", flexDirection: "column" }}>
               <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>Evacuation Buses</span>
               <strong style={{ fontSize: "24px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--accent-blue)", lineHeight: 1, margin: "8px 0" }}>{busesRequired} <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-muted)" }}>Units</span></strong>
               <div style={{ fontSize: "11px", color: "var(--text-secondary)", fontWeight: 500 }}>50 seats / bus</div>
             </div>
-            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column" }}>
+            <div className="glass-panel" style={{ display: "flex", flexDirection: "column" }}>
               <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>Ambulances</span>
               <strong style={{ fontSize: "24px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--accent-red)", lineHeight: 1, margin: "8px 0" }}>{ambulanceRequired} <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-muted)" }}>Units</span></strong>
               <div style={{ fontSize: "11px", color: "var(--text-secondary)", fontWeight: 500 }}>For {currentHabitation.medicalPriority || 0} patients</div>
             </div>
-            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column" }}>
+            <div className="glass-panel" style={{ display: "flex", flexDirection: "column" }}>
               <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>Est. Transit Time</span>
               <strong style={{ fontSize: "24px", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--accent-emerald)", lineHeight: 1, margin: "8px 0" }}>~{Math.round((currentHabitation.distanceToShelterKm || 0) * 4)} <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-muted)" }}>mins</span></strong>
               <div style={{ fontSize: "11px", color: "var(--text-secondary)", fontWeight: 500 }}>Road: {currentHabitation.roadCondition || "Awaiting assessment"}</div>
@@ -281,7 +281,7 @@ function RelocationPlannerView({ habitations = [], safeSites = [], routes = [], 
 
           {/* ACTION AREA: ASSIGNMENT OR STATUS UPDATE */}
           {!isAssigned ? (
-            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", padding: "20px 24px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <h4 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", margin: 0, textTransform: "uppercase", letterSpacing: "0.5px" }}>Assign Safe Shelter</h4>
               <div style={{ display: "flex", gap: "16px" }}>
                 <select
@@ -316,7 +316,7 @@ function RelocationPlannerView({ habitations = [], safeSites = [], routes = [], 
               </div>
             </div>
           ) : (
-            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", padding: "24px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "20px" }}>
+            <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-color)", paddingBottom: "12px" }}>
                 <h4 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", margin: 0, textTransform: "uppercase", letterSpacing: "0.5px" }}>Evacuation Command</h4>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -380,7 +380,7 @@ function RelocationPlannerView({ habitations = [], safeSites = [], routes = [], 
         </div>
 
         {/* RIGHT COLUMN: ACTIVE CORRIDORS */}
-        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div className="glass-panel" style={{ padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div style={{ padding: "16px 20px", background: "rgba(0,0,0,0.02)", borderBottom: "1px solid var(--border-color)" }}>
             <h3 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.5px" }}>Active Dispatch Corridors</h3>
             <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>Live route utilization & vehicle metrics</div>

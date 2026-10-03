@@ -172,28 +172,35 @@ function RiskMapExplorer({
           scrollWheelZoom={true}
           style={{ height: "100%", width: "100%", zIndex: 0 }}
         >
-          {/* OPENSTREETMAP BASE LAYER */}
+          {/* HIGH CONTRAST TOPOGRAPHIC BASE LAYER */}
           <TileLayer
-            attribution='&copy; OpenStreetMap contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; Esri &mdash; Esri, HERE, Garmin, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), (c) OpenStreetMap contributors, and the GIS User Community'
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
           />
 
           {/* REAL HAZARD ZONES */}
           {layers.redZones && !isSimulated &&
-            safeHazardZones.map((zone) => (
-              <Circle
-                key={zone.id}
-                center={zone.center}
-                radius={zone.radius}
-                pathOptions={{
-                  color: zone.severity === "CRITICAL" ? "#dc2626" : "#f59e0b",
-                  fillColor: zone.severity === "CRITICAL" ? "#ef4444" : "#fcd34d",
-                  fillOpacity: 0.15,
-                  weight: 2,
-                  dashArray: zone.severity === "CRITICAL" ? "4, 6" : "2, 8"
-                }}
-              />
-            ))}
+            safeHazardZones.map((zone) => {
+              const isFlood = zone.type?.toLowerCase().includes("flood") || zone.name?.toLowerCase().includes("flood");
+              const isCritical = zone.severity === "CRITICAL";
+              const strokeColor = isFlood ? "#0284c7" : (isCritical ? "#dc2626" : "#ea580c");
+              const fillColor = isFlood ? "#0ea5e9" : (isCritical ? "#ef4444" : "#f97316");
+              
+              return (
+                <Circle
+                  key={zone.id}
+                  center={zone.center}
+                  radius={zone.radius}
+                  pathOptions={{
+                    color: strokeColor,
+                    fillColor: fillColor,
+                    fillOpacity: 0.35,
+                    weight: 2,
+                    dashArray: isCritical ? "4, 6" : "2, 8"
+                  }}
+                />
+              );
+            })}
 
           {/* SCENARIO EVACUATION ROUTES */}
           {isSimulated && layers.scenarioRoutes && simRelocations.map((rel) => {
@@ -347,7 +354,7 @@ function RiskMapExplorer({
                   key={hab.id}
                   center={[hab.lat, hab.lng]}
                   radius={riskStyle.radius}
-                  pathOptions={{ color: riskStyle.stroke, fillColor: riskStyle.fillColor, fillOpacity: 0.9, weight: 2 }}
+                  pathOptions={{ color: riskStyle.stroke, fillColor: riskStyle.fillColor, fillOpacity: 0.95, weight: 2 }}
                 >
                   <Popup className="risk-map-popup">
                     <div className="risk-popup-card">
@@ -455,7 +462,7 @@ function RiskMapExplorer({
         </MapContainer>
 
         {/* MAP LAYER CONTROLS */}
-        <div style={{ position: "absolute", top: "16px", right: "16px", zIndex: 400, background: "var(--bg-card)", border: "1px solid var(--border-color)", padding: "14px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "10px", minWidth: "230px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+        <div className="glass-panel" style={{ position: "absolute", top: "16px", right: "16px", zIndex: 400, padding: "16px", display: "flex", flexDirection: "column", gap: "10px", minWidth: "230px" }}>
           <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", paddingBottom: "6px", borderBottom: "1px solid var(--border-color)" }}>
             {isSimulated ? "SCENARIO LAYERS" : "GIS Layers"}
           </div>
@@ -510,7 +517,7 @@ function RiskMapExplorer({
         </div>
 
         {/* MAP LEGEND */}
-        <div style={{ position: "absolute", bottom: "16px", left: "16px", zIndex: 400, background: "var(--bg-card)", border: "1px solid var(--border-color)", padding: "10px 14px", borderRadius: "8px", display: "flex", gap: "16px", flexWrap: "wrap", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+        <div className="glass-panel" style={{ position: "absolute", bottom: "16px", left: "16px", zIndex: 400, padding: "12px 16px", display: "flex", gap: "16px", flexWrap: "wrap" }}>
           {isSimulated ? (
             <>
               <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>

@@ -44,7 +44,7 @@ function ResourceManagementView({ resources = {}, habitations = [], safeSites = 
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
 
       {/* PAGE HEADER & OPERATIONAL SUMMARY */}
-      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", padding: "16px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+      <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
           <div>
             <h2 className="page-title" style={{ margin: "0 0 4px 0", fontSize: "20px" }}>Resource Management & Logistics</h2>
@@ -74,7 +74,7 @@ function ResourceManagementView({ resources = {}, habitations = [], safeSites = 
 
       <div className="grid-2-1">
         {/* RESOURCE ALLOCATION TABLE */}
-        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div className="glass-panel" style={{ padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div style={{ padding: "16px 20px", background: "rgba(0,0,0,0.02)", borderBottom: "1px solid var(--border-color)" }}>
             <h3 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.5px" }}>Active Fleet & Personnel</h3>
             <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>Current availability vs required active deployments</div>
@@ -155,7 +155,7 @@ function ResourceManagementView({ resources = {}, habitations = [], safeSites = 
         {/* SUPPLIES & SHELTER STOCKS */}
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div className="glass-panel" style={{ padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "16px 20px", background: "rgba(0,0,0,0.02)", borderBottom: "1px solid var(--border-color)" }}>
               <h3 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.5px" }}>Central Depot Reserves</h3>
               <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>Emergency supplies available for immediate dispatch</div>
@@ -181,7 +181,7 @@ function ResourceManagementView({ resources = {}, habitations = [], safeSites = 
             </div>
           </div>
 
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "8px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div className="glass-panel" style={{ padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "16px 20px", background: "rgba(0,0,0,0.02)", borderBottom: "1px solid var(--border-color)" }}>
               <h3 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.5px" }}>Shelter Deployed Stock</h3>
               <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>Total supplies actively distributed across all safe sites</div>

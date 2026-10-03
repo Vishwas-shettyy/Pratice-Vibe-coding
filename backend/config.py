@@ -18,6 +18,9 @@ class Config(metaclass=ConfigMeta):
     PORT = int(os.getenv("PORT", 5005))
     DEBUG = os.getenv("FLASK_ENV") == "development"
     DATABASE_URL = os.getenv("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///sih.db")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-jwt-key")
     CORS_HEADERS = "Content-Type"
 
     # Permitted origins for production Vercel frontend and local development

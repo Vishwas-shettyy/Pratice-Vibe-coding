@@ -2,6 +2,8 @@ from flask import Flask
 from flask_cors import CORS
 from config import Config
 from app.utils.response import error_response
+from app.extensions import db, migrate, limiter
+from app.models import Officer, RefreshToken
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -13,13 +15,19 @@ def create_app(config_class=Config):
     elif not app.config.get("SECRET_KEY"):
         app.config["SECRET_KEY"] = Config.get_secret_key()
 
+    db.init_app(app)
+    migrate.init_app(app, db)
+    limiter.init_app(app)
+
     # Enable CORS for authorized origins (production Vercel frontend and local dev)
     allowed_origins = app.config.get("CORS_ORIGINS", Config.DEFAULT_CORS_ORIGINS)
-    CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
 
     # Register Blueprints
     from app.routes.api import api_bp
+    from app.routes.auth import auth_bp
     app.register_blueprint(api_bp)
+    app.register_blueprint(auth_bp)
 
     # Global Error Handlers
     @app.errorhandler(404)
