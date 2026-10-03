@@ -4,7 +4,10 @@ from app.utils.response import success_response, error_response
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
+from app.extensions import limiter
+
 @api_bp.route("/health", methods=["GET"])
+@limiter.exempt
 def health_check():
     return success_response({"status": "UP", "version": "1.0.0"}, message="SIH Backend Operational")
 
