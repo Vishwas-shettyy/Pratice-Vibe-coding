@@ -1351,29 +1351,37 @@ class Repository:
     def get_all_scenarios(self):
         if self.in_memory:
             return list(self.memory_store["scenarios"].values())
-        with self._get_conn() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT * FROM scenarios")
-                rows = [dict(r) for r in cur.fetchall()]
-                for r in rows:
-                    if r.get("created_at") is not None:
-                        r["created_at"] = str(r["created_at"])
-                    self.memory_store["scenarios"][r["id"]] = r
-                return rows
+        try:
+            with self._get_conn() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT * FROM scenarios")
+                    rows = [dict(r) for r in cur.fetchall()]
+                    for r in rows:
+                        if r.get("created_at") is not None:
+                            r["created_at"] = str(r["created_at"])
+                        self.memory_store["scenarios"][r["id"]] = r
+                    return rows
+        except Exception as e:
+            print(f"⚠️ Error fetching scenarios from database: {e}. Falling back to memory store.")
+            return list(self.memory_store["scenarios"].values())
 
     def get_scenario(self, scenario_id):
         if self.in_memory:
             return self.memory_store["scenarios"].get(scenario_id)
-        with self._get_conn() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT * FROM scenarios WHERE id = %s", (scenario_id,))
-                row = cur.fetchone()
-                if row:
-                    d = dict(row)
-                    if d.get("created_at") is not None:
-                        d["created_at"] = str(d["created_at"])
-                    self.memory_store["scenarios"][scenario_id] = d
-                    return d
+        try:
+            with self._get_conn() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT * FROM scenarios WHERE id = %s", (scenario_id,))
+                    row = cur.fetchone()
+                    if row:
+                        d = dict(row)
+                        if d.get("created_at") is not None:
+                            d["created_at"] = str(d["created_at"])
+                        self.memory_store["scenarios"][scenario_id] = d
+                        return d
+        except Exception as e:
+            print(f"⚠️ Error fetching scenario {scenario_id} from database: {e}. Falling back to memory store.")
+            return self.memory_store["scenarios"].get(scenario_id)
         return None
 
     def upsert_scenario_exposure(self, exp):
@@ -1441,8 +1449,8 @@ class Repository:
             "impact_reason": imp.get("impact_reason"),
             "data_status": imp.get("data_status", "SCENARIO")
         }
+        self.memory_store["scenario_road_impacts"][i_id] = formatted
         if self.in_memory:
-            self.memory_store["scenario_road_impacts"][i_id] = formatted
             return formatted
 
         with self._get_conn() as conn:
@@ -1463,8 +1471,52 @@ class Repository:
                     formatted["data_status"]
                 ))
             conn.commit()
-        self.memory_store["scenario_road_impacts"][i_id] = formatted
         return formatted
+
+    def upsert_scenario_road_impacts_batch(self, imps):
+        if not imps:
+            return []
+        formatted_list = []
+        for imp in imps:
+            i_id = imp["id"]
+            formatted = {
+                "id": i_id,
+                "scenario_id": imp.get("scenario_id"),
+                "road_id": imp.get("road_id"),
+                "impact_status": imp.get("impact_status"),
+                "impact_reason": imp.get("impact_reason"),
+                "data_status": imp.get("data_status", "SCENARIO")
+            }
+            self.memory_store["scenario_road_impacts"][i_id] = formatted
+            formatted_list.append(formatted)
+
+        if self.in_memory:
+            return formatted_list
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    INSERT INTO scenario_road_impacts (
+                        id, scenario_id, road_id, impact_status, impact_reason, data_status
+                    ) VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        scenario_id = EXCLUDED.scenario_id,
+                        road_id = EXCLUDED.road_id,
+                        impact_status = EXCLUDED.impact_status,
+                        impact_reason = EXCLUDED.impact_reason,
+                        data_status = EXCLUDED.data_status
+                """
+                params_list = [
+                    (
+                        f["id"], f["scenario_id"], f["road_id"],
+                        f["impact_status"], f["impact_reason"], f["data_status"]
+                    )
+                    for f in formatted_list
+                ]
+                execute_batch(cur, sql, params_list, page_size=500)
+            conn.commit()
+
+        return formatted_list
 
     def get_scenario_road_impacts(self, scenario_id):
         if self.in_memory:

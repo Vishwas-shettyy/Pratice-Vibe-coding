@@ -205,7 +205,14 @@ from app.services.scenario_service import scenario_service
 @api_bp.route("/scenarios", methods=["GET"])
 def get_scenarios():
     scenario_service.get_or_create_default_scenario()
+    scenario_service.get_or_create_harsh_scenario()
     scens = scenario_service.repo.get_all_scenarios()
+    if not scens:
+        scens = [
+            scenario_service.get_scenario(scenario_service.BASELINE_SCENARIO_ID),
+            scenario_service.get_scenario(scenario_service.HARSH_SCENARIO_ID)
+        ]
+        scens = [s for s in scens if s]
     return success_response(scens, message="Scenarios retrieved")
 
 @api_bp.route("/scenarios/<scenario_id>", methods=["GET"])

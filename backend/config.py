@@ -22,6 +22,7 @@ class Config(metaclass=ConfigMeta):
 
     # Permitted origins for production Vercel frontend and local development
     DEFAULT_CORS_ORIGINS = [
+        "https://resq-roan.vercel.app",
         "https://sih-apex-flax.vercel.app",
         "https://sih-apex-git-main-apex-a9a1.vercel.app",
         r"https://.*\.vercel\.app",

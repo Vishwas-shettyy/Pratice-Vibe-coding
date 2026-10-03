@@ -351,20 +351,29 @@ function App() {
   // Handle Scenario Simulator updates
   const handleSimulateImpact = (simResult) => {
     setLatestSimulationResult(simResult.fullResult);
+    const isHarsh = simResult.fullResult?.scenario?.id === "KODAGU_EXTREME_MONSOON_HARSH_CASE" || simResult.fullResult?.scenario?.label === "HARSH CASE";
+    setIsHarshCaseActive(isHarsh);
     setStats((prev) => ({
       ...prev,
-      hazardLevel: simResult.threatLabel,
-      redZonesCount: simResult.calculatedRiskIndex > 75 ? 12 : 8
+      hazardLevel: isHarsh ? "CRITICAL" : simResult.threatLabel,
+      redZonesCount: isHarsh ? 15 : (simResult.calculatedRiskIndex > 75 ? 12 : 8)
     }));
 
-    const newSimAlert = {
+    const newSimAlert = isHarsh ? {
+      id: `ALT-SIM-HARSH-${Date.now()}`,
+      type: "CRITICAL",
+      severity: "CRITICAL",
+      title: "HARSH CASE SCENARIO SIMULATION ACTIVE",
+      time: "Just now",
+      message: "Extreme 450mm rainfall and severe landslide stress simulation active across Kodagu. 15 settlements elevated to Critical Red Zones, 1,311 roads disrupted. Simulation only — not a live forecast.",
+    } : {
       id: `ALT-SIM-${Date.now()}`,
       type: "WARNING",
       title: `Scenario Simulation: ${simResult.threatLabel}`,
       time: "Just now",
-      message: `Simulated Rainfall: ${simResult.rainfall}mm/hr | Slope Instability: ${simResult.slopeInstability}%. Risk Index recalculated to ${simResult.calculatedRiskIndex}/100.`
+      message: `Simulated Rainfall: ${simResult.rainfall || 85}mm/hr | Slope Instability: ${simResult.slopeInstability || 45}%. Risk Index recalculated to ${simResult.calculatedRiskIndex}/100.`
     };
-    setAlerts([newSimAlert, ...alerts]);
+    setAlerts([newSimAlert, ...alerts.filter((a) => !String(a.id).startsWith("ALT-SIM-"))]);
 
     setActiveTab("overview");
   };

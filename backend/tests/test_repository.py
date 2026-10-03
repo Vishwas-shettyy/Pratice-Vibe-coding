@@ -470,6 +470,42 @@ class TestRepository(unittest.TestCase):
         mock_conn.__enter__.return_value.commit.assert_called_once()
 
     @patch('app.services.repository.psycopg2')
+    @patch('app.services.repository.execute_batch')
+    def test_postgres_batched_scenario_road_impacts_upsert(self, mock_execute_batch, mock_psycopg2):
+        mock_conn = mock_psycopg2.connect.return_value
+        repo = Repository(db_url="postgres://user:pass@localhost:5432/db")
+
+        impacts = [
+            {
+                "id": "sri_scen_1",
+                "scenario_id": "scen_1",
+                "road_id": "road_1",
+                "impact_status": "BLOCKED",
+                "impact_reason": "Simulated flood",
+                "data_status": "SCENARIO"
+            },
+            {
+                "id": "sri_scen_2",
+                "scenario_id": "scen_1",
+                "road_id": "road_2",
+                "impact_status": "OPEN",
+                "impact_reason": "Simulated open",
+                "data_status": "SCENARIO"
+            }
+        ]
+
+        mock_conn.__enter__.return_value.commit.reset_mock()
+        res = repo.upsert_scenario_road_impacts_batch(impacts)
+        self.assertEqual(len(res), 2)
+        self.assertTrue(mock_execute_batch.called)
+        sql = mock_execute_batch.call_args[0][1]
+        self.assertIn("INSERT INTO scenario_road_impacts", sql)
+        self.assertIn("ON CONFLICT (id) DO UPDATE", sql)
+        params_list = mock_execute_batch.call_args[0][2]
+        self.assertEqual(len(params_list), 2)
+        mock_conn.__enter__.return_value.commit.assert_called_once()
+
+    @patch('app.services.repository.psycopg2')
     def test_postgres_count_roads(self, mock_psycopg2):
         mock_conn = mock_psycopg2.connect.return_value
         mock_cur = mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value

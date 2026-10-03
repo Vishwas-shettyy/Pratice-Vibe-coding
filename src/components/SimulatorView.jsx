@@ -1,9 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../services/api";
 
+export const DEFAULT_SCENARIOS = [
+  {
+    id: "KODAGU_MONSOON_FLOOD_LANDSLIDE_SCENARIO",
+    name: "Kodagu Monsoon Flood and Landslide (Simulated)",
+    label: "BASELINE SCENARIO",
+    type: "MONSOON_DISASTER",
+    description: "A controlled simulation of extreme monsoon rainfall leading to localized flooding near river gauges and landslides near steep terrain features."
+  },
+  {
+    id: "KODAGU_EXTREME_MONSOON_HARSH_CASE",
+    name: "Kodagu Extreme Monsoon & Severe Landslide (Harsh Simulation)",
+    label: "HARSH CASE",
+    type: "MONSOON_DISASTER",
+    description: "Deterministic extreme flood and landslide stress simulation using the real Kodagu dataset and network."
+  }
+];
+
 function SimulatorView({ onSimulateImpact, onClearScenario, simulationResult: initialSimulationResult }) {
-  const [scenarios, setScenarios] = useState([]);
-  const [selectedScenarioId, setSelectedScenarioId] = useState("");
+  const [scenarios, setScenarios] = useState(DEFAULT_SCENARIOS);
+  const [selectedScenarioId, setSelectedScenarioId] = useState(
+    initialSimulationResult?.scenario?.id || "KODAGU_MONSOON_FLOOD_LANDSLIDE_SCENARIO"
+  );
   
   const [rainfall, setRainfall] = useState(85);
   const [slopeInstability, setSlopeInstability] = useState(45);
@@ -15,19 +34,26 @@ function SimulatorView({ onSimulateImpact, onClearScenario, simulationResult: in
 
   useEffect(() => {
     setSimulationResult(initialSimulationResult || null);
+    if (initialSimulationResult?.scenario?.id) {
+      setSelectedScenarioId(initialSimulationResult.scenario.id);
+    } else if (!initialSimulationResult) {
+      setSelectedScenarioId("KODAGU_MONSOON_FLOOD_LANDSLIDE_SCENARIO");
+    }
   }, [initialSimulationResult]);
 
   useEffect(() => {
     const fetchScenarios = async () => {
       try {
         const scens = await api.getScenarios();
-        setScenarios(scens || []);
         if (scens && scens.length > 0) {
-          const defaultScen = scens.find(s => s.id === "KODAGU_MONSOON_FLOOD_LANDSLIDE_SCENARIO") || scens[0];
-          setSelectedScenarioId(defaultScen.id);
+          setScenarios(scens);
+          if (!selectedScenarioId) {
+            const defaultScen = scens.find(s => s.id === "KODAGU_MONSOON_FLOOD_LANDSLIDE_SCENARIO") || scens[0];
+            setSelectedScenarioId(defaultScen.id);
+          }
         }
       } catch (err) {
-        console.warn("Failed to load scenarios", err);
+        console.warn("Failed to load scenarios from API, using default scenarios", err);
       }
     };
     fetchScenarios();

@@ -223,6 +223,7 @@ class ScenarioService:
             count_exposures += 1
             
         frac = scenario["affected_road_fraction"]
+        road_impacts_to_upsert = []
         for road in roads:
             # Deterministic pseudo-random using hash of road id and scenario id
             h = hashlib.sha256(f"{scenario_id}_{road['id']}".encode('utf-8')).hexdigest()
@@ -244,8 +245,14 @@ class ScenarioService:
                 "impact_reason": reason,
                 "data_status": "SCENARIO"
             }
-            self.repo.upsert_scenario_road_impact(imp)
+            road_impacts_to_upsert.append(imp)
             count_roads += 1
+
+        if hasattr(self.repo, "upsert_scenario_road_impacts_batch"):
+            self.repo.upsert_scenario_road_impacts_batch(road_impacts_to_upsert)
+        else:
+            for imp in road_impacts_to_upsert:
+                self.repo.upsert_scenario_road_impact(imp)
             
         return {"exposures_calculated": count_exposures, "roads_evaluated": count_roads}
         
