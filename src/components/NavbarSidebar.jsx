@@ -1,5 +1,5 @@
 import React from "react";
-import logoSrc from "../assets/logo_transparent.png";
+import logoSrc from "../assets/logo_black.png";
 function NavbarSidebar({ activeTab, setActiveTab, alertCount }) {
   const menuItems = [
     {
@@ -79,12 +79,9 @@ function NavbarSidebar({ activeTab, setActiveTab, alertCount }) {
 
   return (
     <aside className="sidebar">
-      <div className="brand-container">
-        <div className="brand-logo">
-          <img src={logoSrc} alt="RESQ Logo" width="42" height="42" style={{ objectFit: 'contain' }} />
-        </div>
-        <div className="brand-title">
-          RES<span style={{ fontSize: "1.15em", fontWeight: 800 }}>Q</span>
+      <div className="brand-container" style={{ justifyContent: "center" }}>
+        <div className="brand-logo" style={{ width: "100%", padding: "10px 0" }}>
+          <img src={logoSrc} alt="RESQ Logo" style={{ width: "120px", height: "auto", objectFit: 'contain' }} />
         </div>
       </div>
 
