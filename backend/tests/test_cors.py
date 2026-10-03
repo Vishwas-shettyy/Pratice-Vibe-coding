@@ -10,6 +10,24 @@ class TestCorsConfiguration(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers.get("Access-Control-Allow-Origin"), "https://sih-apex-flax.vercel.app")
 
+    def test_preview_vercel_origin_allowed(self):
+        response = self.app.get("/api/health", headers={"Origin": "https://sih-apex-git-main-apex-a9a1.vercel.app"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers.get("Access-Control-Allow-Origin"), "https://sih-apex-git-main-apex-a9a1.vercel.app")
+
+    def test_preflight_options_allowed(self):
+        response = self.app.open(
+            "/api/resources",
+            method="OPTIONS",
+            headers={
+                "Origin": "https://sih-apex-git-main-apex-a9a1.vercel.app",
+                "Access-Control-Request-Method": "GET",
+                "Access-Control-Request-Headers": "Content-Type",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers.get("Access-Control-Allow-Origin"), "https://sih-apex-git-main-apex-a9a1.vercel.app")
+
     def test_localhost_5173_allowed(self):
         response = self.app.get("/api/health", headers={"Origin": "http://localhost:5173"})
         self.assertEqual(response.status_code, 200)

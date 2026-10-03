@@ -23,6 +23,8 @@ class Config(metaclass=ConfigMeta):
     # Permitted origins for production Vercel frontend and local development
     DEFAULT_CORS_ORIGINS = [
         "https://sih-apex-flax.vercel.app",
+        "https://sih-apex-git-main-apex-a9a1.vercel.app",
+        r"https://.*\.vercel\.app",
         "http://localhost:5173",
         "http://localhost:5174",
         "http://127.0.0.1:5173",
