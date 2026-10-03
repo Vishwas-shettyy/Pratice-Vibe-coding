@@ -1,6 +1,7 @@
 import os
 import math
 import hashlib
+import threading
 from datetime import datetime, timezone
 from app.services.repository import repo
 import json
@@ -27,6 +28,8 @@ class ScenarioService:
 
     def __init__(self, repository=None):
         self.repo = repository or repo
+        self._ingestion_lock = threading.Lock()
+        self._ingestion_thread = None
         self.get_or_create_default_scenario()
         
     def get_or_create_default_scenario(self):
@@ -95,17 +98,76 @@ class ScenarioService:
             exps = self.repo.get_scenario_exposures(scenario_id)
         return exps
 
+    def is_ingesting(self):
+        with self._ingestion_lock:
+            return self._ingestion_thread is not None and self._ingestion_thread.is_alive()
+
+    def trigger_road_ingestion_async(self, scenario_id=None):
+        with self._ingestion_lock:
+            if self._ingestion_thread is not None and self._ingestion_thread.is_alive():
+                return False
+
+            def _worker():
+                advisory_conn = None
+                has_advisory_lock = False
+                if not self.repo.in_memory and getattr(self.repo, "db_url", None):
+                    try:
+                        advisory_conn = self.repo._get_conn()
+                        with advisory_conn.cursor() as cur:
+                            cur.execute("SELECT pg_try_advisory_lock(849201)")
+                            row = cur.fetchone()
+                            has_advisory_lock = row[0] if row else False
+                        if not has_advisory_lock:
+                            advisory_conn.close()
+                            return
+                    except Exception as e:
+                        print(f"Warning: Could not acquire advisory lock: {e}")
+
+                try:
+                    from scripts.ingest_osm_roads import ingest_osm_roads
+                    ingest_osm_roads(self.repo)
+                    if scenario_id:
+                        self.run_scenario(scenario_id, trigger_ingestion=False)
+                except Exception as e:
+                    print(f"Background road ingestion error: {e}")
+                finally:
+                    if advisory_conn and has_advisory_lock:
+                        try:
+                            with advisory_conn.cursor() as cur:
+                                cur.execute("SELECT pg_advisory_unlock(849201)")
+                            advisory_conn.commit()
+                            advisory_conn.close()
+                        except Exception:
+                            pass
+
+            self._ingestion_thread = threading.Thread(
+                target=_worker,
+                daemon=True,
+                name="osm-road-ingestion-worker"
+            )
+            self._ingestion_thread.start()
+            return True
+
     def get_scenario_road_impacts(self, scenario_id):
         imps = self.repo.get_scenario_road_impacts(scenario_id)
         habitations = self.repo.get_all_habitations()
         is_real_kodagu = any(str(h.get("id", "")).startswith("SET-KOD-") for h in habitations)
         road_count = self.repo.count_roads() if hasattr(self.repo, "count_roads") else len(self.repo.get_all_roads())
-        if not imps or (is_real_kodagu and (road_count < 2857 or len(imps) < 2857)):
-            self.run_scenario(scenario_id)
+
+        # Non-blocking trigger: if roads are incomplete, trigger ingestion in the background
+        if is_real_kodagu and road_count < 2857:
+            self.trigger_road_ingestion_async(scenario_id)
+
+        # Only evaluate synchronously if there are no existing impacts at all,
+        # or if all 2,857 roads are already in DB but impacts are incomplete.
+        # This ensures we NEVER block the HTTP request on the 2,857 road ingestion.
+        if not imps or (is_real_kodagu and road_count >= 2857 and len(imps) < 2857):
+            self.run_scenario(scenario_id, trigger_ingestion=False)
             imps = self.repo.get_scenario_road_impacts(scenario_id)
+
         return imps
         
-    def run_scenario(self, scenario_id):
+    def run_scenario(self, scenario_id, trigger_ingestion=True, wait_for_ingestion=False):
         scenario = self.get_scenario(scenario_id)
         if not scenario:
             raise ValueError(f"Scenario '{scenario_id}' not found")
@@ -138,12 +200,10 @@ class ScenarioService:
                 except Exception:
                     pass
             road_count = self.repo.count_roads() if hasattr(self.repo, "count_roads") else len(self.repo.get_all_roads())
-            if road_count < 2857:
-                try:
-                    from scripts.ingest_osm_roads import ingest_osm_roads
-                    ingest_osm_roads(self.repo)
-                except Exception:
-                    pass
+            if road_count < 2857 and trigger_ingestion:
+                self.trigger_road_ingestion_async(scenario_id)
+                if wait_for_ingestion and self._ingestion_thread:
+                    self._ingestion_thread.join(timeout=30.0)
 
         facilities = self.repo.get_all_facilities()
         roads = self.repo.get_all_roads()
