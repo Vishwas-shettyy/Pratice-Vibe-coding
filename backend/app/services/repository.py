@@ -341,6 +341,8 @@ class Repository:
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         )
                     """)
+                    cur.execute("ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS label VARCHAR(100);")
+                    cur.execute("ALTER TABLE scenario_relocations ADD COLUMN IF NOT EXISTS route_geometry JSONB;")
                 conn.commit()
         except Exception as e:
             print(f"❌ Failed to initialize database schema: {e}")
@@ -1257,14 +1259,71 @@ class Repository:
             "data_status": scenario.get("data_status", "SCENARIO"),
             "created_at": scenario.get("created_at")
         }
+        if self.in_memory:
+            self.memory_store["scenarios"][s_id] = formatted
+            return formatted
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO scenarios (
+                        id, name, label, type, description, rainfall_24h_mm, river_stage_m,
+                        flood_influence_radius_km, landslide_influence_radius_km,
+                        landslide_rainfall_trigger_mm, affected_road_fraction, severity,
+                        data_status, created_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        name = EXCLUDED.name,
+                        label = EXCLUDED.label,
+                        type = EXCLUDED.type,
+                        description = EXCLUDED.description,
+                        rainfall_24h_mm = EXCLUDED.rainfall_24h_mm,
+                        river_stage_m = EXCLUDED.river_stage_m,
+                        flood_influence_radius_km = EXCLUDED.flood_influence_radius_km,
+                        landslide_influence_radius_km = EXCLUDED.landslide_influence_radius_km,
+                        landslide_rainfall_trigger_mm = EXCLUDED.landslide_rainfall_trigger_mm,
+                        affected_road_fraction = EXCLUDED.affected_road_fraction,
+                        severity = EXCLUDED.severity,
+                        data_status = EXCLUDED.data_status,
+                        created_at = EXCLUDED.created_at
+                """, (
+                    formatted["id"], formatted["name"], formatted["label"], formatted["type"],
+                    formatted["description"], formatted["rainfall_24h_mm"], formatted["river_stage_m"],
+                    formatted["flood_influence_radius_km"], formatted["landslide_influence_radius_km"],
+                    formatted["landslide_rainfall_trigger_mm"], formatted["affected_road_fraction"],
+                    formatted["severity"], formatted["data_status"], formatted["created_at"]
+                ))
+            conn.commit()
         self.memory_store["scenarios"][s_id] = formatted
         return formatted
 
     def get_all_scenarios(self):
-        return list(self.memory_store["scenarios"].values())
+        if self.in_memory:
+            return list(self.memory_store["scenarios"].values())
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM scenarios")
+                rows = [dict(r) for r in cur.fetchall()]
+                for r in rows:
+                    if r.get("created_at") is not None:
+                        r["created_at"] = str(r["created_at"])
+                    self.memory_store["scenarios"][r["id"]] = r
+                return rows
 
     def get_scenario(self, scenario_id):
-        return self.memory_store["scenarios"].get(scenario_id)
+        if self.in_memory:
+            return self.memory_store["scenarios"].get(scenario_id)
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM scenarios WHERE id = %s", (scenario_id,))
+                row = cur.fetchone()
+                if row:
+                    d = dict(row)
+                    if d.get("created_at") is not None:
+                        d["created_at"] = str(d["created_at"])
+                    self.memory_store["scenarios"][scenario_id] = d
+                    return d
+        return None
 
     def upsert_scenario_exposure(self, exp):
         e_id = exp["id"]
@@ -1281,12 +1340,45 @@ class Repository:
         }
         if self.in_memory:
             self.memory_store["scenario_exposures"][e_id] = formatted
+            return formatted
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO scenario_exposures (
+                        id, scenario_id, entity_id, entity_type,
+                        flood_exposure, landslide_exposure, overall_exposure,
+                        impact_reason, data_status
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        scenario_id = EXCLUDED.scenario_id,
+                        entity_id = EXCLUDED.entity_id,
+                        entity_type = EXCLUDED.entity_type,
+                        flood_exposure = EXCLUDED.flood_exposure,
+                        landslide_exposure = EXCLUDED.landslide_exposure,
+                        overall_exposure = EXCLUDED.overall_exposure,
+                        impact_reason = EXCLUDED.impact_reason,
+                        data_status = EXCLUDED.data_status
+                """, (
+                    formatted["id"], formatted["scenario_id"], formatted["entity_id"],
+                    formatted["entity_type"], formatted["flood_exposure"],
+                    formatted["landslide_exposure"], formatted["overall_exposure"],
+                    formatted["impact_reason"], formatted["data_status"]
+                ))
+            conn.commit()
+        self.memory_store["scenario_exposures"][e_id] = formatted
         return formatted
 
     def get_scenario_exposures(self, scenario_id):
         if self.in_memory:
             return [e for e in self.memory_store["scenario_exposures"].values() if e["scenario_id"] == scenario_id]
-        return []
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM scenario_exposures WHERE scenario_id = %s", (scenario_id,))
+                rows = [dict(r) for r in cur.fetchall()]
+                for r in rows:
+                    self.memory_store["scenario_exposures"][r["id"]] = r
+                return rows
 
     def upsert_scenario_road_impact(self, imp):
         i_id = imp["id"]
@@ -1300,17 +1392,51 @@ class Repository:
         }
         if self.in_memory:
             self.memory_store["scenario_road_impacts"][i_id] = formatted
+            return formatted
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO scenario_road_impacts (
+                        id, scenario_id, road_id, impact_status, impact_reason, data_status
+                    ) VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        scenario_id = EXCLUDED.scenario_id,
+                        road_id = EXCLUDED.road_id,
+                        impact_status = EXCLUDED.impact_status,
+                        impact_reason = EXCLUDED.impact_reason,
+                        data_status = EXCLUDED.data_status
+                """, (
+                    formatted["id"], formatted["scenario_id"], formatted["road_id"],
+                    formatted["impact_status"], formatted["impact_reason"],
+                    formatted["data_status"]
+                ))
+            conn.commit()
+        self.memory_store["scenario_road_impacts"][i_id] = formatted
         return formatted
 
     def get_scenario_road_impacts(self, scenario_id):
         if self.in_memory:
             impacts = [dict(i) for i in self.memory_store["scenario_road_impacts"].values() if i["scenario_id"] == scenario_id]
+            roads_map = self.memory_store["roads"]
             for imp in impacts:
-                road = self.memory_store["roads"].get(imp["road_id"])
+                road = roads_map.get(imp["road_id"])
                 if road:
                     imp["geometry"] = road.get("geometry")
             return impacts
-        return []
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT sri.id, sri.scenario_id, sri.road_id, sri.impact_status, sri.impact_reason, sri.data_status, r.geometry
+                    FROM scenario_road_impacts sri
+                    LEFT JOIN roads r ON sri.road_id = r.id
+                    WHERE sri.scenario_id = %s
+                """, (scenario_id,))
+                rows = [dict(r) for r in cur.fetchall()]
+                for r in rows:
+                    self.memory_store["scenario_road_impacts"][r["id"]] = r
+                return rows
 
     def upsert_scenario_relocation(self, reloc):
         r_id = reloc["id"]
@@ -1334,13 +1460,61 @@ class Repository:
         }
         if self.in_memory:
             self.memory_store["scenario_relocations"][r_id] = formatted
+            return formatted
+
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO scenario_relocations (
+                        id, scenario_id, settlement_id, recommended_site_id,
+                        priority, required_capacity, available_capacity,
+                        capacity_status, route_status, route_distance_m,
+                        estimated_travel_time_min, candidate_count,
+                        recommendation_reason, route_geometry, data_status, created_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        scenario_id = EXCLUDED.scenario_id,
+                        settlement_id = EXCLUDED.settlement_id,
+                        recommended_site_id = EXCLUDED.recommended_site_id,
+                        priority = EXCLUDED.priority,
+                        required_capacity = EXCLUDED.required_capacity,
+                        available_capacity = EXCLUDED.available_capacity,
+                        capacity_status = EXCLUDED.capacity_status,
+                        route_status = EXCLUDED.route_status,
+                        route_distance_m = EXCLUDED.route_distance_m,
+                        estimated_travel_time_min = EXCLUDED.estimated_travel_time_min,
+                        candidate_count = EXCLUDED.candidate_count,
+                        recommendation_reason = EXCLUDED.recommendation_reason,
+                        route_geometry = EXCLUDED.route_geometry,
+                        data_status = EXCLUDED.data_status,
+                        created_at = EXCLUDED.created_at
+                """, (
+                    formatted["id"], formatted["scenario_id"], formatted["settlement_id"],
+                    formatted["recommended_site_id"], formatted["priority"],
+                    formatted["required_capacity"], formatted["available_capacity"],
+                    formatted["capacity_status"], formatted["route_status"],
+                    formatted["route_distance_m"], formatted["estimated_travel_time_min"],
+                    formatted["candidate_count"], formatted["recommendation_reason"],
+                    Json(formatted["route_geometry"]) if formatted["route_geometry"] else None,
+                    formatted["data_status"], formatted["created_at"]
+                ))
+            conn.commit()
+        self.memory_store["scenario_relocations"][r_id] = formatted
         return formatted
 
     def get_scenario_relocations(self, scenario_id):
         if self.in_memory:
             return [r for r in self.memory_store["scenario_relocations"].values() if r["scenario_id"] == scenario_id]
-        return []
-        
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM scenario_relocations WHERE scenario_id = %s", (scenario_id,))
+                rows = [dict(r) for r in cur.fetchall()]
+                for r in rows:
+                    if r.get("created_at") is not None:
+                        r["created_at"] = str(r["created_at"])
+                    self.memory_store["scenario_relocations"][r["id"]] = r
+                return rows
+
     def get_scenario_relocation(self, scenario_id, settlement_id):
         rels = self.get_scenario_relocations(scenario_id)
         for r in rels:

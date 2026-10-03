@@ -243,6 +243,103 @@ class TestRepository(unittest.TestCase):
         self.assertIn("INSERT INTO environmental_observations", executed_sql)
         self.assertIn("ON CONFLICT (id) DO UPDATE", executed_sql)
 
+    @patch('app.services.repository.psycopg2')
+    def test_postgres_scenario_persistence(self, mock_psycopg2):
+        mock_conn = mock_psycopg2.connect.return_value
+        mock_cur = mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value
+
+        repo = Repository(db_url="postgres://user:pass@localhost:5432/db")
+        self.assertFalse(repo.in_memory)
+
+        # 1. Upsert Scenario
+        scen = {
+            "id": "SCEN-TEST",
+            "name": "Test Scenario",
+            "label": "TEST",
+            "rainfall_24h_mm": 300.0,
+            "flood_influence_radius_km": 5.0
+        }
+        repo.upsert_scenario(scen)
+        sql_scen = mock_cur.execute.call_args[0][0]
+        self.assertIn("INSERT INTO scenarios", sql_scen)
+        self.assertIn("ON CONFLICT (id) DO UPDATE", sql_scen)
+
+        # 2. Upsert Exposure
+        exp = {
+            "id": "EXP-01",
+            "scenario_id": "SCEN-TEST",
+            "entity_id": "SET-01",
+            "entity_type": "SETTLEMENT",
+            "flood_exposure": "HIGH",
+            "landslide_exposure": "LOW",
+            "overall_exposure": "HIGH",
+            "impact_reason": "Test"
+        }
+        repo.upsert_scenario_exposure(exp)
+        sql_exp = mock_cur.execute.call_args[0][0]
+        self.assertIn("INSERT INTO scenario_exposures", sql_exp)
+        self.assertIn("ON CONFLICT (id) DO UPDATE", sql_exp)
+
+        # 3. Upsert Road Impact
+        imp = {
+            "id": "IMP-01",
+            "scenario_id": "SCEN-TEST",
+            "road_id": "ROAD-01",
+            "impact_status": "BLOCKED",
+            "impact_reason": "Simulated flood"
+        }
+        repo.upsert_scenario_road_impact(imp)
+        sql_imp = mock_cur.execute.call_args[0][0]
+        self.assertIn("INSERT INTO scenario_road_impacts", sql_imp)
+        self.assertIn("ON CONFLICT (id) DO UPDATE", sql_imp)
+
+        # 4. Upsert Relocation
+        reloc = {
+            "id": "RELOC-01",
+            "scenario_id": "SCEN-TEST",
+            "settlement_id": "SET-01",
+            "priority": "CRITICAL",
+            "route_status": "SUCCESS"
+        }
+        repo.upsert_scenario_relocation(reloc)
+        sql_reloc = mock_cur.execute.call_args[0][0]
+        self.assertIn("INSERT INTO scenario_relocations", sql_reloc)
+        self.assertIn("ON CONFLICT (id) DO UPDATE", sql_reloc)
+
+        # 5. Queries
+        repo.get_scenario("SCEN-TEST")
+        self.assertIn("SELECT * FROM scenarios WHERE id = %s", mock_cur.execute.call_args[0][0])
+
+        repo.get_scenario_exposures("SCEN-TEST")
+        self.assertIn("SELECT * FROM scenario_exposures WHERE scenario_id = %s", mock_cur.execute.call_args[0][0])
+
+        repo.get_scenario_road_impacts("SCEN-TEST")
+        self.assertIn("SELECT sri.id, sri.scenario_id", mock_cur.execute.call_args[0][0])
+
+        repo.get_scenario_relocations("SCEN-TEST")
+        self.assertIn("SELECT * FROM scenario_relocations WHERE scenario_id = %s", mock_cur.execute.call_args[0][0])
+
+        # 6. Verify DB failures raise exceptions and are NOT silently swallowed
+        mock_cur.execute.side_effect = Exception("DB write error")
+        with self.assertRaises(Exception):
+            repo.upsert_scenario_exposure(exp)
+        with self.assertRaises(Exception):
+            repo.upsert_scenario_road_impact(imp)
+        with self.assertRaises(Exception):
+            repo.upsert_scenario_relocation(reloc)
+        with self.assertRaises(Exception):
+            repo.upsert_scenario(scen)
+        mock_cur.execute.side_effect = None
+
+        # 7. Verify in-memory fallback
+        mem_repo = Repository(db_url=None)
+        self.assertTrue(mem_repo.in_memory)
+        res_scen = mem_repo.upsert_scenario(scen)
+        self.assertEqual(res_scen["id"], "SCEN-TEST")
+        self.assertEqual(mem_repo.get_scenario("SCEN-TEST")["id"], "SCEN-TEST")
+        res_exp = mem_repo.upsert_scenario_exposure(exp)
+        self.assertEqual(len(mem_repo.get_scenario_exposures("SCEN-TEST")), 1)
+
     def test_real_dataset_ingestion_and_validation(self):
         from scripts.ingest_real_data import validate_observation, ingest_dataset
 

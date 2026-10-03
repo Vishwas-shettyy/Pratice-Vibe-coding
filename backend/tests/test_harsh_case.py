@@ -169,6 +169,49 @@ class TestHarshCaseScenario(unittest.TestCase):
         self.assertTrue(run_data["success"])
         self.assertGreater(run_data["data"]["roads_evaluated"], 0)
 
+    def test_10_scenario_exposures_and_road_impacts_retrieval_and_relocation_priorities(self):
+        """Verify GET exposure and road-impact endpoints return persisted data, and relocation yields 15 CRITICAL priorities."""
+        # 1. Verify GET exposures
+        resp_exp = self.app.get("/api/scenarios/KODAGU_EXTREME_MONSOON_HARSH_CASE/exposure")
+        self.assertEqual(resp_exp.status_code, 200)
+        exp_data = resp_exp.get_json()
+        self.assertTrue(exp_data["success"])
+        exposures = exp_data["data"]
+        self.assertEqual(len(exposures), 67) # 16 settlements + 51 facilities
+
+        settlement_exps = [e for e in exposures if e["entity_type"] == "SETTLEMENT"]
+        self.assertEqual(len(settlement_exps), 16)
+        high_settlements = [e for e in settlement_exps if e["overall_exposure"] == "HIGH"]
+        self.assertEqual(len(high_settlements), 15)
+
+        ponnampet_exp = next(e for e in settlement_exps if e["entity_id"] == "SET-KOD-VIR-03")
+        self.assertEqual(ponnampet_exp["overall_exposure"], "LOW")
+
+        # 2. Verify GET road impacts
+        resp_imp = self.app.get("/api/scenarios/KODAGU_EXTREME_MONSOON_HARSH_CASE/road-impacts")
+        self.assertEqual(resp_imp.status_code, 200)
+        imp_data = resp_imp.get_json()
+        self.assertTrue(imp_data["success"])
+        impacts = imp_data["data"]
+        self.assertEqual(len(impacts), 2857)
+        blocked = [i for i in impacts if i["impact_status"] == "BLOCKED"]
+        restricted = [i for i in impacts if i["impact_status"] == "RESTRICTED"]
+        self.assertGreater(len(blocked), 500)
+        self.assertGreater(len(restricted), 500)
+
+        # 3. Verify scenario relocation yields 15 CRITICAL priorities and 1 MODERATE (Madikeri Town)
+        resp_reloc = self.app.post("/api/relocation/scenario/KODAGU_EXTREME_MONSOON_HARSH_CASE/run")
+        self.assertEqual(resp_reloc.status_code, 200)
+        reloc_data = resp_reloc.get_json()
+        self.assertTrue(reloc_data["success"])
+        relocs = reloc_data["data"]
+        self.assertEqual(len(relocs), 16)
+        critical_relocs = [r for r in relocs if r["priority"] == "CRITICAL"]
+        moderate_relocs = [r for r in relocs if r["priority"] == "MODERATE"]
+        self.assertEqual(len(critical_relocs), 15)
+        self.assertEqual(len(moderate_relocs), 1)
+        self.assertEqual(moderate_relocs[0]["settlement_id"], "SET-KOD-VIR-03")
+
 
 if __name__ == "__main__":
     unittest.main()

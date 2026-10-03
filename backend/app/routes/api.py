@@ -225,12 +225,12 @@ def run_scenario_endpoint(scenario_id):
 
 @api_bp.route("/scenarios/<scenario_id>/exposure", methods=["GET"])
 def get_scenario_exposures_api(scenario_id):
-    exps = scenario_service.repo.get_scenario_exposures(scenario_id)
+    exps = scenario_service.get_scenario_exposures(scenario_id)
     return success_response(exps, message="Scenario exposures retrieved")
 
 @api_bp.route("/scenarios/<scenario_id>/road-impacts", methods=["GET"])
 def get_scenario_road_impacts_api(scenario_id):
-    imps = scenario_service.repo.get_scenario_road_impacts(scenario_id)
+    imps = scenario_service.get_scenario_road_impacts(scenario_id)
     return success_response(imps, message="Scenario road impacts retrieved")
 
 # ==========================================
@@ -253,6 +253,9 @@ def get_scenario_relocation_detail(scenario_id, settlement_id):
 @api_bp.route("/relocation/scenario/<scenario_id>/run", methods=["POST"])
 def run_scenario_relocation_endpoint(scenario_id):
     try:
+        from app.services.scenario_service import scenario_service
+        if not relocation_service.repo.get_scenario_exposures(scenario_id):
+            scenario_service.run_scenario(scenario_id)
         res = relocation_service.run_scenario_relocation(scenario_id)
         return success_response(res, message="Scenario relocation executed successfully")
     except Exception as e:

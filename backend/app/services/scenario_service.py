@@ -1,3 +1,4 @@
+import os
 import math
 import hashlib
 from datetime import datetime, timezone
@@ -86,19 +87,45 @@ class ScenarioService:
             elif scenario_id == self.BASELINE_SCENARIO_ID:
                 scenario = self.get_or_create_default_scenario()
         return scenario
+
+    def get_scenario_exposures(self, scenario_id):
+        exps = self.repo.get_scenario_exposures(scenario_id)
+        if not exps:
+            self.run_scenario(scenario_id)
+            exps = self.repo.get_scenario_exposures(scenario_id)
+        return exps
+
+    def get_scenario_road_impacts(self, scenario_id):
+        imps = self.repo.get_scenario_road_impacts(scenario_id)
+        if not imps:
+            self.run_scenario(scenario_id)
+            imps = self.repo.get_scenario_road_impacts(scenario_id)
+        return imps
         
     def run_scenario(self, scenario_id):
         scenario = self.get_scenario(scenario_id)
         if not scenario:
             raise ValueError(f"Scenario '{scenario_id}' not found")
             
-        try:
-            with open("backend/data/real_observations_karnataka.json", "r") as f:
-                observations = json.load(f)
-        except Exception:
-            observations = []
+        # Prefer repository observations if already loaded
+        observations = self.repo.get_observations()
+        if not observations:
+            try:
+                base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                obs_path = os.path.join(base_dir, "data", "real_observations_karnataka.json")
+                if os.path.exists(obs_path):
+                    with open(obs_path, "r", encoding="utf-8") as f:
+                        observations = json.load(f)
+            except Exception:
+                observations = []
 
         habitations = self.repo.get_all_habitations()
+        if not habitations:
+            try:
+                from app.services.data_service import data_service
+                habitations = self.repo.get_all_habitations()
+            except Exception:
+                pass
         is_real_kodagu = any(str(h.get("id", "")).startswith("SET-KOD-") for h in habitations)
         if is_real_kodagu:
             if not self.repo.get_all_facilities():

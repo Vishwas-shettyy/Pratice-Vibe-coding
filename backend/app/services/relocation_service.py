@@ -54,7 +54,8 @@ class RelocationService:
 
         facilities = self.repo.get_all_facilities()
         safe_ops = {op["facility_id"]: op for op in self.repo.get_all_safe_site_operations()}
-        exposures = {exp["entity_id"]: exp for exp in self.repo.get_scenario_exposures(scenario_id)}
+        raw_exposures = self.repo.get_scenario_exposures(scenario_id)
+        exposures = {exp["entity_id"]: exp for exp in raw_exposures}
         network_access = self.repo.get_all_network_access()
         access_map = {acc["entity_id"]: acc for acc in network_access}
         nodes = self.repo.get_all_graph_nodes()
