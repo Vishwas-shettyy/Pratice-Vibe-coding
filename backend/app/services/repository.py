@@ -1,7 +1,7 @@
 import os
 import json
 import psycopg2
-from psycopg2.extras import DictCursor, Json
+from psycopg2.extras import DictCursor, Json, execute_batch
 
 class Repository:
     def __init__(self, db_url=None):
@@ -801,62 +801,88 @@ class Repository:
         return self.get_observations(parameter_name=parameter_name)
 
     def upsert_road(self, road):
-        if not isinstance(road, dict) or not road.get("id"):
-            raise ValueError("Road record must be a dict containing a unique 'id' field.")
+        res = self.upsert_roads([road])
+        return res[0] if res else None
 
-        formatted = {
-            "id": road["id"],
-            "name": road.get("name"),
-            "highway_class": road.get("highway_class") or road.get("highwayClass"),
-            "geometry": road.get("geometry"),
-            "surface": road.get("surface"),
-            "bridge": road.get("bridge"),
-            "is_oneway": road.get("is_oneway") or road.get("isOneway"),
-            "access": road.get("access"),
-            "maxspeed": road.get("maxspeed"),
-            "source_name": road.get("source_name") or road.get("sourceName"),
-            "source_url": road.get("source_url") or road.get("sourceUrl"),
-            "source_dataset": road.get("source_dataset") or road.get("sourceDataset"),
-            "source_type": road.get("source_type") or road.get("sourceType"),
-            "data_status": road.get("data_status") or road.get("dataStatus") or "REAL",
-            "observation_time": road.get("observation_time") or road.get("observationTime")
-        }
+    def upsert_roads(self, roads_list):
+        if not isinstance(roads_list, list):
+            raise ValueError("roads_list must be a list of road dicts.")
+        if not roads_list:
+            return []
+
+        formatted_list = []
+        for road in roads_list:
+            if not isinstance(road, dict) or not road.get("id"):
+                raise ValueError("Road record must be a dict containing a unique 'id' field.")
+
+            formatted = {
+                "id": road["id"],
+                "name": road.get("name"),
+                "highway_class": road.get("highway_class") or road.get("highwayClass"),
+                "geometry": road.get("geometry"),
+                "surface": road.get("surface"),
+                "bridge": road.get("bridge"),
+                "is_oneway": road.get("is_oneway") or road.get("isOneway"),
+                "access": road.get("access"),
+                "maxspeed": road.get("maxspeed"),
+                "source_name": road.get("source_name") or road.get("sourceName"),
+                "source_url": road.get("source_url") or road.get("sourceUrl"),
+                "source_dataset": road.get("source_dataset") or road.get("sourceDataset"),
+                "source_type": road.get("source_type") or road.get("sourceType"),
+                "data_status": road.get("data_status") or road.get("dataStatus") or "REAL",
+                "observation_time": road.get("observation_time") or road.get("observationTime")
+            }
+            formatted_list.append(formatted)
 
         if self.in_memory:
-            self.memory_store["roads"][road["id"]] = formatted
-            return dict(formatted)
+            for f in formatted_list:
+                self.memory_store["roads"][f["id"]] = f
+            return [dict(f) for f in formatted_list]
+
+        sql = """
+            INSERT INTO roads (
+                id, name, highway_class, geometry, surface, bridge, is_oneway, access,
+                maxspeed, source_name, source_url, source_dataset, source_type, data_status, observation_time
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (id) DO UPDATE SET
+                name = EXCLUDED.name,
+                highway_class = EXCLUDED.highway_class,
+                geometry = EXCLUDED.geometry,
+                surface = EXCLUDED.surface,
+                bridge = EXCLUDED.bridge,
+                is_oneway = EXCLUDED.is_oneway,
+                access = EXCLUDED.access,
+                maxspeed = EXCLUDED.maxspeed,
+                source_name = EXCLUDED.source_name,
+                source_url = EXCLUDED.source_url,
+                source_dataset = EXCLUDED.source_dataset,
+                source_type = EXCLUDED.source_type,
+                data_status = EXCLUDED.data_status,
+                observation_time = EXCLUDED.observation_time
+        """
+
+        params_list = [
+            (
+                f["id"], f["name"], f["highway_class"], Json(f["geometry"]) if f["geometry"] else None,
+                f["surface"], f["bridge"], f["is_oneway"], f["access"],
+                f["maxspeed"], f["source_name"], f["source_url"],
+                f["source_dataset"], f["source_type"], f["data_status"],
+                f["observation_time"]
+            )
+            for f in formatted_list
+        ]
 
         with self._get_conn() as conn:
             with conn.cursor() as cur:
-                cur.execute("""
-                    INSERT INTO roads (
-                        id, name, highway_class, geometry, surface, bridge, is_oneway, access,
-                        maxspeed, source_name, source_url, source_dataset, source_type, data_status, observation_time
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (id) DO UPDATE SET
-                        name = EXCLUDED.name,
-                        highway_class = EXCLUDED.highway_class,
-                        geometry = EXCLUDED.geometry,
-                        surface = EXCLUDED.surface,
-                        bridge = EXCLUDED.bridge,
-                        is_oneway = EXCLUDED.is_oneway,
-                        access = EXCLUDED.access,
-                        maxspeed = EXCLUDED.maxspeed,
-                        source_name = EXCLUDED.source_name,
-                        source_url = EXCLUDED.source_url,
-                        source_dataset = EXCLUDED.source_dataset,
-                        source_type = EXCLUDED.source_type,
-                        data_status = EXCLUDED.data_status,
-                        observation_time = EXCLUDED.observation_time
-                """, (
-                    formatted["id"], formatted["name"], formatted["highway_class"], Json(formatted["geometry"]) if formatted["geometry"] else None,
-                    formatted["surface"], formatted["bridge"], formatted["is_oneway"], formatted["access"],
-                    formatted["maxspeed"], formatted["source_name"], formatted["source_url"],
-                    formatted["source_dataset"], formatted["source_type"], formatted["data_status"],
-                    formatted["observation_time"]
-                ))
+                execute_batch(cur, sql, params_list, page_size=500)
             conn.commit()
-        return dict(formatted)
+
+        for f in formatted_list:
+            self.memory_store["roads"][f["id"]] = f
+
+        return [dict(f) for f in formatted_list]
+
+    upsert_roads_batch = upsert_roads
 
     def get_all_roads(self):
         if self.in_memory:

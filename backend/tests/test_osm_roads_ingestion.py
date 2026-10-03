@@ -96,5 +96,31 @@ class TestOSMRoadsIngestion(unittest.TestCase):
         self.assertEqual(road["id"], "osm_way_4")
         self.assertEqual(road["name"], "Main Street")
 
+    def test_batched_ingestion(self):
+        records = [
+            {
+                "id": f"osm_way_batch_{i}",
+                "name": f"Road {i}",
+                "highway_class": "residential",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [[75.5, 12.0], [75.6, 12.1]]
+                },
+                "source_name": "OpenStreetMap",
+                "source_type": "OPEN_GEO",
+                "data_status": "REAL"
+            }
+            for i in range(10)
+        ]
+
+        res = self.repo.upsert_roads(records)
+        self.assertEqual(len(res), 10)
+        self.assertEqual(len(self.repo.get_all_roads()), 10)
+
+        # Re-upsert to verify batch idempotency
+        res2 = self.repo.upsert_roads(records)
+        self.assertEqual(len(res2), 10)
+        self.assertEqual(len(self.repo.get_all_roads()), 10)
+
 if __name__ == "__main__":
     unittest.main()

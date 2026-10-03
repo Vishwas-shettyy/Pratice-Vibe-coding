@@ -112,6 +112,7 @@ def ingest_osm_roads(
 
     print(f"🔍 Processing {len(elements)} elements from OSM dataset...")
     
+    valid_records = []
     for idx, el in enumerate(elements):
         if el.get("type") != "way":
             continue
@@ -152,8 +153,16 @@ def ingest_osm_roads(
             # print(f"❌ Rejected road {road_record['id']}: {reason}")
             continue
 
-        repo.upsert_road(road_record)
-        ingested_count += 1
+        valid_records.append(road_record)
+
+    if hasattr(repo, "upsert_roads"):
+        repo.upsert_roads(valid_records)
+    elif hasattr(repo, "upsert_roads_batch"):
+        repo.upsert_roads_batch(valid_records)
+    else:
+        for r in valid_records:
+            repo.upsert_road(r)
+    ingested_count = len(valid_records)
 
     summary = {
         "total_ways": len(elements),

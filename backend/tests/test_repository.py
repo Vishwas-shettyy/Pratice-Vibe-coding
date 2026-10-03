@@ -426,5 +426,49 @@ class TestRepository(unittest.TestCase):
             self.assertIn(obs["source_type"], ["GOVERNMENT", "OPEN_DATA", "OSM"])
             self.assertTrue(obs["source_url"].startswith("http"))
 
+    @patch('app.services.repository.execute_batch')
+    @patch('app.services.repository.psycopg2')
+    def test_postgres_batched_roads_upsert(self, mock_psycopg2, mock_execute_batch):
+        mock_conn = mock_psycopg2.connect.return_value
+        mock_cur = mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value
+
+        repo = Repository(db_url="postgres://user:pass@localhost:5432/db")
+        self.assertFalse(repo.in_memory)
+
+        roads = [
+            {
+                "id": "osm_way_batch_1",
+                "name": "Road 1",
+                "highway_class": "primary",
+                "geometry": {"type": "LineString", "coordinates": [[75.5, 12.0], [75.6, 12.1]]},
+                "source_name": "OpenStreetMap",
+                "source_type": "OPEN_GEO",
+                "data_status": "REAL"
+            },
+            {
+                "id": "osm_way_batch_2",
+                "name": "Road 2",
+                "highway_class": "secondary",
+                "geometry": {"type": "LineString", "coordinates": [[75.6, 12.1], [75.7, 12.2]]},
+                "source_name": "OpenStreetMap",
+                "source_type": "OPEN_GEO",
+                "data_status": "REAL"
+            }
+        ]
+
+        mock_conn.__enter__.return_value.commit.reset_mock()
+        res = repo.upsert_roads(roads)
+        self.assertEqual(len(res), 2)
+        self.assertTrue(mock_execute_batch.called)
+        sql = mock_execute_batch.call_args[0][1]
+        self.assertIn("INSERT INTO roads", sql)
+        self.assertIn("ON CONFLICT (id) DO UPDATE", sql)
+        params_list = mock_execute_batch.call_args[0][2]
+        self.assertEqual(len(params_list), 2)
+        self.assertEqual(params_list[0][0], "osm_way_batch_1")
+        self.assertEqual(params_list[1][0], "osm_way_batch_2")
+        mock_conn.__enter__.return_value.commit.assert_called_once()
+
+
 if __name__ == '__main__':
     unittest.main()
