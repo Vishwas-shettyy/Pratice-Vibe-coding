@@ -1,44 +1,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  /* Default Primary Theme - Near-Black Charcoal (Screenshot 1 Visual Language) */
-  --bg-primary: #121316;
-  --bg-secondary: #1A1D21;
-  --bg-card: #1A1D21;
-  --bg-card-hover: #24282E;
-  --bg-sidebar: #121316;
-  --bg-header: #121316;
+  /* White Theme - Emergency Operations Centre / GIS */
+  --bg-primary: #F7F8FA;
+  --bg-secondary: #F7F8FA;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F9FAFB;
+  --bg-sidebar: #FFFFFF;
+  --bg-header: #FFFFFF;
 
-  --border-color: #2D3239;
-  --border-color-subtle: #24282E;
+  --border-color: #E2E6EB;
+  --border-color-subtle: #E2E6EB;
   --border-color-glow: transparent;
 
-  --text-primary: #FFFFFF;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
+  --text-primary: #17202A;
+  --text-secondary: #5F6B76;
+  --text-muted: #8A949E;
 
-  /* ResQ Restrained Blue Accent */
+  /* ResQ Accent */
   --accent-active: #2563EB;
   --accent-blue: #2563EB;
   --accent-cyan: #06B6D4;
 
   /* Operational Status Accents */
-  --accent-critical: #EF4444;
-  --accent-high: #F97316;
-  --accent-warning: #F59E0B;
-  --accent-moderate: #F59E0B;
-  --accent-safe: #10B981;
-  --accent-low: #10B981;
+  --accent-critical: #DC2626;
+  --accent-high: #D97706;
+  --accent-warning: #D97706;
+  --accent-moderate: #D97706;
+  --accent-safe: #16A34A;
+  --accent-low: #16A34A;
   --accent-info: #2563EB;
-  --accent-red: #EF4444;
-  --accent-amber: #F59E0B;
-  --accent-emerald: #10B981;
+  --accent-red: #DC2626;
+  --accent-amber: #D97706;
+  --accent-emerald: #16A34A;
   --accent-red-glow: transparent;
 
   /* Typography */
-  --font-main: "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif;
-  --font-display: "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-main: "Inter", "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: "Outfit", "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Flat Design Tokens */
   --radius-base: 4px;
@@ -49,76 +49,6 @@
 
   --card-shadow: none;
 
-  color-scheme: dark;
-}
-
-[data-theme="dark"] {
-  /* Dark Mode Explicit Mapping */
-  --bg-primary: #121316;
-  --bg-secondary: #1A1D21;
-  --bg-card: #1A1D21;
-  --bg-card-hover: #24282E;
-  --bg-sidebar: #121316;
-  --bg-header: #121316;
-
-  --border-color: #2D3239;
-  --border-color-subtle: #24282E;
-  --border-color-glow: transparent;
-
-  --text-primary: #FFFFFF;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-
-  --accent-active: #2563EB;
-  --accent-blue: #2563EB;
-  --accent-cyan: #06B6D4;
-
-  --accent-critical: #EF4444;
-  --accent-high: #F97316;
-  --accent-warning: #F59E0B;
-  --accent-moderate: #F59E0B;
-  --accent-safe: #10B981;
-  --accent-low: #10B981;
-  --accent-info: #2563EB;
-  --accent-red: #EF4444;
-  --accent-amber: #F59E0B;
-  --accent-emerald: #10B981;
-
-  color-scheme: dark;
-}
-
-[data-theme="light"] {
-  /* Light Mode (Secondary Theme Support) */
-  --bg-primary: #F4F6F8;
-  --bg-secondary: #FFFFFF;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F9FAFB;
-  --bg-sidebar: #FFFFFF;
-  --bg-header: #FFFFFF;
-
-  --border-color: #E2E8F0;
-  --border-color-subtle: #CBD5E1;
-  --border-color-glow: transparent;
-
-  --text-primary: #1A1D21;
-  --text-secondary: #4A5568;
-  --text-muted: #718096;
-
-  --accent-active: #0B3C6F;
-  --accent-blue: #0B3C6F;
-  --accent-cyan: #1F3A93;
-
-  --accent-critical: #DC2626;
-  --accent-high: #EA580C;
-  --accent-warning: #D97706;
-  --accent-moderate: #D97706;
-  --accent-safe: #059669;
-  --accent-low: #059669;
-  --accent-info: #0B3C6F;
-  --accent-red: #DC2626;
-  --accent-amber: #D97706;
-  --accent-emerald: #059669;
-
   color-scheme: light;
 }
 
@@ -126,7 +56,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 html,
@@ -178,33 +108,32 @@ select:disabled {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.4);
+  background: rgba(138, 148, 158, 0.4);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.7);
+  background: rgba(138, 148, 158, 0.7);
 }
 
-/* Operational Glassmorphism Panel */
+/* Operational Glassmorphism Panel - Actually solid white for this theme */
 .glass-panel {
   background: var(--bg-card) !important;
   border: 1px solid var(--border-color) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Light mode card item overrides */
-[data-theme="light"] .habitation-card-item {
+.habitation-card-item {
   background: #ffffff;
   border-color: rgba(0, 0, 0, 0.1);
 }
 
-[data-theme="light"] .habitation-card-item:hover {
-  background: #f8fafc;
+.habitation-card-item:hover {
+  background: #f9fafb;
   border-color: var(--accent-blue);
 }
 
-[data-theme="light"] .stat-card {
+.stat-card {
   background: #ffffff;
   border-color: rgba(0, 0, 0, 0.1);
 }

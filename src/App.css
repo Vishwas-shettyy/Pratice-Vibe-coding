@@ -111,7 +111,7 @@
 }
 
 .nav-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.03);
   color: var(--text-primary);
 }
 
@@ -149,7 +149,7 @@
 }
 
 .control-status-box {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(0, 0, 0, 0.02);
   border: 1px solid var(--border-color);
   padding: 10px 12px;
   border-radius: 8px;
@@ -294,7 +294,7 @@
 
 .stat-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
 .stat-card::before {
@@ -426,9 +426,9 @@
 
 .stat-value { font-size: 28px; }
 
-[data-theme="light"] .stat-card.danger .stat-value { color: var(--accent-critical); }
-[data-theme="light"] .stat-card.warning .stat-value { color: var(--accent-warning); }
-[data-theme="light"] .stat-card.success .stat-value { color: var(--accent-safe); }
+.stat-card.danger .stat-value { color: var(--accent-critical); }
+.stat-card.warning .stat-value { color: var(--accent-warning); }
+.stat-card.success .stat-value { color: var(--accent-safe); }
 
 /* Habitation cards (priority list) */
 .habitation-card-item {
@@ -509,107 +509,107 @@ button {
 }
 
 .control-status-box {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.02);
 }
 
-[data-theme="light"] .brand-logo,
-[data-theme="light"] .brand-title,
-[data-theme="light"] .page-title,
-[data-theme="light"] .panel-title,
-[data-theme="light"] .stat-value,
-[data-theme="light"] .shelter-title,
-[data-theme="light"] .hab-info h4,
-[data-theme="light"] .map-toggle-item,
-[data-theme="light"] .modal-content h3,
-[data-theme="light"] .modal-close-btn,
-[data-theme="light"] .nav-btn,
-[data-theme="light"] .action-btn,
-[data-theme="light"] .control-status-box,
-[data-theme="light"] .sim-label strong,
-[data-theme="light"] .sim-label span,
-[data-theme="light"] .legend-item,
-[data-theme="light"] .cap-item strong,
-[data-theme="light"] .map-control-title {
+.brand-logo,
+.brand-title,
+.page-title,
+.panel-title,
+.stat-value,
+.shelter-title,
+.hab-info h4,
+.map-toggle-item,
+.modal-content h3,
+.modal-close-btn,
+.nav-btn,
+.action-btn,
+.control-status-box,
+.sim-label strong,
+.sim-label span,
+.legend-item,
+.cap-item strong,
+.map-control-title {
   color: var(--text-primary);
 }
 
-[data-theme="light"] .page-description,
-[data-theme="light"] .panel-sub,
-[data-theme="light"] .stat-label,
-[data-theme="light"] .stat-subtext,
-[data-theme="light"] .brand-subtitle,
-[data-theme="light"] .shelter-sub,
-[data-theme="light"] .hab-info p,
-[data-theme="light"] .sim-slider-group span,
-[data-theme="light"] .legend-item span {
+.page-description,
+.panel-sub,
+.stat-label,
+.stat-subtext,
+.brand-subtitle,
+.shelter-sub,
+.hab-info p,
+.sim-slider-group span,
+.legend-item span {
   color: var(--text-muted);
 }
 
-[data-theme="light"] .action-btn,
-[data-theme="light"] input,
-[data-theme="light"] select,
-[data-theme="light"] .glass-panel,
-[data-theme="light"] .shelter-card,
-[data-theme="light"] .stat-card,
-[data-theme="light"] .map-controls-bar,
-[data-theme="light"] .map-legend,
-[data-theme="light"] .control-status-box {
+.action-btn,
+input,
+select,
+.glass-panel,
+.shelter-card,
+.stat-card,
+.map-controls-bar,
+.map-legend,
+.control-status-box {
   background: var(--bg-card);
   border-color: var(--border-color);
 }
 
-[data-theme="light"] .nav-btn:hover {
+.nav-btn:hover {
   background: rgba(15, 23, 42, 0.03);
 }
 
-[data-theme="light"] .map-wrapper {
+.map-wrapper {
   border-color: var(--border-color);
   box-shadow: 0 8px 24px rgba(2, 6, 23, 0.05);
 }
 
-[data-theme="light"] .map-controls-bar,
-[data-theme="light"] .map-legend {
+.map-controls-bar,
+.map-legend {
   background: rgba(255,255,255,0.9);
   border: 1px solid var(--border-color);
   box-shadow: 0 8px 24px rgba(2,6,23,0.06);
   color: var(--text-primary);
 }
 
-[data-theme="light"] .map-control-title,
-[data-theme="light"] .map-toggle-item,
-[data-theme="light"] .legend-item,
-[data-theme="light"] .risk-popup-card,
-[data-theme="light"] .risk-popup-title,
-[data-theme="light"] .risk-popup-row,
-[data-theme="light"] .risk-popup-row strong,
-[data-theme="light"] .risk-map-popup .leaflet-popup-content-wrapper,
-[data-theme="light"] .risk-map-popup .leaflet-popup-tip {
+.map-control-title,
+.map-toggle-item,
+.legend-item,
+.risk-popup-card,
+.risk-popup-title,
+.risk-popup-row,
+.risk-popup-row strong,
+.risk-map-popup .leaflet-popup-content-wrapper,
+.risk-map-popup .leaflet-popup-tip {
   color: var(--text-primary);
 }
 
-[data-theme="light"] .risk-popup-card,
-[data-theme="light"] .risk-map-popup .leaflet-popup-content-wrapper,
-[data-theme="light"] .risk-map-popup .leaflet-popup-tip {
+.risk-popup-card,
+.risk-map-popup .leaflet-popup-content-wrapper,
+.risk-map-popup .leaflet-popup-tip {
   background: var(--bg-card);
 }
 
-[data-theme="light"] .risk-popup-row {
+.risk-popup-row {
   color: var(--text-muted);
 }
 
-[data-theme="light"] .map-toggle-item {
+.map-toggle-item {
   color: var(--text-primary);
 }
 
-[data-theme="light"] .map-legend {
+.map-legend {
   backdrop-filter: none;
 }
 
-[data-theme="light"] .map-controls-bar {
+.map-controls-bar {
   backdrop-filter: none;
 }
 
-[data-theme="light"] .risk-popup-card {
+.risk-popup-card {
   box-shadow: none;
 }
 
@@ -869,26 +869,26 @@ button {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
-[data-theme="light"] .map-controls-bar,
-[data-theme="light"] .map-legend,
-[data-theme="light"] .risk-popup-card,
-[data-theme="light"] .risk-map-popup .leaflet-popup-content-wrapper,
-[data-theme="light"] .risk-map-popup .leaflet-popup-tip {
+.map-controls-bar,
+.map-legend,
+.risk-popup-card,
+.risk-map-popup .leaflet-popup-content-wrapper,
+.risk-map-popup .leaflet-popup-tip {
   background: rgba(255,255,255,0.92);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
 }
 
-[data-theme="light"] .map-control-title,
-[data-theme="light"] .map-toggle-item,
-[data-theme="light"] .legend-item,
-[data-theme="light"] .risk-popup-row,
-[data-theme="light"] .risk-popup-row strong,
-[data-theme="light"] .risk-popup-title {
+.map-control-title,
+.map-toggle-item,
+.legend-item,
+.risk-popup-row,
+.risk-popup-row strong,
+.risk-popup-title {
   color: var(--text-primary);
 }
 
-[data-theme="light"] .risk-popup-row {
+.risk-popup-row {
   color: var(--text-muted);
 }
 
@@ -934,7 +934,7 @@ button {
   max-height: 90vh !important;
   display: flex !important;
   flex-direction: column !important;
-  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
   overflow: hidden !important;
   position: relative !important;
   margin: auto !important;
@@ -959,7 +959,7 @@ button {
   justify-content: space-between !important;
   padding: 18px 24px !important;
   border-bottom: 1px solid var(--border-color) !important;
-  background: rgba(255, 255, 255, 0.02) !important;
+  background: rgba(0, 0, 0, 0.01) !important;
 }
 
 .modal-title-text {
@@ -988,7 +988,7 @@ button {
 }
 
 .modal-close-btn:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(0, 0, 0, 0.05) !important;
   color: var(--text-primary) !important;
 }
 
@@ -1021,20 +1021,20 @@ button {
 }
 
 /* LIGHT MODE OVERRIDES FOR MODAL */
-[data-theme="light"] .modal-overlay {
+.modal-overlay {
   background: rgba(15, 23, 42, 0.65) !important;
 }
 
-[data-theme="light"] .modal-content {
+.modal-content {
   background: #ffffff !important;
   border-color: var(--border-color) !important;
   box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.2) !important;
 }
 
-[data-theme="light"] .modal-header {
+.modal-header {
   background: #f8fafc !important;
 }
 
-[data-theme="light"] .modal-close-btn:hover {
+.modal-close-btn:hover {
   background: rgba(15, 23, 42, 0.08) !important;
 }

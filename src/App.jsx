@@ -37,21 +37,6 @@ const normalizeDashboardStats = (rawStats = {}) => ({
 
 function App() {
   const [activeTab, setActiveTab] = useState("overview");
-
-  // Theme State (Dark / Light) with Persistence - Dark mode default
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("apex_theme") || "dark";
-  });
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("apex_theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  };
-
   // Dynamic Data States (fetched from Flask REST API)
   const [stats, setStats] = useState(INITIAL_STATS);
   const [habitations, setHabitations] = useState(HABITATIONS_DATA);
@@ -524,8 +509,6 @@ function App() {
           <HeaderTopbar
             title={headerInfo.title}
             subtitle={headerInfo.subtitle}
-            theme={theme}
-            onToggleTheme={toggleTheme}
             onTriggerEmergency={handleTriggerEmergency}
             onExportReport={handleExportReport}
             latestAlert={latestAlert}
@@ -622,7 +605,6 @@ function App() {
               stats={stats}
               resources={resources}
               simulationResult={latestSimulationResult}
-              theme={theme}
               onExportReport={handleExportReport}
             />
           )}

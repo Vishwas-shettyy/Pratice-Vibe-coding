@@ -22,10 +22,9 @@ ChartJS.register(
   Legend
 );
 
-function AnalyticsView({ habitations = [], shelters = [], stats = {}, resources = {}, simulationResult = null, theme = "dark", onExportReport }) {
-  const isDark = theme === "dark";
-  const textColor = isDark ? "#9ca3af" : "#475569";
-  const gridColor = isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)";
+function AnalyticsView({ habitations = [], shelters = [], stats = {}, resources = {}, simulationResult = null, onExportReport }) {
+  const textColor = "#475569";
+  const gridColor = "rgba(0, 0, 0, 0.08)";
   const safeHabitations = Array.isArray(habitations) ? habitations : [];
   const safeShelters = Array.isArray(shelters) ? shelters : [];
 
@@ -130,7 +129,7 @@ function AnalyticsView({ habitations = [], shelters = [], stats = {}, resources 
         data: [totalElderly, totalChildren, totalMedical, totalGeneral],
         backgroundColor: ["#ef4444", "#f59e0b", "#8b5cf6", "#3b82f6"],
         borderWidth: 2,
-        borderColor: isDark ? "#1f293d" : "#ffffff",
+        borderColor: "#ffffff",
       },
     ],
   };
