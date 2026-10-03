@@ -1605,6 +1605,80 @@ class Repository:
         self.memory_store["scenario_relocations"][r_id] = formatted
         return formatted
 
+    def upsert_scenario_relocations_batch(self, relocs):
+        if not relocs:
+            return
+        formatted_list = []
+        for reloc in relocs:
+            r_id = reloc["id"]
+            formatted = {
+                "id": r_id,
+                "scenario_id": reloc.get("scenario_id"),
+                "settlement_id": reloc.get("settlement_id"),
+                "recommended_site_id": reloc.get("recommended_site_id"),
+                "priority": reloc.get("priority"),
+                "required_capacity": reloc.get("required_capacity"),
+                "available_capacity": reloc.get("available_capacity"),
+                "capacity_status": reloc.get("capacity_status"),
+                "route_status": reloc.get("route_status"),
+                "route_distance_m": reloc.get("route_distance_m"),
+                "estimated_travel_time_min": reloc.get("estimated_travel_time_min"),
+                "candidate_count": reloc.get("candidate_count"),
+                "recommendation_reason": reloc.get("recommendation_reason"),
+                "route_geometry": reloc.get("route_geometry"),
+                "data_status": reloc.get("data_status", "SCENARIO"),
+                "created_at": reloc.get("created_at")
+            }
+            formatted_list.append(formatted)
+            self.memory_store["scenario_relocations"][r_id] = formatted
+        
+        if self.in_memory:
+            return formatted_list
+
+        values_list = [
+            (
+                f["id"], f["scenario_id"], f["settlement_id"], f["recommended_site_id"],
+                f["priority"], f["required_capacity"], f["available_capacity"],
+                f["capacity_status"], f["route_status"], f["route_distance_m"],
+                f["estimated_travel_time_min"], f["candidate_count"], f["recommendation_reason"],
+                Json(f["route_geometry"]) if f["route_geometry"] else None,
+                f["data_status"], f["created_at"]
+            )
+            for f in formatted_list
+        ]
+
+        query = """
+            INSERT INTO scenario_relocations (
+                id, scenario_id, settlement_id, recommended_site_id,
+                priority, required_capacity, available_capacity,
+                capacity_status, route_status, route_distance_m,
+                estimated_travel_time_min, candidate_count,
+                recommendation_reason, route_geometry, data_status, created_at
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (id) DO UPDATE SET
+                scenario_id = EXCLUDED.scenario_id,
+                settlement_id = EXCLUDED.settlement_id,
+                recommended_site_id = EXCLUDED.recommended_site_id,
+                priority = EXCLUDED.priority,
+                required_capacity = EXCLUDED.required_capacity,
+                available_capacity = EXCLUDED.available_capacity,
+                capacity_status = EXCLUDED.capacity_status,
+                route_status = EXCLUDED.route_status,
+                route_distance_m = EXCLUDED.route_distance_m,
+                estimated_travel_time_min = EXCLUDED.estimated_travel_time_min,
+                candidate_count = EXCLUDED.candidate_count,
+                recommendation_reason = EXCLUDED.recommendation_reason,
+                route_geometry = EXCLUDED.route_geometry,
+                data_status = EXCLUDED.data_status,
+                created_at = EXCLUDED.created_at
+        """
+        import psycopg2.extras
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                psycopg2.extras.execute_batch(cur, query, values_list)
+            conn.commit()
+        return formatted_list
+
     def get_scenario_relocations(self, scenario_id):
         if self.in_memory:
             return [r for r in self.memory_store["scenario_relocations"].values() if r["scenario_id"] == scenario_id]

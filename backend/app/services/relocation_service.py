@@ -67,7 +67,13 @@ class RelocationService:
             )
             if result:
                 results.append(result)
+        
+        if hasattr(self.repo, "upsert_scenario_relocations_batch"):
+            self.repo.upsert_scenario_relocations_batch(results)
+        else:
+            for result in results:
                 self.repo.upsert_scenario_relocation(result)
+
         return results
 
     def _get_nearest_node(self, lat, lng, nodes):
