@@ -31,8 +31,20 @@ class Repository:
         else:
             print(f"⚠️ DATABASE_URL not set. Falling back to IN-MEMORY persistence.")
 
+    class _ClosingConn:
+        def __init__(self, conn):
+            self.conn = conn
+        def __enter__(self):
+            # Return what conn.__enter__() returns (usually conn itself, but important for mocks)
+            return self.conn.__enter__()
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            self.conn.__exit__(exc_type, exc_val, exc_tb)
+            self.conn.close()
+
     def _get_conn(self):
-        return psycopg2.connect(self.db_url, cursor_factory=DictCursor)
+        if self.db_url:
+            return self._ClosingConn(psycopg2.connect(self.db_url, cursor_factory=DictCursor))
+        raise ValueError("Database URL not configured")
 
     def _init_db(self):
         try:

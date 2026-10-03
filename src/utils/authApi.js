@@ -27,6 +27,10 @@ export const authApi = {
       credentials: 'include' // sends cookies
     });
     if (res.status === 401) {
+      const data = await res.clone().json().catch(() => ({}));
+      if (data?.error?.message === "Missing token") {
+        return res.json();
+      }
       // Try refresh
       const refRes = await this.refresh();
       if (refRes.ok) {

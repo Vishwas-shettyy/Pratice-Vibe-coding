@@ -34,8 +34,11 @@ def create_app(config_class=Config):
     def not_found_error(error):
         return error_response(code="NOT_FOUND", message="Requested endpoint or resource not found", status_code=404)
 
-    @app.errorhandler(500)
+    @app.errorhandler(Exception)
     def internal_error(error):
-        return error_response(code="INTERNAL_SERVER_ERROR", message="An unexpected server error occurred", status_code=500)
+        # Print the traceback so it's visible in Render logs
+        import traceback
+        traceback.print_exc()
+        return error_response(code="INTERNAL_SERVER_ERROR", message=str(error), status_code=500)
 
     return app
