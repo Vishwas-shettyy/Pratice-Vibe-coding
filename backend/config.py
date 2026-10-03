@@ -17,8 +17,13 @@ class ConfigMeta(type):
 class Config(metaclass=ConfigMeta):
     PORT = int(os.getenv("PORT", 5005))
     DEBUG = os.getenv("FLASK_ENV") == "development"
-    DATABASE_URL = os.getenv("DATABASE_URL")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///sih.db")
+    _db_url = os.getenv("DATABASE_URL", "sqlite:///sih.db")
+    if _db_url.startswith("postgres://"):
+        _db_url = _db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif _db_url.startswith("postgresql://"):
+        _db_url = _db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+    DATABASE_URL = _db_url
+    SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-jwt-key")
     CORS_HEADERS = "Content-Type"
