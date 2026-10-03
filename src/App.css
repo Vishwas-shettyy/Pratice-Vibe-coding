@@ -58,9 +58,9 @@
 
 .brand-title {
   font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
   color: var(--text-primary);
   margin-left: 4px;
 }
@@ -90,7 +90,7 @@
   color: var(--text-secondary);
   font-family: var(--font-main);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
@@ -162,10 +162,11 @@
 
 .page-title {
   font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: 800;
   color: var(--text-primary);
-  letter-spacing: 0.2px;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
 }
 
 .page-description {
@@ -304,8 +305,9 @@
 
 .stat-value {
   font-family: var(--font-display);
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 800;
+  letter-spacing: -1px;
   color: var(--text-primary);
   line-height: 1;
   margin-bottom: 6px;
@@ -333,6 +335,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 18px;
+}
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
 }
 
 /* stronger section separation and subtitle hierarchy */
@@ -412,13 +422,22 @@
 .stat-card.warning .stat-value { color: var(--accent-warning); }
 .stat-card.success .stat-value { color: var(--accent-safe); }
 
+/* Apply JetBrains Mono to some specific technical values */
+.stat-value.technical, .coordinate-text, .metric-value, .sim-slider-group span {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.stat-value { font-size: 32px; letter-spacing: -1.5px; }
+
 /* Habitation cards (priority list) */
 .habitation-card-item {
   align-items: flex-start;
   gap: 12px;
 }
 
-.hab-info h4 { font-size: 15px; color: var(--text-primary); margin-bottom: 4px; }
+.hab-info h4 { font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: -0.3px; color: var(--text-primary); margin-bottom: 4px; }
 .hab-info p { color: var(--text-muted); }
 
 .nav-badge, .badge { font-size: 12px; }
